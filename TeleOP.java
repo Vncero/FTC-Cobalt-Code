@@ -23,6 +23,14 @@ public class TeleOP extends OpMode {
 
     final int LINEAR_SLIDE_CURRENT_STATE = 0;
 
+    final int LS_TOP_LIMIT = (int) Math.floor(6 * 537.7);
+    final int LS_BOT_LIMIT = 0;
+
+    boolean STOP_LS = false;
+
+    int upwardsTickCount = 0;
+    int downwardsTickCount = 0;
+
     boolean LINEAR_SLIDE_AT_LIMIT = false; // set to true when LINEAR_SLIDE_LIMIT at either LINEAR_SLIDE_AT_BOTTOM_LIMIT or LINEAR_SLIDE_AT_TOP_LIMIT
 
     //CRServo BucketTurner;top linearSlide servo is normal, not technically Math.pi radians
@@ -81,44 +89,49 @@ public class TeleOP extends OpMode {
             telemetry.update();
         }
 
-        if (gamepad1.left_bumper) {
-            // approx 5 inches per one rotation
-            //approximately 3 rotations-"2cm"
+        if (gamepad1.dpad_up && !STOP_LS) {
+            LinearSlide.setPower(0.01);
 
-            //TODO: convert 2cm to inches, pass into ticks method, get a tick amount for 2cm in inches, multiply tick amount per rotation by 3, subtract 2cm from rotation,
-            //2cm ~ 0.787402 inches, 0.00929886553 * 0.787402 = ticks for 2cm (0.00732194531), 3*537.7 ~ 1613.1
-            // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
-            // theoretically, we get an approximate number of ticks for the full thing
-            double theoreticalFullExtension = 1613.1 - 0.00732194531;
-            
-            encoderMotorReset();
-            
-            setMotorTargets((int)theoreticalFullExtension);
-            
-            FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            
-            FrontLeft.setPower(0.25);
-            FrontRight.setPower(0.25);
-            BackLeft.setPower(0.25);
-            BackRight.setPower(0.25);
-            //LinearSlide.setPower(0.01);
+            if (LinearSlide.getCurrentPosition() == LS_TOP_LIMIT - 300) {
+                STOP_LS = true;
+            }
+
+            else {
+                STOP_LS = false;
+            }
+        }
+
+        else if (gamepad1.dpad_down && !STOP_LS) {
+            LinearSlide.setPower(-0.01);
+
+            if (LinearSlide.getCurrentPosition() == LS_BOT_LIMIT + 300) {
+                STOP_LS = true;
+            }
+
+            else {
+                STOP_LS = false;
+            }
         }
 
         else {
             LinearSlide.setPower(0);
-
         }
 
         double c = gamepad1.left_stick_x;
         double x = gamepad1.right_stick_x;
         double y = -gamepad1.left_stick_y;
 
-        y *= 0.9;
-        c *= 0.9;
-        //x *= 0.9;
+        if (gamepad1.y) {
+            y *= 0.5;
+            c += 0.5;
+            x *= 0.5;
+        }
+
+        else {
+            y *= 0.9;
+            c *= 0.9;
+            x *= 0.9;
+        }
 
 //        FrontLeft.setPower(y+x+c);
 //        FrontRight.setPower(x-y+c);
@@ -140,7 +153,7 @@ public class TeleOP extends OpMode {
 
 
     }
-    
+
     public void encoderMotorReset() {
         FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -151,7 +164,7 @@ public class TeleOP extends OpMode {
         BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-    
+
     public void setMotorTargets (int motorTarget) {
         FrontLeft.setTargetPosition(motorTarget);
         FrontRight.setTargetPosition(motorTarget);
@@ -177,6 +190,31 @@ public class TeleOP extends OpMode {
 
         return ticksPerInch * inches;
 
+    }
+
+    public void TestLinearSlide() {
+        // approx 5 inches per one rotation
+        //approximately 3 rotations-"2cm"
+
+        //TODO: convert 2cm to inches, pass into ticks method, get a tick amount for 2cm in inches, multiply tick amount per rotation by 3, subtract 2cm from rotation,
+        //2cm ~ 0.787402 inches, 0.00929886553 * 0.787402 = ticks for 2cm (0.00732194531), 3*537.7 ~ 1613.1
+        // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
+        // theoretically, we get an approximate number of ticks for the full thing
+        double theoreticalFullExtension = 1613.1 - 0.00732194531;
+
+        encoderMotorReset();
+
+        setMotorTargets((int)theoreticalFullExtension);
+
+        FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+//            FrontLeft.setPower(0.25);
+//            FrontRight.setPower(0.25);
+//            BackLeft.setPower(0.25);
+//            BackRight.setPower(0.25);
     }
 
 }
