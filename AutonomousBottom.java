@@ -45,22 +45,22 @@ public class AutonomousBottom extends LinearOpMode {
         // BackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //CarouselTest = hardwareMap.get(CRServo.class, "CarouselServo");
+        CarouselTest = hardwareMap.get(CRServo.class, "CarouselServo");
         //CarouselTest.setPower(1);
 
-        Forward(0.55);
-        sleep(675);
-
-        Stop();
-
-        StrafeLeft(0.5);
-        sleep(1100);
-        // Stop();
-
-        Stop();
-
-        Forward(-0.3);
-        sleep(100);
+//        Forward(0.55);
+//        sleep(675);
+//
+//        Stop();
+//
+//        StrafeLeft(0.5);
+//        sleep(1100);
+//        // Stop();
+//
+//        Stop();
+//
+//        Forward(-0.3);
+//        sleep(100);
     }
 
     public void EncodersCode() throws InterruptedException{
@@ -259,4 +259,21 @@ public class AutonomousBottom extends LinearOpMode {
         return ticksPerInch * inches;
     }
 
+    public void encoderMotorReset() {
+        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setMotorTargets (int motorTarget) {
+        FrontLeft.setTargetPosition(motorTarget);
+        FrontRight.setTargetPosition(motorTarget);
+        BackLeft.setTargetPosition(motorTarget);
+        BackRight.setTargetPosition(motorTarget);
+    }
 }
