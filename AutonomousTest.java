@@ -15,6 +15,7 @@ public class AutonomousTest extends LinearOpMode {
     DcMotor BackLeft;
     DcMotor FrontRight;
     DcMotor BackRight;
+    DcMotor LinearSlide;
     CRServo CarouselTest;
     Servo OtherServo;
 
@@ -32,13 +33,15 @@ public class AutonomousTest extends LinearOpMode {
 
     @Override
     public void runOpMode(){
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        CarouselTest = hardwareMap.get(CRServo.class, "CarouselServo");
-        CarouselTest.setPower(0.5);
+        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
 
-        sleep(3000);
+        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+        LinearSlide.setTargetPosition((int) Math.floor(0.24 * 537.7));
+
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        telemetry.addData("Motor are position: " + LinearSlide.getCurrentPosition(), null);
     }
 }
