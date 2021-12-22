@@ -250,4 +250,21 @@ public class AutonomousBlueBottom extends LinearOpMode {
 
     }
 
+    public void encoderMotorReset() {
+        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setMotorTargets (int motorTarget) {
+        FrontLeft.setTargetPosition(motorTarget);
+        FrontRight.setTargetPosition(motorTarget);
+        BackLeft.setTargetPosition(motorTarget);
+        BackRight.setTargetPosition(motorTarget);
+    }
 }
