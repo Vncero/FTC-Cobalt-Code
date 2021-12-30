@@ -15,214 +15,168 @@ public class AutonomousRedTop extends LinearOpMode {
     DcMotor BackLeft;
     DcMotor FrontRight;
     DcMotor BackRight;
-    CRServo CarouselTest;
+    DcMotor CarouselMotor;
 
     private ElapsedTime runtime = new ElapsedTime();
-/* TODO
-  move forward
-  strafe left
-  turn
 
-  step #1 get duck on carousel
-    1a Maybe get random duck
-
-  */
-
-    final String side = "left";
     final double DISTANCE_PER_SECOND = 104.25;
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
+    final double ticksInARotation = 537.7;
 
     @Override
     public void runOpMode(){
-        waitForStart();
-
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        //CarouselTest = hardwareMap.get(CRServo.class, "CarouselServo");
-        //CarouselTest.setPower(1);
-
-        StrafeLeft(1);
-        sleep(1000);
-
-        Stop();
-        sleep(500);
-
-        Forward(0.5);
-        sleep(670);
-
-        Stop();
-        sleep(500);
-
-        StrafeLeft(0.5);
-        sleep(700);
-    }
-
-    public void EncodersCode() throws InterruptedException{
-        waitForStart();
 
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         BackRight = hardwareMap.get(DcMotor.class, "BackRight");
 
-        // AT LEAST GET IT TO PARK
+        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
-        int y = (int) Ticks(15.0);
+        waitForStart();
 
-        encoderReset();
+        StrafeLeft(54, 0.5);
+        TurnRight(motorArcLength(90), 0.5); //motorArcLength() returns an inch amount that is passed to motorTicks()
+        CarouselMotor.setPower(1);
+        sleep(1000); //possibly figure out precise number of rotations to get duck off, then do encoders for it
+        CarouselMotor.setPower(0);
+        Forward(6, 0.5);
+        StrafeRight(9, 0.5);
+        Forward(96, 1);
 
-        FrontLeft.setTargetPosition(y);
-        FrontRight.setTargetPosition(-y);
-        BackLeft.setTargetPosition(y);
-        BackRight.setTargetPosition(-y);
-
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        Forward(1.0);
-
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {}
-
-        Stop();
-
-        FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-
-        y = (int) Ticks(5.0);
-
-        FrontLeft.setTargetPosition(y);
-        FrontRight.setTargetPosition(-y);
-        BackLeft.setTargetPosition(y);
-        BackRight.setTargetPosition(-y);
-
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        Forward(0.5);
-
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {}
-
-        Stop();
+//        StrafeLeft(1);
+//        sleep(1000);
+//
+//        Stop();
+//        sleep(500);
+//
+//        Forward(0.5);
+//        sleep(670);
+//
+//        Stop();
+//        sleep(500);
+//
+//        StrafeLeft(0.5);
+//        sleep(700);
     }
 
-    public static double Ticks (double inches) {
+    public static double motorArcLength (int theta) {
+        int rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
+        return rad * theoreticalMaxRadius; //isolates S, arc length
+    	/*
+    	all the turning math is done on the assumption that driving a distance as a line
+    	is the same as driving that distance around a circumference
+    	as in, the turning motion does not counteract movement along the circumference
+    	and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
+    	they would still drive 10 inches, just along the circumference of their rotation
+    	this is likely not true, but I cannot find math online and can't really model it either
+    	to correct much, just do testing
+    	*/
+    }
+
+    public static double motorTicks (double inches) {
         double diameter = 3.5;
 
         double circumference = Math.PI * diameter;
 
-        double inchesPerTick = circumference / 1440;
+        double inchesPerTick = circumference / ticksInARotation;
 
         return inches / inchesPerTick;
     }
 
-    public void d() {
-        CarouselTest.setDirection(DcMotorSimple.Direction.REVERSE);
-        CarouselTest.setPower(0.075);
+    public static double LinearSlideTicks(double inches) {
 
-        sleep(1000);
+        double circumference = 5.0; // might be wrong if it is then we're FUCKED !
 
-        encoderReset();
+        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 ticks
+
+        return inches / inchesPerTick;
     }
 
-    public void encoderReset() {
-        FrontLeft.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        FrontRight.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        BackLeft.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        BackRight.setMode(DcMotor.RunMode.RESET_ENCODERS);
+    public void StrafeLeft (double inches, double Power) {
 
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        encoderMotorReset();
 
-    }
+        setMotorTargets(motorTicks(inches));
 
+        runMotorEncoders();
 
-    public void TestAutonomous() {
-        /*
-        This is for testing our autonomous
-         */
-        //same color up different color down;
-        /*
-        Check TODO
-         */
-
-        // NOTE: flip powers when side is "right"
-
-        // step 1: turn right 90 degree (TODO: find power equal to 90 degree)
-        // step 2: go forward the amount that will reach carousel
-        // step 3: spin that carousel and get the point
-        // step 4: strafeleft for some power
-        //moves 104.25 inches per second at full power
-
-        // step one: find counts per inches
-        // step two: code
-
-        CarouselTest.setPower(1);
-        sleep(1000);
-        StopCarouselServo();
-    }
-
-    public void TestingPower(){
-        // First test 90 degree
-        /*
-        at full power, the robot turns approximately 350 degrees
-        350: 1
-        350 * 90 / 350
-         */
-
-        double power = 1;
-
-
-        TurnLeft(1);
-        sleep(1000);
-        stop();
-    }
-
-    public void StrafeLeft (double Power) {
         FrontLeft.setPower(-Power);
         FrontRight.setPower(-Power);
         BackLeft.setPower(Power);
         BackRight.setPower(Power);
+
+        waitForMotorEncoders();
     }
 
-    public void StrafeRight (double Power) {
+    public void StrafeRight (double inches, double Power) {
+
+        encoderMotorReset();
+
+        setMotorTargets(motorTicks(inches));
+
+        runMotorEncoders();
+
         FrontLeft.setPower(Power);
         FrontRight.setPower(Power);
         BackLeft.setPower(-Power);
         BackRight.setPower(-Power);
+
+        waitForMotorEncoders();
     }
 
-    public void TurnLeft (double Power) {
+    public void TurnLeft (double inches, double Power) {
         // both left sides go forward
         // both right sides go backwards
         // this makes the robot turn left and stationary
 
+        encoderMotorReset();
+
+        setMotorTargets(motorTicks(inches));
+
+        runMotorEncoders();
+
         FrontLeft.setPower(-Power);
         BackLeft.setPower(-Power);
-
         FrontRight.setPower(-Power);
         BackRight.setPower(-Power);
+
+        waitForMotorEncoders();
     }
 
-    public void TurnRight (double Power) {
+    public void TurnRight (double inches, double Power) {
         // both right sides go forward
         // both left sides go backwards
 
+        encoderMotorReset();
+
+        setMotorTargets(motorTicks(inches));
+
+        runMotorEncoders();
+
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
-
         FrontRight.setPower(Power);
         BackRight.setPower(Power);
+
+        waitForMotorEncoders();
+    }
+
+    public void Forward (double inches, double Power) {
+
+        encoderMotorReset();
+
+        setMotorTargets(motorTicks(inches));
+
+        runMotorEncoders();
+
+        FrontLeft.setPower(Power);
+        FrontRight.setPower(-Power);
+        BackLeft.setPower(Power);
+        BackRight.setPower(-Power);
+
+        waitForMotorEncoders();
     }
 
     public void Stop () {
@@ -230,21 +184,8 @@ public class AutonomousRedTop extends LinearOpMode {
         FrontRight.setPower(0);
         BackLeft.setPower(0);
         BackRight.setPower(0);
-    }
 
-    public void StopCarouselServo () {
-        CarouselTest.setPower(0);
-    }
-
-    public void Forward (double Power) {
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(-Power);
-    }
-
-    public void Spin_Carousel(double Power){
-
+        //encoderMotorReset();
     }
 
     public void encoderMotorReset() {
@@ -252,10 +193,6 @@ public class AutonomousRedTop extends LinearOpMode {
         FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void setMotorTargets (int motorTarget) {
@@ -265,4 +202,18 @@ public class AutonomousRedTop extends LinearOpMode {
         BackRight.setTargetPosition(motorTarget);
     }
 
+    public void runMotorEncoders () {
+        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void waitForMotorEncoders () {
+        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
+            idle();
+        }
+
+        Stop();
+    }
 }
