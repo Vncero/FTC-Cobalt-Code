@@ -36,6 +36,7 @@ public class TeleOP extends OpMode {
     // theoretically, we get an approximate number of ticks for the full thing
     final double ticksInARotation = 537.7;
 
+
     final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
 
     boolean STOP_LS = false;

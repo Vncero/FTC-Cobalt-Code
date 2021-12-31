@@ -23,6 +23,7 @@ public class AutonomousBlueBottom extends LinearOpMode {
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
     final double ticksInARotation = 537.7;
+    final double theoreticalMaxRadius = 9;
 
     @Override
     public void runOpMode(){

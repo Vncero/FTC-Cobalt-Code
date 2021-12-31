@@ -29,7 +29,6 @@ public class AutonomousTest extends LinearOpMode {
     NormalizedRGBA normRGBA;
     private ElapsedTime runtime = new ElapsedTime();
 
-    Activity activity
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
@@ -39,10 +38,13 @@ public class AutonomousTest extends LinearOpMode {
 
     TFObjectDetector tfObjectDetector;
 
-    /* TODO: write codes for color sen., distance sen., and camera
-    use colorSensor to gauge what colors appear, look for yellow
-    use distance sensor to somehow figure out
-  */
+    private static final String TFOD_MODEL_ASSET = "FreightFrenzy_DM.tflite";
+    private static final String[] LABELS = {
+            "Duck",
+            "Marker"
+    };
+
+
     @Override
     public void runOpMode(){
         normColorSensor = hardwareMap.get(NormalizedColorSensor.class, "normColorSensor");
@@ -68,45 +70,52 @@ public class AutonomousTest extends LinearOpMode {
         telemetry.addData("normRed", normRGBA.blue);
         telemetry.addData("normRed", normRGBA.alpha);
 
-        if (opModeIsActive()) {
-            /** Activate TensorFlow Object Detection. */
-            if (tfObjectDetector != null) {
-                tfObjectDetector.activate();
+        if (tfObjectDetector != null) {
+            tfObjectDetector.activate();
+        }
+
+        List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
+
+        List<Recognition> duckRecognitions;
+
+        List<Recognition> nonDuckRecognitions;
+
+        if (updatedRecognitions != null) {
+            for (Recognition recognition : updatedRecognitions) {
+                if (recognition.getLabel() == LABELS[0]) {
+                    duckRecognitions.add(recognition);
+                    telemetry.addData("Confidence of recognition " +
+                            Integer.toString(updatedRecognitions.indexOf(recognition)) +  " (duck)", recognition.getConfidence());
+                } else {
+                    nonDuckRecognitions.add(recognition); //nonDuckRecognitions is likely only Marker recognitions: tfod model only has Duck and Marker
+                    telemetry.addData("Confidence of recognition " +
+                            Integer.toString(updatedRecognitions.indexOf(recognition)) + " (nonDuck)", recognition.getConfidence());
+                }
+
             }
 
-            while (opModeIsActive()) {
-                if (tfObjectDetector != null) {
-                    // getUpdatedRecognitions() will return null if no new information is available since
-                    // the last time that call was made.
-                    List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
-                    if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        if (updatedRecognitions.size() == 3) {
-                            int goldMineralX = -1;
-                            int silverMineral1X = -1;
-                            int silverMineral2X = -1;
-                            for (Recognition recognition : updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                    goldMineralX = (int) recognition.getLeft();
-                                } else if (silverMineral1X == -1) {
-                                    silverMineral1X = (int) recognition.getLeft();
-                                } else {
-                                    silverMineral2X = (int) recognition.getLeft();
-                                }
-                            }
-                            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                                    telemetry.addData("Gold Mineral Position", "Left");
-                                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                                    telemetry.addData("Gold Mineral Position", "Right");
-                                } else {
-                                    telemetry.addData("Gold Mineral Position", "Center");
-                                }
-                            }
-                        }
-                        telemetry.update();
-                    }
+            telemetry.addData("Ducks Detected", duckRecognitions.size());
+            telemetry.addData("Non-Ducks Detected", nonDuckRecognitions.size());
+            telemetry.update();
+
+            for (Recognition recognition : duckRecognitions) { //theoretically, there should only be one duck recognized but keep this in case
+                double frameWidth = recognition.getImageWidth(); //this should get the width of the frame from camera
+                double regionWidth = frameWidth / 3; //divide frame width into three sections of this width
+                //therefore, left is ~ 0 < recognition.getBottom() < regionWidth, middle ~ regionWidth < recognition.getBottom() < 2 * regionWidth
+                //and right is 2 * regionWidth < recognition.getBottom() < frameWidth (3 * regionWidth)
+                if (inRange(0, recognition.getBottom(), regionWidth)) { // use bottom to avoid bias in coordinate
+                    //duck is on left, leftmost barcode position means lowest level based on Freight Frenzy video, check how barcode is read
+                    telemetry.addData(("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "left");
                 }
+
+                if (inRange(2 * regionWidth, recognition.getBottom, frameWidth)) {
+                    //duck is on right, rightmost barcode position means highest level based on Freight Frenzy video, check how barcode is read
+                    telemetry.addData("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "right");
+                } else {
+                    //duck is in middle, middle barcode position means middle level based on Freight Frenzy video, check how barcode is read
+                    telemetry.addData("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "middle");
+                }
+                telemetry.update();
             }
         }
 
@@ -114,6 +123,14 @@ public class AutonomousTest extends LinearOpMode {
             tfObjectDetector.deactivate();
             tfObjectDetector.shutdown();
         }
+
+        //put rest of autonomous below
+
+    }
+
+    public boolean inRange (int min, int value, int max) {
+        boolean inRange = (min < value & value < max) ? true : false;
+        return inRange;
     }
 
     public void initVuforia() {
@@ -131,6 +148,7 @@ public class AutonomousTest extends LinearOpMode {
         TFObjectDetector.Parameters tfParams = new TFObjectDetector.Parameters(tfMonitorViewId);
         tfObjectDetector = ClassFactory.getInstance().createTFObjectDetector(tfParams, vuforia);
 
+        tfObjectDetector.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 }
 

@@ -20,8 +20,8 @@ public class AutonomousBlueTop extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     final double ticksInARotation = 537.7;
+    final double theoreticalMaxRadius = 9;
 
-    final String side = "left";
     final double DISTANCE_PER_SECOND = 104.25;
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
