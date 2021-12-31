@@ -61,15 +61,6 @@ public class AutonomousTest extends LinearOpMode {
 
         waitForStart();
 
-        normRGBA = normColorSensor.getNormalizedColors();
-
-        telemetry.addData("normRed", normRGBA.red);
-        telemetry.addData("normGreen", normRGBA.green);
-        telemetry.addData("normBlue", normRGBA.blue);
-        telemetry.addData("normAlpha", normRGBA.alpha);
-
-        telemetry.update();
-
         if (tfObjectDetector != null) {
             tfObjectDetector.activate();
         }

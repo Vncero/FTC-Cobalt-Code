@@ -194,42 +194,6 @@ public class TeleOP extends OpMode {
         telemetry.update();
     }
 
-    // @Override
-    // public void stop() {
-    //     if (LSExtensionServo.getPosition() != 0.8) {
-    //         telemetry.addLine("changing extension position");
-    //         telemetry.update();
-    //         lsLevelSet(2);
-    //         LSExtensionServo.setPosition(0.8); //bot
-    //     }
-
-    //     lsLevelSet(1);
-
-    //     encoderLSReset();
-    // }
-
-    public void intakeFreight () { //intake method, theoretically completely loopable
-        if (LSExtensionServo.getPosition() != 0) { //if ext not at nec, change it to nec
-            lsLevelSet(2);
-        }
-
-        lsLevelSet(1);
-        LSReleaseServo.setPower(1);
-        //will intake freight, should allow driving to continue
-
-        //rel begins 0.5 after releasing: b pressed
-//        //LSReleaseServo.setPosition(0.5);
-//        lsLevelSet(1);
-//        LSExtensionServo.setPosition(0);
-//        Intake.setPower(1);
-//        lsLevelSet(3);
-//        Intake.setPower(0);
-//        LSExtensionServo.setPosition(0.5);
-//        LSReleaseServo.setPosition(0); //if necessary, tweak this to 0.25 in case bucket drops freight
-//        LSExtensionServo.setPosition(1); //if rel is tweaked to 0.25, find a point of ext to return rel to 0
-//        //rel can now go to 0.5 after pressing b
-    }
-
     public void lsLevelSet (int level) { //method to move ls to preset levels
 
         if (level == 1) { //ground
