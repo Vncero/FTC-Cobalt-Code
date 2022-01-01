@@ -18,7 +18,8 @@ public class TeleOP extends OpMode {
     CRServo Intake;
     Servo LSExtensionServo;
     Servo LSReleaseServo;
-    TouchSensor LinearSlideTopSensor;
+    //TouchSensor LinearSlideLimiterTop;
+    //TouchSensor LinearSlideLimiterBottom;
 
     final int LINEAR_SLIDE_AT_BOTTOM_LIMIT = 1;
     final int LINEAR_SLIDE_AT_TOP_LIMIT = 2;
@@ -27,17 +28,6 @@ public class TeleOP extends OpMode {
 
     final int LS_TOP_LIMIT = (int) (6 * 537.7);
     final int LS_BOT_LIMIT = 0;
-    // approx 5 inches per one rotation
-    //approximately 3 rotations-"2cm"
-
-    //TODO: convert 2cm to inches, pass into ticks method, get a tick amount for 2cm in inches, multiply tick amount per rotation by 3, subtract 2cm from rotation,
-    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
-    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
-    // theoretically, we get an approximate number of ticks for the full thing
-    final double ticksInARotation = 537.7;
-
-
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
 
     boolean STOP_LS = false;
 
@@ -46,9 +36,14 @@ public class TeleOP extends OpMode {
 
     boolean LINEAR_SLIDE_AT_LIMIT = false; // set to true when LINEAR_SLIDE_LIMIT at either LINEAR_SLIDE_AT_BOTTOM_LIMIT or LINEAR_SLIDE_AT_TOP_LIMIT
 
-    //CRServo BucketTurner;top linearSlide servo is normal, not technically Math.pi radians
-    //TouchSensor LinearSlideLimiterTop;
-    //TouchSensor LinearSlideLimiterBottom;
+    //approximately 3 rotations - "2cm"
+    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
+    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
+    // theoretically, we get an approximate number of ticks for the full thing
+
+    final double ticksInARotation = 537.7;
+
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
 
     @Override
     public void init() {
@@ -63,34 +58,19 @@ public class TeleOP extends OpMode {
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo")
         LSReleaseServo = hardwareMap.get(Servo.class, "LSReleaseServo");
 
-        positionLSDefault("down");
-
-        LSReleaseServo.setPosition(0);
-
-        LinearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //setPower now sets speed, not directly power into it
-
+        LinearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER); /*setPower now sets speed, not directly power into it
+        makes LS slightly more safe*/
     }
-
-//    @Override
-//    public void loop () {
-//        if (LinearSlideTopSensor.isPressed())  {
-//            Intake.setPower(1);
-//        }
-//
-//        else {
-//            Intake.setPower(0);
-//        }
-//    }
 
     @Override
     public void loop () {
 
-        if (gamepad1.b) { //turns LSReleaseServo opp pos
+        if (gamepad1.b) { //turns LSReleaseServo opp pos, 0.5 is now the release freight pos
             if ((int) LSReleaseServo.getPosition() == 0) {
-                LSReleaseServo.setPosition(1);
+                LSReleaseServo.setPosition(0.5);
             }
 
-            if ((int) LSReleaseServo.getPosition() == 1) {
+            if (LSReleaseServo.getPosition() == 0.5) {
                 LSReleaseServo.setPosition(0);
             }
         }
@@ -128,7 +108,7 @@ public class TeleOP extends OpMode {
                 LinearSlide.setPower(0);
             }
             else  {
-                intakeCargo();
+                intakeFreight();
             }
         }
 
@@ -157,14 +137,14 @@ public class TeleOP extends OpMode {
             LinearSlide.setPower(0.1); //LS moves up if not at top
         }
 
-        if (gamepad1.dpad_down && LinearSlide.getCurrentPosition() > 0) { //LS moves down if not at bottom
+        if (gamepad1.dpad_down && LinearSlide.getCurrentPosition() > 0) {
             LinearSlide.setDirection(DcMotorSimple.Direction.REVERSE);
-            LinearSlide.setPower(0.1);
+            LinearSlide.setPower(0.1); //LS moves down if not at bottom
         }
 
         else {
             LinearSlide.setDirection(DcMotorSimple.Direction.FORWARD)
-            LinearSlide.setPower(0);
+            LinearSlide.setPower(0); //always power off when no input is made, safety
             telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
         }
 
@@ -224,22 +204,23 @@ public class TeleOP extends OpMode {
         BackLeft.setPower(y+x-c);
         BackRight.setPower(-y+x-c);
 
-        // listen for a button, and aim the linear slide
-
     }
 
-    public void intakeCargo () { //intake method
-        LSReleaseServo.setPosition(0);
-        positionLSDefault("down");
+    public void intakeFreight () { //intake method, theoretically completely loopable
+        //rel begins 0.5 after releasing: b pressed
+        lsDefault(true);
         LSExtensionServo.setPosition(0);
         Intake.setPower(1);
-        LSExtensionServo.setPosition(1);
+        lsDefault(false);
         Intake.setPower(0);
-        positionLSDefault("up");
+        LSExtensionServo.setPosition(0.5);
+        LSReleaseServo.setPosition(0); //if necessary, tweak this to 0.25 in case bucket drops freight
+        LSExtensionServo.setPosition(1); //if rel is tweaked to 0.25, find a point of ext to return rel to 0
+        //rel can now go to 0.5 after pressing b
     }
 
-    public void positionLSDefault (String direction) { //method to default LS to top or bottom
-        if (direction == "up") {
+    public void lsDefault (boolean toBottom) { //method to default LS to top or bottom
+        if (!toBottom) { //LS goes to top position
             LinearSlide.setTargetPosition(theoreticalFullExtension);
 
             LinearSlide.setMode(DcMotor.Mode.RUN_TO_POSITION);
@@ -255,7 +236,7 @@ public class TeleOP extends OpMode {
             LinearSlide.setPower(0);
         }
 
-        if (direction == "down") {
+        if (toBottom) { //LS goes to bottom position
             LinearSlide.setTargetPosition(0);
 
             LinearSlide.setMode(DcMotor.Mode.RUN_TO_POSITION);
@@ -275,7 +256,6 @@ public class TeleOP extends OpMode {
         else {
             break;
         }
-
     }
 
     public void encoderLSReset() {
@@ -317,7 +297,7 @@ public class TeleOP extends OpMode {
     }
 
     public static double MotorTicks (double inches) {
-        double diameter = 3.75; // in inches
+        double diameter = 3.75;
 
         double circumference = Math.PI * diameter; // in inches
 

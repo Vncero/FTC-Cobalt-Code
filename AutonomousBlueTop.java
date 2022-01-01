@@ -205,7 +205,7 @@ public class AutonomousBlueTop extends LinearOpMode {
         BackLeft.setPower(0);
         BackRight.setPower(0);
 
-        //encoderMotorReset();
+        encoderMotorReset();
     }
 
     public void encoderMotorReset() {
