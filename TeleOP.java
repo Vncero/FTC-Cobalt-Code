@@ -26,12 +26,7 @@ public class TeleOP extends OpMode {
 
     final double ticksInARotation = 537.7;
 
-    // final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
-
-    final double down = 0.25;
-    final double up = 0.93;
-
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
     // official information says 3.1 rotations apparently
     //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
@@ -146,16 +141,10 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.left_bumper) {
             LSExtensionServo.setPosition(0.15);
-            //0
-            //moves to bot
-            // LSExtensionServo.setPosition(up);
         }
 
         else if (gamepad2.right_bumper) {
             LSExtensionServo.setPosition(0.45);
-            //90
-            //zero
-            // LSExtensionServo.setPosition(down);
         }
 
         else if (gamepad2.right_trigger == 1) {
@@ -163,30 +152,18 @@ public class TeleOP extends OpMode {
             LSExtensionServo.setPosition(0.8);
         }
 
-        if (gamepad2.y) {
+        if (gamepad2.y) { // top extension
             lsLevelSet(3);
             LSExtensionServo.setPosition(0.15);
         }
 
-        if (gamepad2.b) {
+        if (gamepad2.b) { // middle extension
             lsLevelSet(2);
             LSExtensionServo.setPosition(0.45);
-
-            // telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
         }
 
-        if (gamepad2.a) {
-
+        if (gamepad2.a) { // ground extension
             lsLevelSet(1);
-            telemetry.addData("Ground LS Extension", 0);
-        }
-
-        if (gamepad2.x) {
-            //level 1 dump freight
-
-            lsLevelSet(1);
-
-            LSExtensionServo.setPosition(0.45);
         }
 
         //make a default percentage to read at the whole game
