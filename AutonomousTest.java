@@ -3,14 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import com.qualcomm.robotcore.external.tfod.TFObjectDetector;
 import com.qualcomm.robotcore.external.tfod.Recognition;
 
-import android.app.Activity;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "test")
@@ -66,9 +62,11 @@ public class AutonomousTest extends LinearOpMode {
         normRGBA = normColorSensor.getNormalizedColors();
 
         telemetry.addData("normRed", normRGBA.red);
-        telemetry.addData("normRed", normRGBA.green);
-        telemetry.addData("normRed", normRGBA.blue);
-        telemetry.addData("normRed", normRGBA.alpha);
+        telemetry.addData("normGreen", normRGBA.green);
+        telemetry.addData("normBlue", normRGBA.blue);
+        telemetry.addData("normAlpha", normRGBA.alpha);
+
+        telemetry.update();
 
         if (tfObjectDetector != null) {
             tfObjectDetector.activate();
@@ -133,8 +131,10 @@ public class AutonomousTest extends LinearOpMode {
         return inRange;
     }
 
-    public void initVuforia() {
-        VuforiaLocalizer.Parameters vuParams = new VuforiaLocalizer.Parameters();
+    public void initVuforia() { //the two monitors may conflict, remove cameraMonitorViewId if necessary
+        int cameraMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters vuParams = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
         vuParams.vuforiaLicenseKey = vuforiaLicenseKey;
         vuParams.cameraName = hardwareMap.get(WebcamName.class, "vuCam");

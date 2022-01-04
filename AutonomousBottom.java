@@ -20,10 +20,26 @@ public class AutonomousBottom extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     final double ticksInARotation = 537.7;
-    final double theoreticalMaxRadius = 9;
-    /*
+    final double theoreticalRadius = 10.9;
+    /* a lot of notes
+    the objective - get radius of turning circle
+    when the robot turns, the edges of the wheel hit points that make up its turning circle
+    relating the turning circle to the robot, we can deduce that the diameter of this circle can be found by
+    finding the diagonal measure between wheels, like FrontLeft and BackRight.
+    without being able to directly measure, we can estimate this diagonal by figuring out the robot's dimensions
+    we know that it fits between the barrier gap, meaning the width is at max 13.68in, use 13.65in
+    for length, the robot fits in the 2ft by 2ft squares, but the size limit is 18, so use 17in
+    now we have two measures for pythagorean theorem
+    13.65^2 + 17^2 = c^2
+    186.3225 + 289 = c^2
+    475.3225 = c^2
+    sqrt(475.3225) ~ 21.8in diameter
+    21.8 / 2 = 10.9in radius
+    * */
+
+    /* previous turn circle radius estimate
      the robot must be within 18*18*18
-	 therefore, the circle it rotates has diameter 18 at max
+     therefore, the circle it rotates has diameter 18 at max
      18 / 2 = 9
      previously, I made the judgment that the circle it rotates needs the same area as the 18*18 square
      however, this would create a circle larger than the square
@@ -76,32 +92,32 @@ public class AutonomousBottom extends LinearOpMode {
 //        sleep(100);
     }
 
-    public static double motorArcLength (int theta) {
-        int rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
-        return rad * theoreticalMaxRadius; //isolates S, arc length
-    	/*
-    	all the turning math is done on the assumption that driving a distance as a line
-    	is the same as driving that distance around a circumference
-    	as in, the turning motion does not counteract movement along the circumference
-    	and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
-    	they would still drive 10 inches, just along the circumference of their rotation
-    	this is likely not true, but I cannot find math online and can't really model it either
-    	to correct much, just do testing
-    	*/
+    public double motorArcLength (int theta) {
+        double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
+        return rad * theoreticalRadius; //returns S, the arc length
+        /* old notes
+        all the turning math is done on the assumption that driving a distance as a line
+        is the same as driving that distance around a circumference
+        as in, the turning motion does not counteract movement along the circumference
+        and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
+        they would still drive 10 inches, just along the circumference of their rotation
+        this is likely not true, but I cannot find math online and can't really model it either
+        to correct much, just do testing
+        */
     }
 
-    public static double motorTicks (double inches) {
+    public int motorTicks (double inches) {
         double diameter = 3.5;
 
         double circumference = Math.PI * diameter;
 
         double inchesPerTick = circumference / ticksInARotation; // approx 0.0204492733635192 inch
 
-        return inches / inchesPerTick;
+        return (int) Math.floor(inches / inchesPerTick);
     }
 
-    public static double linearSlideTicks(double inches) {
-
+    public double linearSlideTicks(double inches) {
+        //copy changes in these measurments from TeleOp
         double circumference = 5.0; // might be wrong if it is then we're FUCKED !
 
         double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inch
@@ -115,7 +131,7 @@ public class AutonomousBottom extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders()
+        runMotorEncoders();
 
         FrontLeft.setPower(-Power);
         FrontRight.setPower(-Power);
@@ -131,7 +147,7 @@ public class AutonomousBottom extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders()
+        runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(Power);
@@ -150,7 +166,7 @@ public class AutonomousBottom extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders()
+        runMotorEncoders();
 
         FrontLeft.setPower(-Power);
         BackLeft.setPower(-Power);
@@ -168,7 +184,7 @@ public class AutonomousBottom extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders()
+        runMotorEncoders();
 
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
@@ -184,7 +200,7 @@ public class AutonomousBottom extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders()
+        runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(-Power);
