@@ -28,7 +28,7 @@ public class TeleOP extends OpMode {
 
     final int LS_TOP_LIMIT = (int) (6 * 537.7);
     final int LS_BOT_LIMIT = 0;
-    //
+// 
     boolean STOP_LS = false;
 
     int upwardsTickCount = 0;
@@ -64,12 +64,14 @@ public class TeleOP extends OpMode {
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        Intake = hardwareMap.get(CRServo.class, "IntakeServo");
+        // Intake = hardwareMap.get(CRServo.class, "IntakeServo");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         // LinearSlideTopSensor = hardwareMap.get(TouchSensor.class, "LinearSlideTopTouchSensor");
-        //LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-        //LSReleaseServo = hardwareMap.get(Servo.class, "LSReleaseServo");
+        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
+        LSReleaseServo = hardwareMap.get(Servo.class, "LSReleaseServo");
+        
+        LSReleaseServo.setPosition(0.12);
 
         //LSReleaseServo.setPosition(0.5);
         //either uncomment this or the one in intakeFreight()
@@ -83,44 +85,57 @@ public class TeleOP extends OpMode {
         //     CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         //     //reverse motor, now turns CW - blue, dpad_right
         // }
+        
+        telemetry.addData("Full LS Extension", theoreticalFullExtension);
+        telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
+        telemetry.addData("Ground LS Extension", theoreticalGroundExtension);
+        
+        telemetry.addLine("Press right on the dpad if on red");
+        telemetry.addLine("Press start if on blue");
+        telemetry.update();
     }
 
     //if the init while doesn't work, use this init_loop()
     @Override
     public void init_loop () {
-        telemetry.addLine("Press right on the dpad if on red");
-        telemetry.update();
         if (gamepad1.dpad_right) {
             CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            telemetry.addLine("Changed carousel direction to CW");
+            telemetry.clear();
+            
+            telemetry.addLine("Changed carousel direction to CW (red)");
             telemetry.update();
-
+            
             //reverse motor, now turns CW - blue, dpad_right
+        } if (gamepad1.dpad_left) {
+            CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            telemetry.clear();
+            
+            telemetry.addLine("Changed carousel direction to CCW (blue)");
+            telemetry.update();
         }
-
+        
     }
 
     @Override
     public void loop () {
         /* button config
-         *   gamepad1: movement on joysticks, carousel dir set (dpad) and activate (button)
-         *   gamepad2: bucket on dpad up and down, x intake, y top LS, b mid LS, a bot LS
-         * */
+        *   gamepad1: movement on joysticks, carousel dir set (dpad) and activate (button)
+        *   gamepad2: bucket on dpad up and down, x intake, y top LS, b mid LS, a bot LS
+        * */
 
         if (gamepad1.b) {
             CarouselMotor.setPower(1);
         }
-
+        
         else CarouselMotor.setPower(0);
 
-
-        if (gamepad2.dpad_up) { //or left and right, depending what makes sense
-            LSReleaseServo.setPosition(0);
+        if (gamepad2.dpad_down) { //or left and right, depending what makes sense
+            LSReleaseServo.setPosition(0.12);
             //theoretically, the way the intake method is designed, 0 is higher up than 0.5
         }
 
-        if (gamepad2.dpad_down) {
-            LSReleaseServo.setPosition(0.5);
+        if (gamepad2.dpad_up) {
+            LSReleaseServo.setPosition(0.775);
         }
 
         if (gamepad2.x) {
@@ -130,59 +145,55 @@ public class TeleOP extends OpMode {
         //LS level presets
         if (gamepad2.y) {
             lsLevelSet(3);
+            telemetry.addData("Full LS Extension", theoreticalFullExtension);
+        
         }
 
         if (gamepad2.b) {
             lsLevelSet(2);
+
+            telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
+
         }
 
         if (gamepad2.a) {
             lsLevelSet(1);
+        
+            //telemetry.addData("Ground LS Extension", theoreticalGroundExtension);
         }
-
-//        if (gamepad1.dpad_up && !STOP_LS) {
-//            LinearSlide.setPower(0.01);
-//
-//            if (LinearSlide.getCurrentPosition() == LS_TOP_LIMIT - 300) {
-//                STOP_LS = true;
-//            }
-//
-//            else {
-//                STOP_LS = false;
-//            }
-//        }
-//
-//        else if (gamepad1.dpad_down && !STOP_LS) {
-//            LinearSlide.setPower(-0.01);
-//
-//            if (LinearSlide.getCurrentPosition() == LS_BOT_LIMIT + 300) {
-//                STOP_LS = true;
-//            }
-//
-//            else {
-//                STOP_LS = false;
-//            }
-//        }
-//
-//        else {
-//            LinearSlide.setPower(0);
-//        }
+        
+        if (gamepad2.dpad_right) {
+            LSExtensionServo.setPosition(0);
+        }
+        
+        else if (gamepad2.dpad_left) {
+            LSExtensionServo.setPosition(1);
+        }
+        
+        if (gamepad2.dpad_up) {
+            LSExtensionServo.setPosition(0.4);
+        }
+        
+        else if (gamepad2.dpad_down) {
+            LSExtensionServo.setPosition(0.45);
+        }
 
         double c = gamepad1.left_stick_x;
         double x = gamepad1.right_stick_x;
         double y = -gamepad1.left_stick_y;
-
+        
         y *= 0.9;
         c *= 0.9;
         x *= 0.9;
-
+    
         //make a default percentage to read at the whole game
 
         FrontLeft.setPower(y+x+c);
         FrontRight.setPower(-y+x+c);
         BackLeft.setPower(y+x-c);
         BackRight.setPower(-y+x-c);
-
+        
+        telemetry.update();
     }
 
     public void intakeFreight () { //intake method, theoretically completely loopable
@@ -202,6 +213,9 @@ public class TeleOP extends OpMode {
     public void lsLevelSet (int level) { //method to move ls to preset levels
 
         if (level == 1) { //ground
+            LSExtensionServo.setPosition(0.2);
+            LSReleaseServo.setPosition(0.12);
+        
             LinearSlide.setTargetPosition(0);
 
             LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -211,14 +225,17 @@ public class TeleOP extends OpMode {
             while (LinearSlide.isBusy()) {
                 telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
                 telemetry.update();
-
-
             }
             LinearSlide.setPower(0);
-
+            telemetry.addLine("wsg bro");
+            telemetry.update();
+            publicServoCode();
         }
 
         if (level == 2) { //middle
+            LSExtensionServo.setPosition(0.2);
+            LSReleaseServo.setPosition(0.12);
+        
             LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
 
             LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -228,10 +245,12 @@ public class TeleOP extends OpMode {
             while (LinearSlide.isBusy()) {
                 telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
                 telemetry.update();
-
-
             }
+            
             LinearSlide.setPower(0);
+            telemetry.addLine("wsg bro");
+            telemetry.update();
+            publicServoCode();
         }
 
         if (level == 3) { //top
@@ -245,10 +264,31 @@ public class TeleOP extends OpMode {
                 telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
                 telemetry.update();
 
-
+                
             }
             LinearSlide.setPower(0);
         }
+    }
+    
+    public publicServoCode() {
+        LSExtensionServo.setPosition(0.2);
+        LSReleaseServo.setPosition(0.12);
+    }
+    
+    public void groundBucketCode() {
+        LSReleaseServo.setPosition(0.5);
+        
+        LSExtensionServo.setPosition(0.1);
+        LSReleaseServo.setPosition(0.12);
+    }
+    
+    public void middleBucketCode() {
+        LSExtensionServo.setPosition(0.5);
+        LSReleaseServo.setPosition(0.5);
+        
+        CarouselMotor.setPower(1);
+        
+        // CarouselMotor.setPower(0);
     }
 
     public void encoderLSReset() {
