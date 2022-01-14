@@ -26,7 +26,7 @@ public class AutonomousRedTop extends LinearOpMode {
     final double theoreticalRadius = 10.9;
 
     @Override
-    public void runOpMode(){
+    public void runOpMode(){ 
 
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
@@ -36,30 +36,11 @@ public class AutonomousRedTop extends LinearOpMode {
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
         waitForStart();
-
-        StrafeLeft(54, 0.5);
-        TurnRight(motorArcLength(90), 0.5); //motorArcLength() returns an inch amount that is passed to motorTicks()
-        CarouselMotor.setPower(1);
-        sleep(1000); //possibly figure out precise number of rotations to get duck off, then do encoders for it
-        CarouselMotor.setPower(0);
-        Forward(6, 0.5);
-        StrafeRight(9, 0.5);
-        Forward(96, 1);
-
-//        StrafeLeft(1);
-//        sleep(1000);
-//
-//        Stop();
-//        sleep(500);
-//
-//        Forward(0.5);
-//        sleep(670);
-//
-//        Stop();
-//        sleep(500);
-//
-//        StrafeLeft(0.5);
-//        sleep(700);
+        
+        // did not put this encoder reset in the directional methods, in case programmer wants flexiblity with keeping the encoder ticks at the same value. not sure why but there it instanceof
+        encoderMotorReset();
+        
+        Forward(10, 0.5);
     }
 
     public double motorArcLength (int theta) {
@@ -96,12 +77,15 @@ public class AutonomousRedTop extends LinearOpMode {
     }
 
     public void StrafeLeft (double inches, double Power) {
+    
+        int ticks = motorTicks(inches);
+        
+        FrontLeft.setTargetPosition(ticks);
+        FrontRight.setTargetPosition(-ticks);
+        BackLeft.setTargetPosition(ticks);
+        BackRight.setTargetPosition(-ticks);
 
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();;
+        runMotorEncoders();
 
         FrontLeft.setPower(-Power);
         FrontRight.setPower(-Power);
@@ -109,6 +93,7 @@ public class AutonomousRedTop extends LinearOpMode {
         BackRight.setPower(Power);
 
         waitForMotorEncoders();
+        
     }
 
     public void StrafeRight (double inches, double Power) {
@@ -117,7 +102,7 @@ public class AutonomousRedTop extends LinearOpMode {
 
         setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders();;
+        runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(Power);
@@ -165,12 +150,14 @@ public class AutonomousRedTop extends LinearOpMode {
     }
 
     public void Forward (double inches, double Power) {
+        int ticks = motorTicks(inches);
+        
+        FrontLeft.setTargetPosition(ticks);
+        FrontRight.setTargetPosition(-ticks);
+        BackLeft.setTargetPosition(ticks);
+        BackRight.setTargetPosition(-ticks);
 
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();;
+        runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(-Power);
@@ -212,7 +199,7 @@ public class AutonomousRedTop extends LinearOpMode {
 
     public void waitForMotorEncoders () {
         while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
-            idle();
+            // idle();
         }
 
         Stop();
