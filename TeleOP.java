@@ -23,10 +23,14 @@ public class TeleOP extends OpMode {
     //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
     // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
     // theoretically, we get an approximate number of ticks for the full thing
+ 
+    final double topExtensionPosition = 0.8;
 
     final double ticksInARotation = 537.7;
 
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
+    // final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    
     // official information says 3.1 rotations apparently
     //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
@@ -55,6 +59,10 @@ public class TeleOP extends OpMode {
         // IMPORTANT: 0.93 is top position, 0.25 is bottom position
 
 
+        // LSExtensionServo.setPosition(0);
+        // IMPORTANT: 0.93 is top position, 0.25 is bottom position
+        LSExtensionServo.setPosition(0.25);
+        
         telemetry.addData("Full LS Extension", theoreticalFullExtension);
         telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
         telemetry.addData("Ground LS Extension", theoreticalGroundExtension);
@@ -67,6 +75,12 @@ public class TeleOP extends OpMode {
 
         telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + LinearSlide.getTargetPosition());
 
+        telemetry.update();
+        
+        encoderLSReset();
+        LinearSlide.setTargetPosition(0); // need to clear it first - set to 0
+        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + LinearSlide.getTargetPosition());
+        
         telemetry.update();
     }
 
