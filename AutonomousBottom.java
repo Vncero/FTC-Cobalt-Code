@@ -16,11 +16,19 @@ public class AutonomousBottom extends LinearOpMode {
     DcMotor FrontRight;
     DcMotor BackRight;
     DcMotor CarouselMotor;
+    DcMotor LinearSlide;
 
     private ElapsedTime runtime = new ElapsedTime();
 
     final double ticksInARotation = 537.7;
     final double theoreticalRadius = 10.9;
+    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    final double theoreticalGroundExtension = LinearSlideTicks(3);
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+
+    CRServo Intake;
+    Servo LSExtensionServo;
+
     /* a lot of notes
     the objective - get radius of turning circle
     when the robot turns, the edges of the wheel hit points that make up its turning circle
@@ -63,33 +71,164 @@ public class AutonomousBottom extends LinearOpMode {
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         BackRight = hardwareMap.get(DcMotor.class, "BackRight");
+        Intake = hardwareMap.get(CRServo.class, "Intake");
+        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
+
+        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
 
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
         waitForStart();
 
-        StrafeLeft(6, 0.5);
-        TurnRight(motorArcLength(90), 0.5); //motorArcLength() returns an inch amount that is passed to motorTicks()
-        CarouselMotor.setPower(1);
-        sleep(1000); //possibly figure out precise number of rotations to get duck off, then do encoders for it
-        CarouselMotor.setPower(0);
-        Forward(6, 0.5);
-        StrafeRight(9, 0.5);
-        Forward(72, 1);
+        Forward(0.5);
 
-//        Forward(0.55);
-//        sleep(675);
-//
-//        Stop();
-//
-//        StrafeLeft(0.5);
-//        sleep(1100);
-//        // Stop();
-//
-//        Stop();
-//
-//        Forward(-0.3);
-//        sleep(100);
+        sleep(200);
+
+        TurnRight(0.5);
+
+        sleep(500);
+
+        Stop();
+
+        sleep(200);
+
+        Forward(-0.5);
+
+        sleep(400);
+        
+        StrafeRight(0.3);
+        
+        sleep(250);
+        
+        Stop();
+        
+        CarouselMotor.setPower(-1);
+        
+        sleep(5000);
+        
+        CarouselMotor.setPower(0);
+        
+        StrafeLeft(0.5);
+        
+        sleep(500);
+        
+        Forward(0.5);
+        
+        sleep(800);
+        
+        StrafeRight(0.4);
+        
+        sleep(1000);
+        
+        Forward(0.5);
+        
+        sleep(800);
+        
+        StrafeRight(0.4);
+        sleep(600);
+        
+        Forward(0.5);
+        
+        sleep(3500);
+    }
+
+    public enum Drive {
+        FORWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT
+    }
+
+    public void STRAIGHT_TO_WAREHOUSE() {
+        Forward(0.5);
+
+        sleep(200);
+
+        TurnRight(0.5);
+
+        sleep(500);
+
+        Stop();
+
+        sleep(200);
+
+        StrafeRight(0.3);
+
+        sleep(1000);
+
+        Forward(0.75);
+
+        sleep(2000);
+    }
+
+    public void AUTOCODE() {
+        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+
+        LinearSlide.setPower(0.75);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        StrafeRight(0.2);
+
+        sleep(2000);
+
+        Stop();
+        sleep(200);
+
+        Forward(0.5);
+
+        sleep(600);
+
+        LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+
+        LinearSlide.setPower(0.75);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        LSExtensionServo.setPosition(0.15);
+
+        Intake.setPower(-1);
+
+        sleep(200);
+
+        Intake.setPower(0);
+
+        LSExtensionServo.setPosition(-0.8);
+
+        LinearSlide.setTargetPosition(0);
+        LinearSlide.setPower(0.75);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        Forward(-0.5);
+
+        sleep(500);
+
+        TurnRight(0.5);
+
+        sleep(1000);
+    }
+
+    public int LinearSlideTicks(double inches) {
+        double diameter = 1.5;
+
+        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
+        // original measurement was 5in
+        //alt circumference ~ 4.75in.
+        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
+
+        return (int) Math.floor(inches / inchesPerTick);
     }
 
     public double motorArcLength (int theta) {
@@ -125,89 +264,98 @@ public class AutonomousBottom extends LinearOpMode {
         return inches / inchesPerTick;
     }
 
-    public void StrafeLeft (double inches, double Power) {
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
-        FrontLeft.setPower(-Power);
-        FrontRight.setPower(-Power);
+    public void Drive (double Power) {
+        FrontLeft.setPower(Power);
+        FrontRight.setPower(Power);
         BackLeft.setPower(Power);
         BackRight.setPower(Power);
 
         waitForMotorEncoders();
     }
 
-    public void StrafeRight (double inches, double Power) {
+    public void StrafeLeft (double Power) {
 
-        encoderMotorReset();
+        // encoderMotorReset();
 
-        setMotorTargets(motorTicks(inches));
+        // setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders();
+        // runMotorEncoders();
+
+        FrontLeft.setPower(-Power);
+        FrontRight.setPower(-Power);
+        BackLeft.setPower(Power);
+        BackRight.setPower(Power);
+
+        // waitForMotorEncoders();
+    }
+
+    public void StrafeRight (double Power) {
+
+        // encoderMotorReset();
+
+        // setMotorTargets(motorTicks(inches));
+
+        // runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(Power);
         BackLeft.setPower(-Power);
         BackRight.setPower(-Power);
 
-        waitForMotorEncoders();
+        // waitForMotorEncoders();
     }
 
-    public void TurnLeft (double inches, double Power) {
+    public void TurnLeft (double Power) {
         // both left sides go forward
         // both right sides go backwards
         // this makes the robot turn left and stationary
 
-        encoderMotorReset();
+        // encoderMotorReset();
 
-        setMotorTargets(motorTicks(inches));
+        // setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders();
+        // runMotorEncoders();
 
         FrontLeft.setPower(-Power);
         BackLeft.setPower(-Power);
         FrontRight.setPower(-Power);
         BackRight.setPower(-Power);
 
-        waitForMotorEncoders();
+        // waitForMotorEncoders();
     }
 
-    public void TurnRight (double inches, double Power) {
+    public void TurnRight (double Power) {
         // both right sides go forward
         // both left sides go backwards
 
-        encoderMotorReset();
+        // encoderMotorReset();
 
-        setMotorTargets(motorTicks(inches));
+        // setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders();
+        // runMotorEncoders();
 
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
         FrontRight.setPower(Power);
         BackRight.setPower(Power);
 
-        waitForMotorEncoders();
+        // waitForMotorEncoders();
     }
 
-    public void Forward (double inches, double Power) {
+    public void Forward (double Power) {
 
-        encoderMotorReset();
+        // encoderMotorReset();
 
-        setMotorTargets(motorTicks(inches));
+        // setMotorTargets(motorTicks(inches));
 
-        runMotorEncoders();
+        // runMotorEncoders();
 
         FrontLeft.setPower(Power);
         FrontRight.setPower(-Power);
         BackLeft.setPower(Power);
         BackRight.setPower(-Power);
 
-        waitForMotorEncoders();
+        // waitForMotorEncoders();
     }
 
     public void Stop () {
@@ -216,7 +364,7 @@ public class AutonomousBottom extends LinearOpMode {
         BackLeft.setPower(0);
         BackRight.setPower(0);
 
-        encoderMotorReset();
+        // encoderMotorReset();
     }
 
     public void encoderMotorReset() {
@@ -227,11 +375,46 @@ public class AutonomousBottom extends LinearOpMode {
 
     }
 
-    public void setMotorTargets (int motorTarget) {
-        FrontLeft.setTargetPosition(motorTarget);
-        FrontRight.setTargetPosition(motorTarget);
-        BackLeft.setTargetPosition(motorTarget);
-        BackRight.setTargetPosition(motorTarget);
+    public void setMotorTargets (int inches, Drive drive) {
+        encoderMotorReset();
+
+        int target = (int) motorTicks(inches);
+
+        switch (drive) {
+            case FORWARD:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case TURN_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case TURN_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+        }
+
+        runMotorEncoders();
+
     }
 
     public void runMotorEncoders () {
