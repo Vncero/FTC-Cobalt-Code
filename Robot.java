@@ -59,6 +59,14 @@ public class Robot {
         BackRight.setPower(-Power);
     }
 
+    public void LinearSlideSet(int ticks) {
+        LinearSlide.setTargetPosition(ticks);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+    }
+
     public void Stop () {
         FrontLeft.setPower(0);
         FrontRight.setPower(0);

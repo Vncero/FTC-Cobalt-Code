@@ -1,11 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.qualcomm.robotcore.external.tfod.TFObjectDetector;
-import com.qualcomm.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import java.util.List;
 
@@ -49,13 +57,7 @@ public class AutonomousTest extends LinearOpMode {
 
         initVuforia();
 
-        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
-            initTensorFlow();
-        }
-        else {
-            telemetry.addLine("Failed to create TFObjectDetector.");
-            telemetry.update()
-        }
+        initTensorFlow();
 
         waitForStart();
 
@@ -74,20 +76,20 @@ public class AutonomousTest extends LinearOpMode {
 
         List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
 
-        List<Recognition> duckRecognitions;
+        List<Recognition> duckRecognitions = null;
 
-        List<Recognition> nonDuckRecognitions;
+        List<Recognition> nonDuckRecognitions = null;
 
         if (updatedRecognitions != null) {
             for (Recognition recognition : updatedRecognitions) {
-                if (recognition.getLabel() == LABELS[0]) {
+                if (recognition.getLabel().equals(LABELS[0])) {
                     duckRecognitions.add(recognition);
                     telemetry.addData("Confidence of recognition " +
-                            Integer.toString(updatedRecognitions.indexOf(recognition)) +  " (duck)", recognition.getConfidence());
+                            updatedRecognitions.indexOf(recognition) +  " (duck)", recognition.getConfidence());
                 } else {
                     nonDuckRecognitions.add(recognition); //nonDuckRecognitions is likely only Marker recognitions: tfod model only has Duck and Marker
                     telemetry.addData("Confidence of recognition " +
-                            Integer.toString(updatedRecognitions.indexOf(recognition)) + " (nonDuck)", recognition.getConfidence());
+                            updatedRecognitions.indexOf(recognition) + " (nonDuck)", recognition.getConfidence());
                 }
 
             }
@@ -103,15 +105,15 @@ public class AutonomousTest extends LinearOpMode {
                 //and right is 2 * regionWidth < recognition.getBottom() < frameWidth (3 * regionWidth)
                 if (inRange(0, recognition.getBottom(), regionWidth)) { // use bottom to avoid bias in coordinate
                     //duck is on left, leftmost barcode position means lowest level based on Freight Frenzy video, check how barcode is read
-                    telemetry.addData(("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "left");
+                    telemetry.addData("Duck " + duckRecognitions.indexOf(recognition), "left");
                 }
 
-                if (inRange(2 * regionWidth, recognition.getBottom, frameWidth)) {
+                if (inRange(2 * regionWidth, recognition.getBottom(), frameWidth)) {
                     //duck is on right, rightmost barcode position means highest level based on Freight Frenzy video, check how barcode is read
-                    telemetry.addData("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "right");
+                    telemetry.addData("Duck " + duckRecognitions.indexOf(recognition), "right");
                 } else {
                     //duck is in middle, middle barcode position means middle level based on Freight Frenzy video, check how barcode is read
-                    telemetry.addData("Duck " + Integer.toString(duckRecognitions.indexOf(recognition)), "middle");
+                    telemetry.addData("Duck " + duckRecognitions.indexOf(recognition), "middle");
                 }
                 telemetry.update();
             }
@@ -126,9 +128,8 @@ public class AutonomousTest extends LinearOpMode {
 
     }
 
-    public boolean inRange (int min, int value, int max) {
-        boolean inRange = (min < value & value < max) ? true : false;
-        return inRange;
+    public boolean inRange (double min, double value, double max) {
+        return min < value & value < max;
     }
 
     public void initVuforia() { //the two monitors may conflict, remove cameraMonitorViewId if necessary
