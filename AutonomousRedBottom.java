@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 //import com.qualcomm.robotcore.util.
 
-@Autonomous(name="AutonomousRedTop")
-public class AutonomousRedTop extends AutonomousBase {
+@Autonomous(name="AutonomousRedBottom")
+public class AutonomousRedBottom extends AutonomousBase {
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
