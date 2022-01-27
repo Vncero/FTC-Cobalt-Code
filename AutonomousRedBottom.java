@@ -61,21 +61,16 @@ public class AutonomousRedTop extends AutonomousBase {
      20.310 >~ d
      round diameter down a little to 20, then circumference is about 62.83185
     */
-    final double DISTANCE_PER_SECOND = 104.25;
-    final double DEGREES_PER_SECOND = 350.0; // approximated
 
     @Override
     public void runOpMode(){
-
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         BackRight = hardwareMap.get(DcMotor.class, "BackRight");
         Intake = hardwareMap.get(CRServo.class, "Intake");
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
-
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
         waitForStart();
@@ -85,46 +80,39 @@ public class AutonomousRedTop extends AutonomousBase {
         LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
         LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
         LinearSlide.setPower(0.5);
-
         while (LinearSlide.isBusy()) {}
-
         LinearSlide.setPower(0);
-
+        
         sleep(100);
-
+        
+        // strafe along the walll
         StrafeRight(0.4);
-
         sleep(1300);
-
         Stop();
-
         sleep(100);
 
         // go back more to ensure robot is facing perfectly perpendicular to the wall
         Forward(-0.1);
-
         sleep(200);
-
         Stop();
-
+        
+        // now, the robot is facing shipping hub, with its back to the wall. 
+    
+        // forward towards the shipping hub
         Forward(0.45);
         sleep(500);
-
         Stop();
         sleep(100);
-
+        
+        // raise linear slides to highest position
         LinearSlide.setTargetPosition((int) theoreticalFullExtension);
-
         LinearSlide.setPower(0.5);
-
         while (LinearSlide.isBusy()) {}
-
         LinearSlide.setPower(0);
-
+        
+        // extend fully with extension servo
         LSExtensionServo.setPosition(0.15);
-
         sleep(1000);
 
         // Forward(0.3);
