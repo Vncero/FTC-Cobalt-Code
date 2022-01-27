@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //import com.qualcomm.robotcore.util.
 
 @Autonomous(name="AutonomousBlueTop")
-public class AutonomousBlueTop extends LinearOpMode {
+public class AutonomousBlueTop extends AutonomousBase {
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
@@ -65,7 +65,7 @@ public class AutonomousBlueTop extends LinearOpMode {
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
 
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");

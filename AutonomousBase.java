@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public abstract class AutonomousBase extends LinearOpMode {
     DcMotor FrontLeft;
@@ -9,11 +10,19 @@ public abstract class AutonomousBase extends LinearOpMode {
     DcMotor BackLeft;
     DcMotor BackRight;
 
+    final double up = 0.15d;
+    // final double middle = 0.45d;
+    final double bottom = 0.8d;
+
     public void setDriveTrain(DcMotor FrontLeft, DcMotor FrontRight, DcMotor BackLeft, DcMotor BackRight) {
         this.FrontLeft = FrontLeft;
         this.FrontRight = FrontRight;
         this.BackLeft = BackLeft;
         this.BackRight = BackRight;
+    }
+    public Servo setLSExtensionServo(Servo LSExtensionServo) {
+        LSExtensionServo.scaleRange(up, bottom);
+        return LSExtensionServo;
     }
 
     public void Forward (double Power) {
