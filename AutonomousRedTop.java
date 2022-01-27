@@ -79,6 +79,8 @@ public class AutonomousRedTop extends AutonomousBase {
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
         waitForStart();
+        
+        super.setDriveTrain(FrontLeft, FrontRight, BackLeft, BackRight);
 
         LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
