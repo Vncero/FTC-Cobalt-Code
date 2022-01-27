@@ -7,9 +7,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+//import com.qualcomm.robotcore.util.
 
-@Autonomous(name="AutonomousRedBottom")
-public class AutonomousRedBottom extends LinearOpMode {
+@Autonomous(name="AutonomousRedTop")
+public class AutonomousRedTop extends AutonomousBase {
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
@@ -78,7 +79,160 @@ public class AutonomousRedBottom extends LinearOpMode {
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
 
         waitForStart();
+        
+        super.setDriveTrain(FrontLeft, FrontRight, BackLeft, BackRight);
 
+        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        LinearSlide.setPower(0.5);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        sleep(100);
+
+        StrafeRight(0.4);
+
+        sleep(1300);
+
+        Stop();
+
+        sleep(100);
+
+        // go back more to ensure robot is facing perfectly perpendicular to the wall
+        Forward(-0.1);
+
+        sleep(200);
+
+        Stop();
+
+        Forward(0.45);
+        sleep(500);
+
+        Stop();
+        sleep(100);
+
+        LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+
+        LinearSlide.setPower(0.5);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        LSExtensionServo.setPosition(0.15);
+
+        sleep(1000);
+
+        // Forward(0.3);
+        // sleep(50);
+
+        Stop();
+
+        sleep(500);
+
+        Intake.setPower(1);
+        sleep(1000);
+
+        Intake.setPower(0);
+
+        Forward(-0.25);
+        sleep(1500);
+
+        Stop();
+
+        LSExtensionServo.setPosition(0.8);
+        sleep(1000);
+
+        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+        LinearSlide.setPower(0.5);
+
+        while (LinearSlide.isBusy()) {}
+
+        StrafeLeft(0.5);
+        sleep(1900);
+
+        Stop();
+
+        // right now robot is around a foot away from the carousel, with its back to
+        // the wall, and the carousel to its left. go forward, turn right a bit, go
+        // backwards, turn carousel, go forward, turn right a bit more, strafe right
+        // at low power. now you are parallel to the wall, with the front of
+        // the robot facing the warehouse. now simply move forward.
+
+        // this is all in the perspective of red bottom
+
+        sleep(200);
+
+        Forward(0.3);
+        sleep(500);
+
+        Stop();
+
+        TurnRight(0.25);
+        sleep(500);
+
+        Forward(-0.3);
+        sleep(150);
+
+        Forward(-0.15);
+        sleep(500);
+
+        Stop();
+
+        TurnRight(0.1);
+        sleep(500);
+
+        Stop();
+
+        CarouselMotor.setPower(1);
+
+        sleep(2000);
+
+        CarouselMotor.setPower(0);
+
+        // right now, the robot is facing diagonally from the carousel, with the motor touching the disk
+        Forward(0.5);
+        sleep(600);
+
+        TurnRight(0.5);
+        sleep(230);
+        Stop();
+
+        // currently, the robot is facing forward towards the warehouse, +- a few degrees
+        // go backwards to ensure robot direction is perpendicular to the warehouse
+
+        sleep(100);
+
+        Forward(-0.15);
+        sleep(850);
+
+        // now the robot is perpendicular to the wall and facing the warehouse
+        Forward(1);
+        sleep(500);
+
+//        Stop();
+//        sleep(100);
+//
+//        Forward(0.5);
+//        sleep(800);
+//
+//        Stop();
+//
+//        sleep(500);
+//
+//        StrafeRight(0.5);
+//
+//        sleep(800);
+//
+//        StrafeRight(0.15);
+//        sleep(500);
+//
+//        Forward(1);
+//        sleep(1300);
     }
 
     public enum Drive {
@@ -190,7 +344,7 @@ public class AutonomousRedBottom extends LinearOpMode {
     }
 
     public int motorTicks (double inches) {
-        double diameter = 3.5;
+        double diameter = 5.75;
 
         double circumference = Math.PI * diameter;
 
@@ -282,22 +436,6 @@ public class AutonomousRedBottom extends LinearOpMode {
         BackLeft.setPower(Power);
         FrontRight.setPower(Power);
         BackRight.setPower(Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void Forward (double Power) {
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(-Power);
 
         // waitForMotorEncoders();
     }
