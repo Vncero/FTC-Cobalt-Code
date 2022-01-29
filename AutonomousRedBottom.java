@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -75,7 +75,6 @@ public class AutonomousRedBottom extends AutonomousBase {
         waitForStart();
         
         super.setDriveTrain(FrontLeft, FrontRight, BackLeft, BackRight);
-        LSExtensionServo = super.setLSExtensionServo(LSExtensionServo);
 
         LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
@@ -88,7 +87,7 @@ public class AutonomousRedBottom extends AutonomousBase {
         
         // strafe along the walll
         StrafeRight(0.4);
-        sleep(1300);
+        sleep(1500);
         Stop();
         sleep(100);
 
@@ -153,44 +152,48 @@ public class AutonomousRedBottom extends AutonomousBase {
         Stop();
 
         TurnRight(0.25);
-        sleep(500);
+        sleep(550);
         Stop();
 
         Forward(-0.3);
         sleep(150);
         Forward(-0.15);
-        sleep(500);
+        sleep(600);
         Stop();
 
         TurnRight(0.1);
         sleep(500);
         Stop();
 
-        CarouselMotor.setPower(1);
-        sleep(2000);
+        CarouselMotor.setPower(0.55);
+        sleep(6000);
         CarouselMotor.setPower(0);
+        
+        StrafeLeft(0.5);
+        sleep(1600);
+        
+        Forward(0.25);
+        sleep(240);
 
         // right now, the robot is facing diagonally from the carousel, with the motor touching the disk
-        Forward(0.5);
-        sleep(600);
-
-        TurnRight(0.5);
-        sleep(230);
+        
+        // int iterations = 0;
+        
+        // Forward(0.5);
+        // sleep(300);
+        
+        // StrafeRight(0.25);
+        // sleep(6000);
+        
+        // Forward(1);
+        // sleep(1500);
+        
+        LinearSlide.setTargetPosition(0);
+        LinearSlide.setPower(0.7);
+        
+        while (LinearSlide.isBusy()) {}
+        
         Stop();
-
-        // currently, the robot is facing forward towards the warehouse, +- a few degrees
-        // go backwards to ensure robot direction is perpendicular to the warehouse
-
-        sleep(100);
-
-        Forward(-0.15);
-        sleep(850);
-
-        // now the robot is perpendicular to the wall and facing the warehouse
-        Forward(1);
-        sleep(500);
-
-        // NOW BIG PROBLEM IS, IF THE ROBOT WAS AT AN ANGLE
     }
 
     public enum Drive {
