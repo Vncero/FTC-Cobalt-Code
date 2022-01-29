@@ -145,22 +145,22 @@ public class TeleOP extends OpMode {
         else Intake.setPower(0);
 
         if (gamepad2.left_bumper) {
-                    LSExtensionServo.setPosition(0.15);
-                    //0
-                    //moves to bot
-                    // LSExtensionServo.setPosition(up);
+            LSExtensionServo.setPosition(0.15);
+            //0
+            //moves to bot
+            // LSExtensionServo.setPosition(up);
         }
 
         else if (gamepad2.right_bumper) {
-                    LSExtensionServo.setPosition(0.45);
-                    //90
-                    //zero
-                    // LSExtensionServo.setPosition(down);
+            LSExtensionServo.setPosition(0.45);
+            //90
+            //zero
+            // LSExtensionServo.setPosition(down);
         }
 
         else if (gamepad2.right_trigger == 1) {
-                    //180
-                    LSExtensionServo.setPosition(0.8);
+            //180
+            LSExtensionServo.setPosition(0.8);
         }
 
         if (gamepad2.y) {
