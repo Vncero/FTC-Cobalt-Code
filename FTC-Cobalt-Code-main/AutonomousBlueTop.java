@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //import com.qualcomm.robotcore.util.
 
 @Autonomous(name="AutonomousBlueTop")
-public class AutonomousBlueTop extends AutonomousBase {
+public class AutonomousBlueTop extends LinearOpMode {
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
@@ -65,7 +65,7 @@ public class AutonomousBlueTop extends AutonomousBase {
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
     @Override
-    public void runOpMode() {
+    public void runOpMode(){
 
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
@@ -80,143 +80,58 @@ public class AutonomousBlueTop extends AutonomousBase {
 
         waitForStart();
 
+        Robot r = new Robot(telemetry, hardwareMap);
+        r.hardwareMap(hardwareMap);
+
+        r.setMotorTargets(20, Robot.Drive.STRAFE_RIGHT);
+        r.drive(0.2);
+        r.setMotorTargets(0.5, Robot.Drive.BACKWARD);
+        r.drive(0.05);
+
         LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
         LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        LinearSlide.setPower(0.5);
+        r.setLinearSlidePosition((int) theoreticalFullExtension);
+        r.LSExtensionServo.setPosition(r.up);
 
-        while (LinearSlide.isBusy()) {}
+        sleep(1000); // wait for extension servo to go up
 
-        LinearSlide.setPower(0);
-
-        sleep(100);
-
-        StrafeRight(0.4);
-
-        sleep(1300);
-
-        Stop();
-
-        sleep(100);
-
-        // go back more to ensure robot is facing perfectly perpendicular to the wall
-        Forward(-0.1);
+        r.setMotorTargets(16, Robot.Drive.FORWARD);
+        r.drive(0.15);
 
         sleep(200);
 
-        Stop();
+        r.Intake.setPower(0.75);
+        sleep(1000);
+        r.Intake.setPower(0);
 
-        Forward(0.45);
-        sleep(500);
-
-        Stop();
         sleep(100);
 
-        LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+        r.setMotorTargets(16, Robot.Drive.BACKWARD);
+        r.drive(0.2);
 
-        LinearSlide.setPower(0.5);
+        sleep(100);
 
-        while (LinearSlide.isBusy()) {}
+        r.setMotorTargets(2, Robot.Drive.BACKWARD);
+        r.drive(0.05);
 
-        LinearSlide.setPower(0);
+        r.LSExtensionServo.setPosition(r.bottom);
 
-        LSExtensionServo.setPosition(0.15);
+        sleep(100);
 
-        sleep(1000);
+        r.setLinearSlidePosition((int) theoreticalMiddleExtension);
+        r.setMotorTargets(30, Robot.Drive.STRAFE_LEFT);
+        r.drive(0.3);
 
-        // Forward(0.3);
-        // sleep(50);
+        r.setMotorTargets(1, Robot.Drive.BACKWARD);
+        r.drive(0.05);
 
-        Stop();
+        r.setMotorTargets(30, Robot.Drive.STRAFE_LEFT);
+        r.drive(0.3);
 
-        sleep(500);
-
-        Intake.setPower(1);
-        sleep(1000);
-
-        Intake.setPower(0);
-
-        Forward(-0.25);
-        sleep(1500);
-
-        Stop();
-
-        LSExtensionServo.setPosition(0.8);
-        sleep(1000);
-
-        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
-        LinearSlide.setPower(0.5);
-
-        while (LinearSlide.isBusy()) {}
-
-        StrafeLeft(0.5);
-        sleep(1900);
-
-        Stop();
-
-        // right now robot is around a foot away from the carousel, with its back to
-        // the wall, and the carousel to its left. go forward, turn right a bit, go
-        // backwards, turn carousel, go forward, turn right a bit more, strafe right
-        // at low power. now you are parallel to the wall, with the front of
-        // the robot facing the warehouse. now simply move forward.
-
-        // this is all in the perspective of red bottom
-
-        sleep(200);
-
-        Forward(0.3);
-        sleep(500);
-
-        Stop();
-
-        TurnRight(0.25);
-        sleep(500);
-
-        Forward(-0.3);
-        sleep(150);
-
-        Forward(-0.15);
-        sleep(500);
-
-        Stop();
-
-        TurnRight(0.1);
-        sleep(500);
-
-        Stop();
-
-        CarouselMotor.setPower(1);
-
-        sleep(2000);
-
-        CarouselMotor.setPower(0);
-
-        // right now, the robot is facing diagonally from the carousel, with the motor touching the disk
-        Forward(0.5);
-        sleep(600);
-
-        TurnRight(0.5);
-        sleep(230);
-        Stop();
-
-        Forward(0.5);
-        sleep(800);
-
-        Stop();
-
-        sleep(500);
-
-        StrafeRight(0.5);
-
-        sleep(800);
-
-        StrafeRight(0.15);
-        sleep(500);
-
-        Forward(1);
-        sleep(1300);
-
+        r.setLinearSlidePosition(0);
+        r.setMotorTargets(12, Robot.Drive.FORWARD);
+        r.drive(0.4);
     }
 
     public void NoEncodersFullAutonomous() {

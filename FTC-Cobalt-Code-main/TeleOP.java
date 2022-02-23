@@ -6,6 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
 public class TeleOP extends OpMode {
@@ -18,6 +24,7 @@ public class TeleOP extends OpMode {
     CRServo Intake;
     Servo LSExtensionServo;
     CRServo LSReleaseServo;
+    public Robot r;
 
     //approximately 3 rotations - "2cm"
     //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
@@ -28,10 +35,6 @@ public class TeleOP extends OpMode {
 
     // final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
     final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
-
-    final double down = 0.25;
-    final double up = 0.93;
-
     // official information says 3.1 rotations apparently
     //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
@@ -53,12 +56,7 @@ public class TeleOP extends OpMode {
         Intake = hardwareMap.get(CRServo.class, "Intake");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
-        // LinearSlideTopSensor = hardwareMap.get(TouchSensor.class, "LinearSlideTopTouchSensor");
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-
-        // LSExtensionServo.setPosition(0);
-        // IMPORTANT: 0.93 is top position, 0.25 is bottom position
-
 
         telemetry.addData("Full LS Extension", theoreticalFullExtension);
         telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
@@ -69,13 +67,18 @@ public class TeleOP extends OpMode {
 
         // need to clear it first - set to 0
         encoderLSReset();
+        runWithoutEncoders();
 
         telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + LinearSlide.getTargetPosition());
 
         telemetry.update();
+
+        r = new Robot(telemetry, hardwareMap);
+        r.hardwareMap(hardwareMap);
+
+        r.headingOffset = r.currentHeading.firstAngle;
     }
 
-    //if the init while doesn't work, use this init_loop()
     @Override
     public void init_loop () {
         if (gamepad1.dpad_right) {
@@ -93,7 +96,6 @@ public class TeleOP extends OpMode {
             telemetry.addLine("Changed carousel direction to CCW (blue)");
             telemetry.update();
         }
-
     }
 
     @Override
@@ -104,9 +106,62 @@ public class TeleOP extends OpMode {
          *   gamepad2:  x intake, y top LS, b mid LS, a bot LS
          * */
 
+        r.updateHeading();
+        telemetry.addData("updatedHeading Z", r.currentHeadingZ);
+        telemetry.addData("lastHeading Z", r.lastHeadingZ);
+
         double c = gamepad1.left_stick_x;
         double x = gamepad1.right_stick_x;
         double y = -gamepad1.left_stick_y;
+
+        telemetry.addLine("past horizontal: " + c);
+        telemetry.addLine("past vertical: " + y);
+
+        double angle = r.getExternalHeading();
+        telemetry.addData("external heading (with offset)", angle);
+
+        double _c = c * Math.cos(angle) - y * Math.sin(angle);
+        double _y = c * Math.sin(angle) + y * Math.cos(angle);
+
+        c = _c;
+        y = _y;
+
+        telemetry.addData("calculated horizontal", c);
+        telemetry.addData("calculated vertical", y);
+
+        /* May or may not need brandon-gong's normalizer
+        to normalize the calculated values and not the angle
+        // You may need to multiply some of these by -1 to invert direction of
+        // the motor.  This is not an issue with the calculations themselves.
+        double[] speeds = {
+            (drive + strafe + twist),
+            (drive - strafe - twist),
+            (drive - strafe + twist),
+            (drive + strafe - twist)
+        };
+
+        // Because we are adding vectors and motors only take values between
+        // [-1,1] we may need to normalize them.
+
+        // Loop through all values in the speeds[] array and find the greatest
+        // *magnitude*.  Not the greatest velocity.
+        double max = Math.abs(speeds[0]);
+        for(int i = 0; i < speeds.length; i++) {
+            if ( max < Math.abs(speeds[i]) ) max = Math.abs(speeds[i]);
+        }
+
+        // If and only if the maximum is outside of the range we want it to be,
+        // normalize all the other speeds based on the given speed value.
+        if (max > 1) {
+            for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
+        }
+
+        // apply the calculated values to the motors.
+        front_left.setPower(speeds[0]);
+        front_right.setPower(speeds[1]);
+        back_left.setPower(speeds[2]);
+        back_right.setPower(speeds[3]);
+        * */
 
         if (gamepad1.left_bumper) {
             y *= 0.3;
@@ -118,10 +173,25 @@ public class TeleOP extends OpMode {
             x *= 0.9;
         }
 
+        telemetry.addData("leftS_y", y);
+        telemetry.addData("leftS_x", c);
+        telemetry.addData("rightS_x", x);
+        telemetry.update();
+
         FrontLeft.setPower(y+x+c);
         FrontRight.setPower(-y+x+c);
         BackLeft.setPower(y+x-c);
         BackRight.setPower(-y+x-c);
+
+//        telemetry.addData("FrontLeft power", FrontLeft.getPower());
+//        telemetry.addData("FrontRight power", FrontRight.getPower());
+//        telemetry.addData("BackLeft power", BackLeft.getPower());
+//        telemetry.addData("BackRight power", BackRight.getPower());
+//
+//        telemetry.addData("FrontLeft pos", FrontLeft.getCurrentPosition());
+//        telemetry.addData("FrontRight pos", FrontRight.getCurrentPosition());
+//        telemetry.addData("BackLeft pos", BackLeft.getCurrentPosition());
+//        telemetry.addData("BackRight pos", BackRight.getCurrentPosition());
 
         if (gamepad1.dpad_right) {
             CarouselMotor.setPower(1);
@@ -144,90 +214,35 @@ public class TeleOP extends OpMode {
 
         else Intake.setPower(0);
 
-        if (gamepad2.left_bumper) {
-            LSExtensionServo.setPosition(0.15);
+        if (gamepad2.right_bumper) {
             //0
-            //moves to bot
-            // LSExtensionServo.setPosition(up);
-        }
-
-        else if (gamepad2.right_bumper) {
-            LSExtensionServo.setPosition(0.45);
-            //90
-            //zero
-            // LSExtensionServo.setPosition(down);
+            LSExtensionServo.setPosition(0.15);
         }
 
         else if (gamepad2.right_trigger == 1) {
             //180
-            LSExtensionServo.setPosition(0.8);
+            LSExtensionServo.setPosition(0.85);
         }
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            LSExtensionServo.setPosition(0.8);
+            LSExtensionServo.setPosition(0.15);
         }
 
         if (gamepad2.b) {
             lsLevelSet(2);
-            LSExtensionServo.setPosition(0.45);
-
             // telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
         }
 
         if (gamepad2.a) {
-
             lsLevelSet(1);
             telemetry.addData("Ground LS Extension", 0);
         }
 
-        if (gamepad2.x) {
-            //level 1 dump freight
-
-            lsLevelSet(1);
-
-            LSExtensionServo.setPosition(0.45);
-        }
-
-        //make a default percentage to read at the whole game
+        r.lastHeading = r.currentHeading;
+        r.lastHeadingZ = r.currentHeadingZ;
 
         telemetry.update();
-    }
-
-    // @Override
-    // public void stop() {
-    //     if (LSExtensionServo.getPosition() != 0.8) {
-    //         telemetry.addLine("changing extension position");
-    //         telemetry.update();
-    //         lsLevelSet(2);
-    //         LSExtensionServo.setPosition(0.8); //bot
-    //     }
-
-    //     lsLevelSet(1);
-
-    //     encoderLSReset();
-    // }
-
-    public void intakeFreight () { //intake method, theoretically completely loopable
-        if (LSExtensionServo.getPosition() != 0) { //if ext not at nec, change it to nec
-            lsLevelSet(2);
-        }
-
-        lsLevelSet(1);
-        LSReleaseServo.setPower(1);
-        //will intake freight, should allow driving to continue
-
-        //rel begins 0.5 after releasing: b pressed
-//        //LSReleaseServo.setPosition(0.5);
-//        lsLevelSet(1);
-//        LSExtensionServo.setPosition(0);
-//        Intake.setPower(1);
-//        lsLevelSet(3);
-//        Intake.setPower(0);
-//        LSExtensionServo.setPosition(0.5);
-//        LSReleaseServo.setPosition(0); //if necessary, tweak this to 0.25 in case bucket drops freight
-//        LSExtensionServo.setPosition(1); //if rel is tweaked to 0.25, find a point of ext to return rel to 0
-//        //rel can now go to 0.5 after pressing b
     }
 
     public void lsLevelSet (int level) { //method to move ls to preset levels
@@ -329,6 +344,13 @@ public class TeleOP extends OpMode {
         FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void runWithoutEncoders() {
+        FrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public int LinearSlideTicks(double inches) {

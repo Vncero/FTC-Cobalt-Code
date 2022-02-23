@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import java.lang.reflect.Array;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
+//import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+//import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+//import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "test")
@@ -42,12 +44,13 @@ public class AutonomousTest extends LinearOpMode {
 
     TFObjectDetector tfObjectDetector;
 
-    private static final String TFOD_MODEL_ASSET = "FreightFrenzy_DM.tflite";
+    private static final String TFOD_MODEL_ASSET = "FreightFenzy_BCDM.tflite";
     private static final String[] LABELS = {
+            "Ball",
+            "Cube",
             "Duck",
             "Marker"
     };
-
 
     @Override
     public void runOpMode(){
@@ -75,27 +78,29 @@ public class AutonomousTest extends LinearOpMode {
         }
 
         List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
+        telemetry.update();
 
-        List<Recognition> duckRecognitions = null;
+        ArrayList<Recognition> duckRecognitions = new ArrayList<Recognition>();
 
-        List<Recognition> nonDuckRecognitions = null;
-
+        ArrayList<Recognition> nonDuckRecognitions = new ArrayList<Recognition>();
+        int i = 0;
         if (updatedRecognitions != null) {
             for (Recognition recognition : updatedRecognitions) {
-                if (recognition.getLabel().equals(LABELS[0])) {
+                i++;
+                if (recognition.getLabel().equals(LABELS[1])) {
                     duckRecognitions.add(recognition);
                     telemetry.addData("Confidence of recognition " +
-                            updatedRecognitions.indexOf(recognition) +  " (duck)", recognition.getConfidence());
+                            updatedRecognitions.indexOf(recognition) +  " (cube)", recognition.getConfidence());
                 } else {
                     nonDuckRecognitions.add(recognition); //nonDuckRecognitions is likely only Marker recognitions: tfod model only has Duck and Marker
                     telemetry.addData("Confidence of recognition " +
-                            updatedRecognitions.indexOf(recognition) + " (nonDuck)", recognition.getConfidence());
+                            updatedRecognitions.indexOf(recognition) + " (noncube)", recognition.getConfidence());
                 }
-
             }
 
-            telemetry.addData("Ducks Detected", duckRecognitions.size());
-            telemetry.addData("Non-Ducks Detected", nonDuckRecognitions.size());
+            // telemetry.addData("Cubes Detected", duckRecognitions.size());
+            // telemetry.addData("Non-Cubes Detected", nonDuckRecognitions.size());
+            telemetry.addLine("" + i);
             telemetry.update();
 
             for (Recognition recognition : duckRecognitions) { //theoretically, there should only be one duck recognized but keep this in case
@@ -119,23 +124,26 @@ public class AutonomousTest extends LinearOpMode {
             }
         }
 
+        telemetry.update();
+
         if (tfObjectDetector != null) {
             tfObjectDetector.deactivate();
             tfObjectDetector.shutdown();
         }
 
-        //put rest of autonomous below
-
+        // //put rest of autonomous below
+        // sleep(5000);
     }
 
     public boolean inRange (double min, double value, double max) {
-        return min < value & value < max;
+        return min <= value & value <= max;
     }
 
     public void initVuforia() { //the two monitors may conflict, remove cameraMonitorViewId if necessary
-        int cameraMonitorViewId = hardwareMap.appContext.getResources()
-                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters vuParams = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        // int cameraMonitorViewId = hardwareMap.appContext.getResources()
+        //         .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        // add camera monitor view id if not works
+        VuforiaLocalizer.Parameters vuParams = new VuforiaLocalizer.Parameters();
 
         vuParams.vuforiaLicenseKey = vuforiaLicenseKey;
         vuParams.cameraName = hardwareMap.get(WebcamName.class, "vuCam");
@@ -145,7 +153,7 @@ public class AutonomousTest extends LinearOpMode {
 
     public void initTensorFlow () {
         int tfMonitorViewId = hardwareMap.appContext.getResources()
-                .getIdentifier("tfMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+                .getIdentifier("tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfParams = new TFObjectDetector.Parameters(tfMonitorViewId);
         tfObjectDetector = ClassFactory.getInstance().createTFObjectDetector(tfParams, vuforia);
 
