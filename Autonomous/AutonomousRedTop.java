@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,20 +7,29 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-//import com.qualcomm.robotcore.util.
 
-@Autonomous(name="AutonomousRedBottom")
-public class AutonomousBottom extends LinearOpMode {
+import org.firstinspires.ftc.teamcode.Robot;
+
+@Autonomous(name="AutonomousRedTop")
+public class AutonomousRedTop extends LinearOpMode{
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
     DcMotor BackRight;
     DcMotor CarouselMotor;
+    DcMotor LinearSlide;
 
     private ElapsedTime runtime = new ElapsedTime();
 
     final double ticksInARotation = 537.7;
     final double theoreticalRadius = 10.9;
+    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    final double theoreticalGroundExtension = LinearSlideTicks(3);
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+
+    CRServo Intake;
+    Servo LSExtensionServo;
+
     /* a lot of notes
     the objective - get radius of turning circle
     when the robot turns, the edges of the wheel hit points that make up its turning circle
@@ -38,58 +47,74 @@ public class AutonomousBottom extends LinearOpMode {
     * */
 
     /* previous turn circle radius estimate
-     the robot must be within 18*18*18
-     therefore, the circle it rotates has diameter 18 at max
-     18 / 2 = 9
-     previously, I made the judgment that the circle it rotates needs the same area as the 18*18 square
-     however, this would create a circle larger than the square
-     anyway, here's the math
-     18*18 = 324 sq. in., max area of the circle
-     324 >= Math.PI * Math.pow(r, 2)
-     324 / Math.PI ~ 103.13240312354819
-     103.13240312354819 >~ Math.pow(r, 2)
-     Math.sqrt(103.13240312354819) ~ 10.155
-     10.155 >~ r
-     20.310 >~ d
-     round diameter down a little to 20, then circumference is about 62.83185
+    the robot must be within 18*18*18
+    therefore, the circle it rotates has diameter 18 at max
+    18 / 2 = 9
+    previously, I made the judgment that the circle it rotates needs the same area as the 18*18 square
+    however, this would create a circle larger than the square
+    anyway, here's the math
+    18*18 = 324 sq. in., max area of the circle
+    324 >= Math.PI * Math.pow(r, 2)
+    324 / Math.PI ~ 103.13240312354819
+    103.13240312354819 >~ Math.pow(r, 2)
+    Math.sqrt(103.13240312354819) ~ 10.155
+    10.155 >~ r
+    20.310 >~ d
+    round diameter down a little to 20, then circumference is about 62.83185
     */
-    final double DISTANCE_PER_SECOND = 104.25;
-    final double DEGREES_PER_SECOND = 350.0; // approximated
 
     @Override
     public void runOpMode(){
 
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-
-        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
+        Robot robot = new Robot();
 
         waitForStart();
 
-        StrafeLeft(6, 0.5);
-        TurnRight(motorArcLength(90), 0.5); //motorArcLength() returns an inch amount that is passed to motorTicks()
-        CarouselMotor.setPower(1);
-        sleep(1000); //possibly figure out precise number of rotations to get duck off, then do encoders for it
-        CarouselMotor.setPower(0);
-        Forward(6, 0.5);
-        StrafeRight(9, 0.5);
-        Forward(72, 1);
+        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
 
-//        Forward(0.55);
-//        sleep(675);
-//
-//        Stop();
-//
-//        StrafeLeft(0.5);
-//        sleep(1100);
-//        // Stop();
-//
-//        Stop();
-//
-//        Forward(-0.3);
-//        sleep(100);
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        LinearSlide.setPower(0.75);
+
+        while (LinearSlide.isBusy()) {}
+
+        LinearSlide.setPower(0);
+
+        StrafeRight(0.5);
+        sleep(800);
+
+        Forward(0.5);
+        sleep(500);
+
+        Stop();
+
+        LinearSlide.setTargetPosition(0);
+        LinearSlide.setPower(0.7);
+
+        while (LinearSlide.isBusy()) {}
+
+        Stop();
+    }
+
+    public enum Drive {
+        FORWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT
+    }
+
+
+    public int LinearSlideTicks(double inches) {
+        double diameter = 1.5;
+
+        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
+        // original measurement was 5in
+        //alt circumference ~ 4.75in.
+        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
+
+        return (int) Math.floor(inches / inchesPerTick);
     }
 
     public double motorArcLength (int theta) {
@@ -107,7 +132,7 @@ public class AutonomousBottom extends LinearOpMode {
     }
 
     public int motorTicks (double inches) {
-        double diameter = 3.5;
+        double diameter = 5.75;
 
         double circumference = Math.PI * diameter;
 
@@ -116,98 +141,39 @@ public class AutonomousBottom extends LinearOpMode {
         return (int) Math.floor(inches / inchesPerTick);
     }
 
-    public double linearSlideTicks(double inches) {
-        //copy changes in these measurments from TeleOp
-        double circumference = 5.0; // might be wrong if it is then we're FUCKED !
-
-        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inch
-
-        return inches / inchesPerTick;
-    }
-
-    public void StrafeLeft (double inches, double Power) {
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
+    public void StrafeLeft (double Power) {
         FrontLeft.setPower(-Power);
         FrontRight.setPower(-Power);
         BackLeft.setPower(Power);
         BackRight.setPower(Power);
-
-        waitForMotorEncoders();
     }
 
-    public void StrafeRight (double inches, double Power) {
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
+    public void StrafeRight (double Power) {
         FrontLeft.setPower(Power);
         FrontRight.setPower(Power);
         BackLeft.setPower(-Power);
         BackRight.setPower(-Power);
-
-        waitForMotorEncoders();
     }
 
-    public void TurnLeft (double inches, double Power) {
-        // both left sides go forward
-        // both right sides go backwards
-        // this makes the robot turn left and stationary
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
+    public void TurnLeft (double Power) {
         FrontLeft.setPower(-Power);
         BackLeft.setPower(-Power);
         FrontRight.setPower(-Power);
         BackRight.setPower(-Power);
-
-        waitForMotorEncoders();
     }
 
-    public void TurnRight (double inches, double Power) {
-        // both right sides go forward
-        // both left sides go backwards
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
-        FrontLeft.setPower(Power);
-        BackLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackRight.setPower(Power);
-
-        waitForMotorEncoders();
-    }
-
-    public void Forward (double inches, double Power) {
-
-        encoderMotorReset();
-
-        setMotorTargets(motorTicks(inches));
-
-        runMotorEncoders();
-
+    public void Forward (double Power) {
         FrontLeft.setPower(Power);
         FrontRight.setPower(-Power);
         BackLeft.setPower(Power);
         BackRight.setPower(-Power);
+    }
 
-        waitForMotorEncoders();
+    public void TurnRight (double Power) {
+        FrontLeft.setPower(Power);
+        BackLeft.setPower(Power);
+        FrontRight.setPower(Power);
+        BackRight.setPower(Power);
     }
 
     public void Stop () {
@@ -215,8 +181,6 @@ public class AutonomousBottom extends LinearOpMode {
         FrontRight.setPower(0);
         BackLeft.setPower(0);
         BackRight.setPower(0);
-
-        encoderMotorReset();
     }
 
     public void encoderMotorReset() {
@@ -227,11 +191,46 @@ public class AutonomousBottom extends LinearOpMode {
 
     }
 
-    public void setMotorTargets (int motorTarget) {
-        FrontLeft.setTargetPosition(motorTarget);
-        FrontRight.setTargetPosition(motorTarget);
-        BackLeft.setTargetPosition(motorTarget);
-        BackRight.setTargetPosition(motorTarget);
+    public void setMotorTargets (int inches, Drive drive) {
+        encoderMotorReset();
+
+        int target = (int) motorTicks(inches);
+
+        switch (drive) {
+            case FORWARD:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case TURN_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case TURN_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+        }
+
+        runMotorEncoders();
+
     }
 
     public void runMotorEncoders () {
