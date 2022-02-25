@@ -75,8 +75,6 @@ public class TeleOP extends OpMode {
 
         r = new Robot(telemetry, hardwareMap);
         r.hardwareMap(hardwareMap);
-
-        r.headingOffset = r.currentHeading.firstAngle;
     }
 
     @Override
@@ -120,11 +118,11 @@ public class TeleOP extends OpMode {
         double angle = r.getExternalHeading();
         telemetry.addData("external heading (with offset)", angle);
 
-        double _c = c * Math.cos(angle) - y * Math.sin(angle);
-        double _y = c * Math.sin(angle) + y * Math.cos(angle);
-
-        c = _c;
-        y = _y;
+//        double _c = c * Math.cos(angle) - y * Math.sin(angle);
+//        double _y = c * Math.sin(angle) + y * Math.cos(angle);
+//
+//        c = _c;
+//        y = _y;
 
         telemetry.addData("calculated horizontal", c);
         telemetry.addData("calculated vertical", y);

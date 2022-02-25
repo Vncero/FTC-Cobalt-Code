@@ -146,6 +146,13 @@ public class Robot {
         BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    public void runUsingEncoders () {
+        FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     public void waitForMotorEncoders () {
         while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
 
@@ -294,8 +301,6 @@ public class Robot {
 
     public void updateHeading () {
         currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-        currentHeadingZ = currentHeading.firstAngle;
-        lastHeadingZ = lastHeading.firstAngle;
 
         double delta = normalizeDelta(currentHeadingZ - lastHeadingZ);
 
