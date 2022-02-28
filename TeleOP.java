@@ -213,15 +213,16 @@ public class TeleOP extends OpMode {
         }
 
         else Intake.setPower(0);
+        if (_level != 1) {
+            if (gamepad2.right_bumper) {
+                //0
+                LSExtensionServo.setPosition(0.15);
+            }
 
-        if (gamepad2.right_bumper && _level != 1) {
-            //0
-            LSExtensionServo.setPosition(0.15);
-        }
-
-        else if (gamepad2.right_trigger >= 0.5d && _level != 1) {
-            //180
-            LSExtensionServo.setPosition(0.85);
+            else if (gamepad2.right_trigger >= 0.5d) {
+                //180
+                LSExtensionServo.setPosition(0.85);
+            }
         }
 
         if (gamepad2.y) {
