@@ -3,14 +3,15 @@ package org.firstinspires.ftc.teamcode;
 // DO NOT RUN THIS - THIS IS MEANT TO BE BASE OBJECT
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 
-@Autonomous(name="DO NOT RUN (base bottom)!")
 public class AutonomousBaseBottom extends LinearOpMode {
     DcMotor FrontLeft;
     DcMotor BackLeft;
@@ -28,6 +29,7 @@ public class AutonomousBaseBottom extends LinearOpMode {
     final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
     final double theoreticalGroundExtension = LinearSlideTicks(3);
     final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    double globalAngle;
 
     CRServo Intake;
     Servo LSExtensionServo;
@@ -67,31 +69,10 @@ public class AutonomousBaseBottom extends LinearOpMode {
     round diameter down a little to 20, then circumference is about 62.83185
     */
 
-    public void setComponents(
-        DcMotor FrontLeft,
-        DcMotor FrontRight,
-        DcMotor BackLeft,
-        DcMotor BackRight,
-        CRServo Intake,
-        DcMotor LinearSlide,
-        Servo LSExtensionServo,
-        DcMotor CarouselMotor
-    )
-    {
-        this.FrontLeft = FrontLeft;
-        this.FrontRight = FrontRight;
-        this.BackLeft = BackLeft;
-        this.BackRight = BackRight;
-        this.Intake = Intake;
-        this.LinearSlide = LinearSlide;
-        this.Intake = Intake;
-        this.LSExtensionServo = LSExtensionServo;
-        this.CarouselMotor = CarouselMotor;
-    }
-
     @Override
     public void runOpMode() {
 //        __start();
+
     }
 
     public void setMult(int mult) {
@@ -101,11 +82,14 @@ public class AutonomousBaseBottom extends LinearOpMode {
     public void __start(){
         r.hardwareMap(hardwareMap);
 
-        telemetry.addLine("" + hardwareMap);
-
-        telemetry.update();
+        this.FrontLeft = r.FrontLeft;
+        this.BackLeft = r.BackLeft;
+        this.FrontRight = r.FrontRight;
+        this.BackRight = r.BackRight;
 
         waitForStart();
+
+        LinearSlide = r.LinearSlide;
 
         LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LinearSlide.setTargetPosition((int) theoreticalFullExtension);
@@ -123,12 +107,18 @@ public class AutonomousBaseBottom extends LinearOpMode {
 
         sleep(100);
 
+        r.setMotorTargets(1, Robot.Drive.BACKWARD);
+        r.drive(0.1);
+
         r.setMotorTargets(16, Robot.Drive.FORWARD);
         r.drive(0.2);
-        sleep(100);
+        sleep(200);
 
         r.Intake.setPower(0.75);
         sleep(1000);
+
+        telemetry.addLine("i am here, the intake is set power to: " + r.Intake.getPower());
+        telemetry.update();
 
         r.Intake.setPower(0);
 
@@ -142,7 +132,7 @@ public class AutonomousBaseBottom extends LinearOpMode {
 
         sleep(500);
 
-        r.setMotorTargets(mult * (38), Robot.Drive.STRAFE_LEFT);
+        r.setMotorTargets(mult * 38, Robot.Drive.STRAFE_LEFT);
         r.drive(0.3);
 
         sleep(100);
@@ -174,9 +164,9 @@ public class AutonomousBaseBottom extends LinearOpMode {
         }
 
         else {
-            r.setMotorTargets(mult * (3), Robot.Drive.STRAFE_LEFT);
+            r.setMotorTargets(mult * (5), Robot.Drive.STRAFE_LEFT);
             r.drive(0.15);
-            r.setMotorTargets(5.8, Robot.Drive.BACKWARD);
+            r.setMotorTargets(7.8, Robot.Drive.BACKWARD);
             r.drive(0.05);
         }
 
@@ -207,11 +197,16 @@ public class AutonomousBaseBottom extends LinearOpMode {
             r.setMotorTargets(3, Robot.Drive.FORWARD);
             r.drive(0.3);
 
-            r.setMotorTargets(mult * 7, Robot.Drive.STRAFE_LEFT);
+            r.setMotorTargets(7, Robot.Drive.STRAFE_LEFT);
             r.drive(0.15);
+
+            r.setMotorTargets(15.5, Robot.Drive.FORWARD);
         }
 
-        r.setMotorTargets(15.5, Robot.Drive.FORWARD);
+        else {
+            r.setMotorTargets(17.5, Robot.Drive.FORWARD);
+        }
+
         r.drive(0.3);
 
         sleep(100);

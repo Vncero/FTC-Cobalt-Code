@@ -23,6 +23,7 @@ public class Robot {
     DcMotor BackRight;
     DcMotor CarouselMotor;
     DcMotor LinearSlide;
+    DcMotor test;
     CRServo Intake;
     Servo LSExtensionServo;
     Telemetry telemetry;
@@ -30,13 +31,9 @@ public class Robot {
 
     //headings
     Orientation currentHeading;
-    Orientation lastHeading;
+    Orientation lastAngle;
 
     //angles
-    double currentHeadingZ = 0.0;
-    double lastHeadingZ = 0.0;
-    double headingOffset = 0.0;
-
     final double diameter = 5.75;
     final double ticksInARotation = 537.7;
     final double theoreticalRadius = 10.9;
@@ -48,36 +45,47 @@ public class Robot {
     final double theoreticalGroundExtension = LinearSlideTicks(3);
     final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
 
-    final double up = 0.15d;
+    final double bottom = 0.15d;
     // final double middle = 0.45d;
-    final double bottom = 0.75d;
+    final double up = 0.95d;
+    double globalAngle;
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
          hardwareMap(hardwareMap);
+
+         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+         parameters.mode                = BNO055IMU.SensorMode.IMU;
+         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+         parameters.loggingEnabled      = false;
+
+         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+         // and named "imu".
+         imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+         imu.initialize(parameters);
+
          currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     }
 
-    public void hardwareMap(HardwareMap hardware) {
-        FrontLeft = hardware.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardware.get(DcMotor.class, "BackLeft");
-        FrontRight = hardware.get(DcMotor.class, "FrontRight");
-        BackRight = hardware.get(DcMotor.class, "BackRight");
-        LinearSlide = hardware.get(DcMotor.class, "LinearSlide");
-        CarouselMotor = hardware.get(DcMotor.class, "CarouselMotor");
-        Intake = hardware.get(CRServo.class, "Intake");
-        LSExtensionServo = hardware.get(Servo.class, "LSExtensionServo");
-        imu = hardware.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    public void hardwareMap(HardwareMap hardwareMap) {
+        if (hardwareMap == null) {
+            telemetry.addLine("asjflkadfjladskfj");
+            telemetry.update();
+            return;
+        }
 
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json";
-        imu.initialize(parameters);
+        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
+        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
+        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
+        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
+        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
+        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
+        Intake = hardwareMap.get(CRServo.class, "Intake");
+        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
     }
 
     public void Forward(double Power) {
@@ -273,14 +281,6 @@ public class Robot {
         */
     }
 
-    public double getExternalHeading () {
-        return normalizeAngle(currentHeadingZ + headingOffset);
-    }
-
-    public void setExternalHeading (double value) {
-        headingOffset = -currentHeadingZ + value;
-    }
-
     public double normalizeAngle (double angle) {
         double modifiedAngle = angle % TAU;
 
@@ -299,22 +299,12 @@ public class Robot {
         return modifiedAngleDelta;
     }
 
-    public void updateHeading () {
-        currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+    public void updateGlobalAngle() {
+        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
 
-        double delta = normalizeDelta(currentHeadingZ - lastHeadingZ);
+        globalAngle += normalizeDelta(deltaAngle);
 
-        currentHeadingZ += delta;
-
-        lastHeadingZ = currentHeadingZ;
+        lastAngle = currentOrientation;
     }
-
-//    public void updateGlobalAngle() {
-//        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-//        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
-//
-//        globalAngle += normalizeDelta(deltaAngle);
-//
-//        lastAngle = currentOrientation;
-//    }
 }

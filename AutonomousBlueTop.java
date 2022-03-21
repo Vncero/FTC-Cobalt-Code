@@ -66,18 +66,6 @@ public class AutonomousBlueTop extends LinearOpMode {
 
     @Override
     public void runOpMode(){
-
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
-        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
-
-        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-
-        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
-
         waitForStart();
 
         Robot r = new Robot(telemetry, hardwareMap);

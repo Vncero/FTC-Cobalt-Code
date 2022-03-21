@@ -1,24 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.CRServo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
+@Autonomous(name="servo testing")
 public class AutoGyroTesting extends LinearOpMode {
-    BNO055IMU imu;
+    CRServo small;
+    CRServo big;
 
     @Override
     public void runOpMode () {
-
+//        small = hardwareMap.get(CRServo.class, "small");
+        big = hardwareMap.get(CRServo.class, "big");
+        big.setPower(0.01);
     }
 
 }

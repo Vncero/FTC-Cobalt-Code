@@ -15,15 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
 public class TeleOP extends OpMode {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor LinearSlide;
-    DcMotor CarouselMotor;
-    CRServo Intake;
-    Servo LSExtensionServo;
-    CRServo LSReleaseServo;
     public Robot r;
 
     //approximately 3 rotations - "2cm"
@@ -51,14 +42,7 @@ public class TeleOP extends OpMode {
 
     @Override
     public void init() {
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
-        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
-        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
-        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
+        r = new Robot(telemetry, hardwareMap);
 
         telemetry.addData("Full LS Extension", theoreticalFullExtension);
         telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
@@ -67,22 +51,16 @@ public class TeleOP extends OpMode {
         telemetry.addLine("Press right on the dpad if on red");
         telemetry.addLine("Press start if on blue");
 
-        // need to clear it first - set to 0
-        encoderLSReset();
-        runWithoutEncoders();
+        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + LinearSlide.getTargetPosition());
-
+        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + r.LinearSlide.getTargetPosition());
         telemetry.update();
-
-        r = new Robot(telemetry, hardwareMap);
-        r.hardwareMap(hardwareMap);
     }
 
     @Override
     public void init_loop () {
         if (gamepad1.dpad_right) {
-            CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            r.CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             telemetry.clear();
 
             telemetry.addLine("Changed carousel direction to CW (red)");
@@ -90,7 +68,7 @@ public class TeleOP extends OpMode {
 
             //reverse motor, now turns CW - blue, dpad_right
         } if (gamepad1.dpad_left) {
-            CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            r.CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             telemetry.clear();
 
             telemetry.addLine("Changed carousel direction to CCW (blue)");
@@ -106,19 +84,12 @@ public class TeleOP extends OpMode {
          *   gamepad2:  x intake, y top LS, b mid LS, a bot LS
          * */
 
-        r.updateHeading();
-        telemetry.addData("updatedHeading Z", r.currentHeadingZ);
-        telemetry.addData("lastHeading Z", r.lastHeadingZ);
-
         double c = gamepad1.left_stick_x;
         double x = gamepad1.right_stick_x;
         double y = -gamepad1.left_stick_y;
 
         telemetry.addLine("past horizontal: " + c);
         telemetry.addLine("past vertical: " + y);
-
-        double angle = r.getExternalHeading();
-        telemetry.addData("external heading (with offset)", angle);
 
 //        double _c = c * Math.cos(angle) - y * Math.sin(angle);
 //        double _y = c * Math.sin(angle) + y * Math.cos(angle);
@@ -128,40 +99,6 @@ public class TeleOP extends OpMode {
 
         telemetry.addData("calculated horizontal", c);
         telemetry.addData("calculated vertical", y);
-
-        /* May or may not need brandon-gong's normalizer
-        to normalize the calculated values and not the angle
-        // You may need to multiply some of these by -1 to invert direction of
-        // the motor.  This is not an issue with the calculations themselves.
-        double[] speeds = {
-            (drive + strafe + twist),
-            (drive - strafe - twist),
-            (drive - strafe + twist),
-            (drive + strafe - twist)
-        };
-
-        // Because we are adding vectors and motors only take values between
-        // [-1,1] we may need to normalize them.
-
-        // Loop through all values in the speeds[] array and find the greatest
-        // *magnitude*.  Not the greatest velocity.
-        double max = Math.abs(speeds[0]);
-        for(int i = 0; i < speeds.length; i++) {
-            if ( max < Math.abs(speeds[i]) ) max = Math.abs(speeds[i]);
-        }
-
-        // If and only if the maximum is outside of the range we want it to be,
-        // normalize all the other speeds based on the given speed value.
-        if (max > 1) {
-            for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
-        }
-
-        // apply the calculated values to the motors.
-        front_left.setPower(speeds[0]);
-        front_right.setPower(speeds[1]);
-        back_left.setPower(speeds[2]);
-        back_right.setPower(speeds[3]);
-        * */
 
         if (gamepad1.left_bumper) {
             y *= 0.3;
@@ -178,56 +115,66 @@ public class TeleOP extends OpMode {
         telemetry.addData("rightS_x", x);
         telemetry.update();
 
-        FrontLeft.setPower(y+x+c);
-        FrontRight.setPower(-y+x+c);
-        BackLeft.setPower(y+x-c);
-        BackRight.setPower(-y+x-c);
-
-//        telemetry.addData("FrontLeft power", FrontLeft.getPower());
-//        telemetry.addData("FrontRight power", FrontRight.getPower());
-//        telemetry.addData("BackLeft power", BackLeft.getPower());
-//        telemetry.addData("BackRight power", BackRight.getPower());
-//
-//        telemetry.addData("FrontLeft pos", FrontLeft.getCurrentPosition());
-//        telemetry.addData("FrontRight pos", FrontRight.getCurrentPosition());
-//        telemetry.addData("BackLeft pos", BackLeft.getCurrentPosition());
-//        telemetry.addData("BackRight pos", BackRight.getCurrentPosition());
+        r.FrontLeft.setPower(y+x+c);
+        r.FrontRight.setPower(-y+x+c);
+        r.BackLeft.setPower(y+x-c);
+        r.BackRight.setPower(-y+x-c);
 
         if (gamepad1.dpad_right) {
-            CarouselMotor.setPower(1);
+            r.CarouselMotor.setPower(1);
         }
 
         else if (gamepad1.dpad_left) {
-            CarouselMotor.setPower(-1);
+            r.CarouselMotor.setPower(-1);
         }
 
-        else CarouselMotor.setPower(0);
+        else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up) {
-            Intake.setPower(1);
-            telemetry.update();
+            r.Intake.setPower(1);
         }
 
         else if (gamepad2.dpad_down) {
-            Intake.setPower(-1);
+            r.Intake.setPower(-1);
         }
 
-        else Intake.setPower(0);
+        else r.Intake.setPower(0);
+
+        if (gamepad1.y) {
+            r.LinearSlide.setPower(0.1);
+            telemetry.addLine("tu madre soy dora");
+            telemetry.update();
+        }
+
+        else if (gamepad1.a) {
+            r.LinearSlide.setPower(-0.1);
+            telemetry.addLine("tu madre soy no dora");
+            telemetry.update();
+        }
+
+        else {
+            r.LinearSlide.setPower(0);
+            telemetry.addLine("tu madre soy deeznuts");
+            telemetry.update();
+        }
+
         if (_level != 1) {
             if (gamepad2.right_bumper) {
                 //0
-                LSExtensionServo.setPosition(0.15);
+                r.LSExtensionServo.setPosition(0.15);
             }
 
             else if (gamepad2.right_trigger >= 0.5d) {
                 //180
-                LSExtensionServo.setPosition(0.85);
+                r.LSExtensionServo.setPosition(0.85);
             }
+        } else {
+            r.LSExtensionServo.setPosition(r.LSExtensionServo.getPosition());
         }
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            LSExtensionServo.setPosition(0.15);
+            r.LSExtensionServo.setPosition(0.15);
         }
 
         if (gamepad2.b) {
@@ -240,61 +187,44 @@ public class TeleOP extends OpMode {
             telemetry.addData("Ground LS Extension", 0);
         }
 
-        r.lastHeading = r.currentHeading;
-        r.lastHeadingZ = r.currentHeadingZ;
-
         telemetry.update();
     }
 
+//    @Override
+//    public void stop () {
+//        lsLevelSet(1);
+//    }
+
     public void lsLevelSet (int level) { //method to move ls to preset levels
         this._level = level;
+
         if (level == 1) { //ground
-
-            LinearSlide.setTargetPosition(0);
+            r.LinearSlide.setTargetPosition(0);
             //Set the Linear Slide's target to the lowest, 0
-
-            LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //set the motor to run toward the position
-
-            LinearSlide.setPower(0.75); //set power to the motor
-
-            waitForLinearSlide(); //while loop for the encoders to run through
-
-            LinearSlide.setPower(0); //cut the encoder power
         }
 
         if (level == 2) { //middle
-            telemetry.addLine("target position before: " + LinearSlide.getTargetPosition());
-            LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
-
-            // telemetry.addLine("middle extension is " + theoreticalMiddleExtension);
-
-            LinearSlide.setPower(0.75);
-
-            telemetry.addLine("the target position should be " + theoreticalMiddleExtension + " , and is: " + LinearSlide.getTargetPosition());
-
-            waitForLinearSlide();
-
-            LinearSlide.setPower(0);
+            r.LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
         }
 
         if (level == 3) { //top
-
-            LinearSlide.setTargetPosition((int) theoreticalFullExtension);
-
-            LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            LinearSlide.setPower(0.75);
-
-            waitForLinearSlide();
-
-            LinearSlide.setPower(0);
+            r.LinearSlide.setTargetPosition((int) theoreticalFullExtension);
         }
+
+        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //set the motor to run toward the position
+
+        r.LinearSlide.setPower(0.75); //set power to the motor
+
+        waitForLinearSlide(); //while loop for the encoders to run through
+
+        r.LinearSlide.setPower(0); //cut the encoder power
     }
 
     public void waitForLinearSlide() {
-        while (LinearSlide.isBusy()) {
-            telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
+        while (r.LinearSlide.isBusy()) {
+            r.LinearSlide.setPower(-0.25);
+            telemetry.addData("Linear Slide at position", r.LinearSlide.getCurrentPosition());
             telemetry.update();
 
             double c = gamepad1.left_stick_x;
@@ -311,47 +241,40 @@ public class TeleOP extends OpMode {
                 x *= 0.9;
             }
 
-            FrontLeft.setPower(y+x+c);
-            FrontRight.setPower(-y+x+c);
-            BackLeft.setPower(y+x-c);
-            BackRight.setPower(-y+x-c);
+            r.FrontLeft.setPower(y+x+c);
+            r.FrontRight.setPower(-y+x+c);
+            r.BackLeft.setPower(y+x-c);
+            r.BackRight.setPower(-y+x-c);
         }
     }
 
     public void encoderLSReset() {
-        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void runLSEncoder() {
-        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void encoderMotorReset() {
-        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void setMotorTargets (int motorTarget) {
-        FrontLeft.setTargetPosition(motorTarget);
-        FrontRight.setTargetPosition(motorTarget);
-        BackLeft.setTargetPosition(motorTarget);
-        BackRight.setTargetPosition(motorTarget);
+        r.FrontLeft.setTargetPosition(motorTarget);
+        r.FrontRight.setTargetPosition(motorTarget);
+        r.BackLeft.setTargetPosition(motorTarget);
+        r.BackRight.setTargetPosition(motorTarget);
     }
 
     public void runMotorEncoders () {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void runWithoutEncoders() {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        r.FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public int LinearSlideTicks(double inches) {
