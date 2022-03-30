@@ -17,38 +17,45 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Robot {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor CarouselMotor;
-    DcMotor LinearSlide;
-    DcMotor test;
-    CRServo Intake;
-    Servo LSExtensionServo;
+    DcMotor FrontLeft, BackLeft,
+            FrontRight, BackRight,
+            CarouselMotor, LinearSlide;
+    CRServo Intake, big, small;
+    Servo LSExtensionServo, horizontal, vertical;
     Telemetry telemetry;
     public BNO055IMU imu;
 
     //headings
-    Orientation currentHeading;
-    Orientation lastAngle;
+    Orientation currentHeading, lastAngle;
 
     //angles
-    final double diameter = 5.75;
-    final double ticksInARotation = 537.7;
-    final double theoreticalRadius = 10.9;
+    double globalAngle;
+
+    public final double diameter = 5.75;
+    public final double ticksInARotation = 537.7;
+    public final double theoreticalRadius = 10.9;
 
     final double measuredWheelCircumference = Math.PI * 3.9d;
     final double TAU = Math.PI * 2;
 
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    public final double extenderPower = 0.8d;
+
+    public final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    public final double theoreticalGroundExtension = LinearSlideTicks(3);
+    public final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    //approximately 3 rotations - "2cm"
+    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
+    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
+    // theoretically, we get an approximate number of ticks for the full thing
+    // official information says 3.1 rotations apparently
+    //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
+    //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
+    //so alternate fullExtension to use is LinearSlideTicks(14.7);
 
     final double bottom = 0.15d;
     // final double middle = 0.45d;
     final double up = 0.95d;
-    double globalAngle;
+
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
@@ -72,12 +79,6 @@ public class Robot {
     }
 
     public void hardwareMap(HardwareMap hardwareMap) {
-        if (hardwareMap == null) {
-            telemetry.addLine("asjflkadfjladskfj");
-            telemetry.update();
-            return;
-        }
-
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
@@ -85,7 +86,14 @@ public class Robot {
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         Intake = hardwareMap.get(CRServo.class, "Intake");
+        big = hardwareMap.get(CRServo.class, "big");
+        small = hardwareMap.get(CRServo.class, "small");
+        small.setDirection(CRServo.Direction.REVERSE);
+
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
+        horizontal = hardwareMap.get(Servo.class, "horizontal");
+        vertical = hardwareMap.get(Servo.class, "vertical");
+
     }
 
     public void Forward(double Power) {
@@ -162,17 +170,16 @@ public class Robot {
     }
 
     public void waitForMotorEncoders () {
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
-
-        }
+        while (FrontLeft.isBusy() && FrontRight.isBusy()
+                && BackLeft.isBusy() && BackRight.isBusy()) {}
 
         Stop();
     }
 
     public int motorTicks (double inches) {
-        double circumference = Math.PI * diameter;
+//        double circumference = Math.PI * diameter;
 
-        circumference = measuredWheelCircumference;
+        double circumference = measuredWheelCircumference;
 
         double inchesPerTick = circumference / ticksInARotation; // approx 0.0204492733635192 inch
 
@@ -202,7 +209,6 @@ public class Robot {
         encoderMotorReset();
 
         int target = motorTicks(inches);
-//        target = (int) ticksInARotation;
 
         switch (drive) {
             case FORWARD:
@@ -252,8 +258,6 @@ public class Robot {
         double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
         // original measurement was 5in
         //alt circumference ~ 4.75in.
-
-//        circumference = measuredWheelCircumference;
         double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
 
         return (int) Math.floor(inches / inchesPerTick);

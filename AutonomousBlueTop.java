@@ -7,27 +7,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-//import com.qualcomm.robotcore.util.
 
 @Autonomous(name="AutonomousBlueTop")
 public class AutonomousBlueTop extends LinearOpMode {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor CarouselMotor;
-    DcMotor LinearSlide;
+    Robot r;
 
     private ElapsedTime runtime = new ElapsedTime();
-
-    final double ticksInARotation = 537.7;
-    final double theoreticalRadius = 10.9;
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
-
-    CRServo Intake;
-    Servo LSExtensionServo;
 
     /* a lot of notes
     the objective - get radius of turning circle
@@ -61,25 +46,25 @@ public class AutonomousBlueTop extends LinearOpMode {
      20.310 >~ d
      round diameter down a little to 20, then circumference is about 62.83185
     */
+
     final double DISTANCE_PER_SECOND = 104.25;
     final double DEGREES_PER_SECOND = 350.0; // approximated
 
     @Override
     public void runOpMode(){
-        waitForStart();
 
-        Robot r = new Robot(telemetry, hardwareMap);
-        r.hardwareMap(hardwareMap);
+        r = new Robot(telemetry, hardwareMap);
+
+        waitForStart();
 
         r.setMotorTargets(20, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.2);
         r.setMotorTargets(0.5, Robot.Drive.BACKWARD);
         r.drive(0.05);
 
-        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        r.setLinearSlidePosition((int) theoreticalFullExtension);
+        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.setLinearSlidePosition((int) r.theoreticalFullExtension);
         r.LSExtensionServo.setPosition(r.up);
 
         sleep(1000); // wait for extension servo to go up
@@ -107,7 +92,7 @@ public class AutonomousBlueTop extends LinearOpMode {
 
         sleep(100);
 
-        r.setLinearSlidePosition((int) theoreticalMiddleExtension);
+        r.setLinearSlidePosition((int) r.theoreticalMiddleExtension);
         r.setMotorTargets(30, Robot.Drive.STRAFE_LEFT);
         r.drive(0.3);
 
@@ -135,288 +120,78 @@ public class AutonomousBlueTop extends LinearOpMode {
     }
 
     public void STRAIGHT_TO_WAREHOUSE() {
-        Forward(0.5);
+        r.Forward(0.5);
 
         sleep(200);
 
-        TurnRight(0.5);
+        r.TurnRight(0.5);
 
         sleep(500);
 
-        Stop();
+        r.Stop();
 
         sleep(200);
 
-        StrafeRight(0.3);
+        r.StrafeRight(0.3);
 
         sleep(1000);
 
-        Forward(0.75);
+        r.Forward(0.75);
 
         sleep(2000);
     }
 
     public void AUTOCODE() {
-        Forward(0.5);
+        r.Forward(0.5);
 
         sleep(200);
 
-        TurnRight(0.5);
+        r.TurnRight(0.5);
 
         sleep(500);
 
-        Stop();
+        r.Stop();
 
         sleep(200);
 
-        Forward(-0.5);
+        r.Forward(-0.5);
 
         sleep(400);
 
-        StrafeRight(0.3);
+        r.StrafeRight(0.3);
 
         sleep(250);
 
-        Stop();
+        r.Stop();
 
-        CarouselMotor.setPower(-1);
+        r.CarouselMotor.setPower(-1);
 
         sleep(5000);
 
-        CarouselMotor.setPower(0);
+        r.CarouselMotor.setPower(0);
 
-        StrafeLeft(0.5);
+        r.StrafeLeft(0.5);
 
         sleep(500);
 
-        Forward(0.5);
+        r.Forward(0.5);
 
         sleep(800);
 
-        StrafeRight(0.4);
+        r.StrafeRight(0.4);
 
         sleep(1000);
 
-        Forward(0.5);
+        r.Forward(0.5);
 
         sleep(800);
 
-        StrafeRight(0.4);
+        r.StrafeRight(0.4);
         sleep(600);
 
-        Forward(0.5);
+        r.Forward(0.5);
 
         sleep(3500);
     }
 
-    public int LinearSlideTicks(double inches) {
-        double diameter = 1.5;
-
-        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
-        // original measurement was 5in
-        //alt circumference ~ 4.75in.
-        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
-
-        return (int) Math.floor(inches / inchesPerTick);
-    }
-
-    public double motorArcLength (int theta) {
-        double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
-        return rad * theoreticalRadius; //returns S, the arc length
-        /* old notes
-        all the turning math is done on the assumption that driving a distance as a line
-        is the same as driving that distance around a circumference
-        as in, the turning motion does not counteract movement along the circumference
-        and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
-        they would still drive 10 inches, just along the circumference of their rotation
-        this is likely not true, but I cannot find math online and can't really model it either
-        to correct much, just do testing
-        */
-    }
-
-    public int motorTicks (double inches) {
-        double diameter = 5.75;
-
-        double circumference = Math.PI * diameter;
-
-        double inchesPerTick = circumference / ticksInARotation; // approx 0.0204492733635192 inch
-
-        return (int) Math.floor(inches / inchesPerTick);
-    }
-
-    public double linearSlideTicks(double inches) {
-        //copy changes in these measurments from TeleOp
-        double circumference = 5.0; // might be wrong if it is then we're FUCKED !
-
-        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inch
-
-        return inches / inchesPerTick;
-    }
-
-    public void Drive (double Power) {
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(Power);
-
-        waitForMotorEncoders();
-    }
-
-    public void StrafeLeft (double Power) {
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(-Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void StrafeRight (double Power) {
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackLeft.setPower(-Power);
-        BackRight.setPower(-Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void TurnLeft (double Power) {
-        // both left sides go forward
-        // both right sides go backwards
-        // this makes the robot turn left and stationary
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(-Power);
-        BackLeft.setPower(-Power);
-        FrontRight.setPower(-Power);
-        BackRight.setPower(-Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void TurnRight (double Power) {
-        // both right sides go forward
-        // both left sides go backwards
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(Power);
-        BackLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackRight.setPower(Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void Forward (double Power) {
-
-        // encoderMotorReset();
-
-        // setMotorTargets(motorTicks(inches));
-
-        // runMotorEncoders();
-
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(-Power);
-
-        // waitForMotorEncoders();
-    }
-
-    public void Stop () {
-        FrontLeft.setPower(0);
-        FrontRight.setPower(0);
-        BackLeft.setPower(0);
-        BackRight.setPower(0);
-
-        // encoderMotorReset();
-    }
-
-    public void encoderMotorReset() {
-        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void setMotorTargets (int inches, Drive drive) {
-        encoderMotorReset();
-
-        int target = (int) motorTicks(inches);
-
-        switch (drive) {
-            case FORWARD:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(-target);
-                break;
-            case TURN_LEFT:
-                FrontLeft.setTargetPosition(-target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(-target);
-                BackRight.setTargetPosition(-target);
-                break;
-            case TURN_RIGHT:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(target);
-                break;
-            case STRAFE_LEFT:
-                FrontLeft.setTargetPosition(-target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(target);
-                break;
-            case STRAFE_RIGHT:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(target);
-                BackLeft.setTargetPosition(-target);
-                BackRight.setTargetPosition(-target);
-                break;
-        }
-
-        runMotorEncoders();
-
-    }
-
-    public void runMotorEncoders () {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void waitForMotorEncoders () {
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
-            idle();
-        }
-
-        Stop();
-    }
 }

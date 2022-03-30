@@ -17,36 +17,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class TeleOP extends OpMode {
     public Robot r;
 
-    //approximately 3 rotations - "2cm"
-    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
-    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
-    // theoretically, we get an approximate number of ticks for the full thing
-
-    final double ticksInARotation = 537.7;
-
-    // final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
-    // official information says 3.1 rotations apparently
-    //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
-    //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
-    //so alternate fullExtension to use is LinearSlideTicks(14.7);
-
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    /*alliance shipping hub middle level top edge is 8.5 inches up,
-    assuming that the extension servo will cover the remaining height to dump freight in*/
-
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
-    //if the ext doesn't already reach bottom level, use this
-
     public int _level = 1;
 
     @Override
     public void init() {
         r = new Robot(telemetry, hardwareMap);
 
-        telemetry.addData("Full LS Extension", theoreticalFullExtension);
-        telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
-        telemetry.addData("Ground LS Extension", theoreticalGroundExtension);
+        telemetry.addData("Full LS Extension", r.theoreticalFullExtension);
+        telemetry.addData("Middle LS Extension", r.theoreticalMiddleExtension);
+        telemetry.addData("Ground LS Extension", r.theoreticalGroundExtension);
 
         telemetry.addLine("Press right on the dpad if on red");
         telemetry.addLine("Press start if on blue");
@@ -81,7 +60,9 @@ public class TeleOP extends OpMode {
 
         /* button config
          *   gamepad1: movement on joysticks, carousel dir set (dpad) and activate (button)
-         *   gamepad2:  x intake, y top LS, b mid LS, a bot LS
+         *   gamepad2:  x intake, y top LS, b mid LS, a bot LS,
+         *          (left_bumper: dpad_up measuring tape out, dpad_down measuring tape in)
+         *          left_stick_y vertical, right_stick_x horizontal
          * */
 
         double c = gamepad1.left_stick_x;
@@ -122,49 +103,47 @@ public class TeleOP extends OpMode {
 
         if (gamepad1.dpad_right) {
             r.CarouselMotor.setPower(1);
-        }
-
-        else if (gamepad1.dpad_left) {
+        } else if (gamepad1.dpad_left) {
             r.CarouselMotor.setPower(-1);
-        }
-
-        else r.CarouselMotor.setPower(0);
+        } else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up) {
-            r.Intake.setPower(1);
+            if (gamepad2.left_bumper) {
+                r.big.setPower(r.extenderPower);
+                r.small.setPower(r.extenderPower);
+            } else {
+                r.Intake.setPower(1);
+            }
+        } else if (gamepad2.dpad_down) {
+            if (gamepad2.left_bumper) {
+                r.big.setPower(-r.extenderPower);
+                r.small.setPower(-r.extenderPower);
+            } else {
+                r.Intake.setPower(-1);
+            }
+        } else {
+            r.Intake.setPower(0);
+            r.big.setPower(0);
+            r.small.setPower(0);
         }
 
-        else if (gamepad2.dpad_down) {
-            r.Intake.setPower(-1);
+        double verticalIncrement = gamepad2.left_stick_y;
+        double horizontalIncrement = gamepad2.right_stick_x;
+
+        if ((r.vertical.getPosition() > 0 && verticalIncrement < 0) ||
+                (r.vertical.getPosition() < 1 && verticalIncrement > 0)) {
+            r.vertical.setPosition(r.vertical.getPosition() + (verticalIncrement / 10));
         }
-
-        else r.Intake.setPower(0);
-
-        if (gamepad1.y) {
-            r.LinearSlide.setPower(0.1);
-            telemetry.addLine("tu madre soy dora");
-            telemetry.update();
-        }
-
-        else if (gamepad1.a) {
-            r.LinearSlide.setPower(-0.1);
-            telemetry.addLine("tu madre soy no dora");
-            telemetry.update();
-        }
-
-        else {
-            r.LinearSlide.setPower(0);
-            telemetry.addLine("tu madre soy deeznuts");
-            telemetry.update();
+        if ((r.horizontal.getPosition() > 0 && horizontalIncrement < 0) ||
+                (r.horizontal.getPosition() < 1 && horizontalIncrement > 0)) {
+            r.horizontal.setPosition(r.horizontal.getPosition() + (horizontalIncrement / 10));
         }
 
         if (_level != 1) {
             if (gamepad2.right_bumper) {
                 //0
                 r.LSExtensionServo.setPosition(0.15);
-            }
-
-            else if (gamepad2.right_trigger >= 0.5d) {
+            } else if (gamepad2.right_trigger >= 0.5d) {
                 //180
                 r.LSExtensionServo.setPosition(0.85);
             }
@@ -179,7 +158,6 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.b) {
             lsLevelSet(2);
-            // telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
         }
 
         if (gamepad2.a) {
@@ -190,11 +168,6 @@ public class TeleOP extends OpMode {
         telemetry.update();
     }
 
-//    @Override
-//    public void stop () {
-//        lsLevelSet(1);
-//    }
-
     public void lsLevelSet (int level) { //method to move ls to preset levels
         this._level = level;
 
@@ -204,11 +177,11 @@ public class TeleOP extends OpMode {
         }
 
         if (level == 2) { //middle
-            r.LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+            r.LinearSlide.setTargetPosition((int) r.theoreticalMiddleExtension);
         }
 
         if (level == 3) { //top
-            r.LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+            r.LinearSlide.setTargetPosition((int) r.theoreticalFullExtension);
         }
 
         r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -246,55 +219,5 @@ public class TeleOP extends OpMode {
             r.BackLeft.setPower(y+x-c);
             r.BackRight.setPower(-y+x-c);
         }
-    }
-
-    public void encoderLSReset() {
-        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void runLSEncoder() {
-        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void encoderMotorReset() {
-        r.FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        r.FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        r.BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        r.BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void setMotorTargets (int motorTarget) {
-        r.FrontLeft.setTargetPosition(motorTarget);
-        r.FrontRight.setTargetPosition(motorTarget);
-        r.BackLeft.setTargetPosition(motorTarget);
-        r.BackRight.setTargetPosition(motorTarget);
-    }
-
-    public void runMotorEncoders () {
-        r.FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        r.FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        r.BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        r.BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public int LinearSlideTicks(double inches) {
-        double diameter = 1.5;
-
-        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
-        // original measurement was 5in
-        //alt circumference ~ 4.75in.
-        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
-
-        return (int) Math.floor(inches / inchesPerTick);
-    }
-
-    public double MotorTicks (double inches) {
-        double diameter = 3.75;
-
-        double circumference = Math.PI * diameter; // in inches
-
-        double inchesPerTick = circumference / 537.7; // approx 0.0204492733635192 inches per tick
-
-        return inches / inchesPerTick;
     }
 }

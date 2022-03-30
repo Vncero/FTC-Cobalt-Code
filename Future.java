@@ -15,15 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
 public class Future extends OpMode {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor LinearSlide;
-    DcMotor CarouselMotor;
-    CRServo Intake;
-    Servo LSExtensionServo;
-    CRServo LSReleaseServo;
+
     public Robot r;
 
     //approximately 3 rotations - "2cm"
@@ -33,34 +25,25 @@ public class Future extends OpMode {
 
     final double ticksInARotation = 537.7;
 
-    // final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(0.787402));
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    // final double theoreticalFullExtension = (3 * ticksInARotation) - (r.LinearSlideTicks(0.787402));
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (r.LinearSlideTicks(5));
     // official information says 3.1 rotations apparently
     //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
-    //so alternate fullExtension to use is LinearSlideTicks(14.7);
+    //so alternate fullExtension to use is r.LinearSlideTicks(14.7);
 
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    final double theoreticalMiddleExtension =  r.LinearSlideTicks(5.5);
     /*alliance shipping hub middle level top edge is 8.5 inches up,
     assuming that the extension servo will cover the remaining height to dump freight in*/
 
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
+    final double theoreticalGroundExtension = r.LinearSlideTicks(3);
     //if the ext doesn't already reach bottom level, use this
 
     public int _level = 1;
 
     @Override
     public void init() {
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
-        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
-        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
-        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-
-        telemetry.addData("Full LS Extension", theoreticalFullExtension);
+       telemetry.addData("Full LS Extension", theoreticalFullExtension);
         telemetry.addData("Middle LS Extension", theoreticalMiddleExtension);
         telemetry.addData("Ground LS Extension", theoreticalGroundExtension);
 
@@ -68,10 +51,8 @@ public class Future extends OpMode {
         telemetry.addLine("Press start if on blue");
 
         // need to clear it first - set to 0
-        encoderLSReset();
-        runWithoutEncoders();
 
-        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + LinearSlide.getTargetPosition());
+        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + r.LinearSlide.getTargetPosition());
 
         telemetry.update();
 
@@ -82,18 +63,18 @@ public class Future extends OpMode {
     @Override
     public void init_loop () {
         if (gamepad1.dpad_right) {
-            CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            r.CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             telemetry.clear();
 
-            telemetry.addLine("Changed carousel direction to CW (red)");
+            telemetry.addLine("Changed r.carousel direction to CW (red)");
             telemetry.update();
 
             //reverse motor, now turns CW - blue, dpad_right
         } if (gamepad1.dpad_left) {
-            CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            r.CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             telemetry.clear();
 
-            telemetry.addLine("Changed carousel direction to CCW (blue)");
+            telemetry.addLine("Changed r.carousel direction to CCW (blue)");
             telemetry.update();
         }
     }
@@ -102,8 +83,8 @@ public class Future extends OpMode {
     public void loop () {
 
         /* button config
-         *   gamepad1: movement on joysticks, carousel dir set (dpad) and activate (button)
-         *   gamepad2:  x intake, y top LS, b mid LS, a bot LS
+         *   gamepad1: movement on joysticks, r.carousel dir set (dpad) and activate (button)
+         *   gamepad2:  x r.intake, y top LS, b mid LS, a bot LS
          * */
 
         double c = gamepad1.left_stick_x;
@@ -174,47 +155,47 @@ public class Future extends OpMode {
         telemetry.addData("rightS_x", x);
         telemetry.update();
 
-        FrontLeft.setPower(y+x+c);
-        FrontRight.setPower(-y+x+c);
-        BackLeft.setPower(y+x-c);
-        BackRight.setPower(-y+x-c);
+        r.FrontLeft.setPower(y+x+c);
+        r.FrontRight.setPower(-y+x+c);
+        r.BackLeft.setPower(y+x-c);
+        r.BackRight.setPower(-y+x-c);
 
 
         if (gamepad1.dpad_right) {
-            CarouselMotor.setPower(1);
+            r.CarouselMotor.setPower(1);
         }
 
         else if (gamepad1.dpad_left) {
-            CarouselMotor.setPower(-1);
+            r.CarouselMotor.setPower(-1);
         }
 
-        else CarouselMotor.setPower(0);
+        else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up) {
-            Intake.setPower(1);
+            r.Intake.setPower(1);
             telemetry.update();
         }
 
         else if (gamepad2.dpad_down) {
-            Intake.setPower(-1);
+            r.Intake.setPower(-1);
         }
 
-        else Intake.setPower(0);
+        else r.Intake.setPower(0);
         if (_level != 1) {
             if (gamepad2.right_bumper) {
                 //0
-                LSExtensionServo.setPosition(0.15);
+                r.LSExtensionServo.setPosition(0.15);
             }
 
             else if (gamepad2.right_trigger >= 0.5d) {
                 //180
-                LSExtensionServo.setPosition(0.85);
+                r.LSExtensionServo.setPosition(0.85);
             }
         }
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            LSExtensionServo.setPosition(0.15);
+            r.LSExtensionServo.setPosition(0.15);
         }
 
         if (gamepad2.b) {
@@ -234,51 +215,51 @@ public class Future extends OpMode {
         this._level = level;
         if (level == 1) { //ground
 
-            LinearSlide.setTargetPosition(0);
+            r.LinearSlide.setTargetPosition(0);
             //Set the Linear Slide's target to the lowest, 0
 
-            LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             //set the motor to run toward the position
 
-            LinearSlide.setPower(0.75); //set power to the motor
+            r.LinearSlide.setPower(0.75); //set power to the motor
 
             waitForLinearSlide(); //while loop for the encoders to run through
 
-            LinearSlide.setPower(0); //cut the encoder power
+            r.LinearSlide.setPower(0); //cut the encoder power
         }
 
         if (level == 2) { //middle
-            telemetry.addLine("target position before: " + LinearSlide.getTargetPosition());
-            LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+            telemetry.addLine("target position before: " + r.LinearSlide.getTargetPosition());
+            r.LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
 
             // telemetry.addLine("middle extension is " + theoreticalMiddleExtension);
 
-            LinearSlide.setPower(0.75);
+            r.LinearSlide.setPower(0.75);
 
-            telemetry.addLine("the target position should be " + theoreticalMiddleExtension + " , and is: " + LinearSlide.getTargetPosition());
+            telemetry.addLine("the target position should be " + theoreticalMiddleExtension + " , and is: " + r.LinearSlide.getTargetPosition());
 
             waitForLinearSlide();
 
-            LinearSlide.setPower(0);
+            r.LinearSlide.setPower(0);
         }
 
         if (level == 3) { //top
 
-            LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+            r.LinearSlide.setTargetPosition((int) theoreticalFullExtension);
 
-            LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            LinearSlide.setPower(0.75);
+            r.LinearSlide.setPower(0.75);
 
             waitForLinearSlide();
 
-            LinearSlide.setPower(0);
+            r.LinearSlide.setPower(0);
         }
     }
 
     public void waitForLinearSlide() {
-        while (LinearSlide.isBusy()) {
-            telemetry.addData("Linear Slide at position", LinearSlide.getCurrentPosition());
+        while (r.LinearSlide.isBusy()) {
+            telemetry.addData("Linear Slide at position", r.LinearSlide.getCurrentPosition());
             telemetry.update();
 
             double c = gamepad1.left_stick_x;
@@ -295,67 +276,11 @@ public class Future extends OpMode {
                 x *= 0.9;
             }
 
-            FrontLeft.setPower(y+x+c);
-            FrontRight.setPower(-y+x+c);
-            BackLeft.setPower(y+x-c);
-            BackRight.setPower(-y+x-c);
+            r.FrontLeft.setPower(y+x+c);
+            r.FrontRight.setPower(-y+x+c);
+            r.BackLeft.setPower(y+x-c);
+            r.BackRight.setPower(-y+x-c);
         }
     }
 
-    public void encoderLSReset() {
-        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void runLSEncoder() {
-        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void encoderMotorReset() {
-        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void setMotorTargets (int motorTarget) {
-        FrontLeft.setTargetPosition(motorTarget);
-        FrontRight.setTargetPosition(motorTarget);
-        BackLeft.setTargetPosition(motorTarget);
-        BackRight.setTargetPosition(motorTarget);
-    }
-
-    public void runMotorEncoders () {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void runWithoutEncoders() {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-
-    public int LinearSlideTicks(double inches) {
-        double diameter = 1.5;
-
-        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
-        // original measurement was 5in
-        //alt circumference ~ 4.75in.
-        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
-
-        return (int) Math.floor(inches / inchesPerTick);
-    }
-
-    public double MotorTicks (double inches) {
-        double diameter = 3.75;
-
-        double circumference = Math.PI * diameter; // in inches
-
-        double inchesPerTick = circumference / 537.7; // approx 0.0204492733635192 inches per tick
-
-        return inches / inchesPerTick;
-    }
 }

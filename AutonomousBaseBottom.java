@@ -1,9 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-// DO NOT RUN THIS - THIS IS MEANT TO BE BASE OBJECT
-
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -13,26 +9,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 
 public class AutonomousBaseBottom extends LinearOpMode {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor CarouselMotor;
-    DcMotor LinearSlide;
 
-    public Robot r = new Robot(telemetry, hardwareMap);
+    Robot r;
     private ElapsedTime runtime = new ElapsedTime();
 
     final double ticksInARotation = 537.7;
     final double theoreticalRadius = 10.9;
     final double diameter = 5.75;
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    final double theoreticalMiddleExtension =  r.LinearSlideTicks(5.5);
+    final double theoreticalGroundExtension = r.LinearSlideTicks(3);
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (r.LinearSlideTicks(5));
     double globalAngle;
-
-    CRServo Intake;
-    Servo LSExtensionServo;
 
     int mult = 1;
 
@@ -40,7 +27,7 @@ public class AutonomousBaseBottom extends LinearOpMode {
     the objective - get radius of turning circle
     when the r turns, the edges of the wheel hit points that make up its turning circle
     relating the turning circle to the r, we can deduce that the diameter of this circle can be found by
-    finding the diagonal measure between wheels, like FrontLeft and BackRight.
+    finding the diagonal measure between wheels, like r.FrontLeft and r.BackRight.
     without being able to directly measure, we can estimate this diagonal by figuring out the r's dimensions
     we know that it fits between the barrier gap, meaning the width is at max 13.68in, use 13.65in
     for length, the r fits in the 2ft by 2ft squares, but the size limit is 18, so use 17in
@@ -80,23 +67,15 @@ public class AutonomousBaseBottom extends LinearOpMode {
     }
 
     public void __start(){
-        r.hardwareMap(hardwareMap);
-
-        this.FrontLeft = r.FrontLeft;
-        this.BackLeft = r.BackLeft;
-        this.FrontRight = r.FrontRight;
-        this.BackRight = r.BackRight;
-
+        r = new Robot(telemetry,hardwareMap);
         waitForStart();
 
-        LinearSlide = r.LinearSlide;
-
-        LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LinearSlide.setTargetPosition((int) theoreticalFullExtension);
-        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LinearSlide.setPower(0.75);
-        while (LinearSlide.isBusy()) {}
-        LinearSlide.setPower(0);
+        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.LinearSlide.setPower(0.75);
+        while (r.LinearSlide.isBusy()) {}
+        r.LinearSlide.setPower(0);
 
         r.LSExtensionServo.setPosition(r.up);
 
@@ -259,56 +238,56 @@ public class AutonomousBaseBottom extends LinearOpMode {
     }
 
     public void StrafeLeft (double Power) {
-        FrontLeft.setPower(-Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(Power);
+        r.FrontLeft.setPower(-Power);
+        r.FrontRight.setPower(-Power);
+        r.BackLeft.setPower(Power);
+        r.BackRight.setPower(Power);
     }
 
     public void StrafeRight (double Power) {
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackLeft.setPower(-Power);
-        BackRight.setPower(-Power);
+        r.FrontLeft.setPower(Power);
+        r.FrontRight.setPower(Power);
+        r.BackLeft.setPower(-Power);
+        r.BackRight.setPower(-Power);
     }
 
     public void TurnLeft (double Power) {
-        FrontLeft.setPower(-Power);
-        BackLeft.setPower(-Power);
-        FrontRight.setPower(-Power);
-        BackRight.setPower(-Power);
+        r.FrontLeft.setPower(-Power);
+        r.BackLeft.setPower(-Power);
+        r.FrontRight.setPower(-Power);
+        r.BackRight.setPower(-Power);
     }
 
     public void TurnRight (double Power) {
-        FrontLeft.setPower(Power);
-        BackLeft.setPower(Power);
-        FrontRight.setPower(Power);
-        BackRight.setPower(Power);
+        r.FrontLeft.setPower(Power);
+        r.BackLeft.setPower(Power);
+        r.FrontRight.setPower(Power);
+        r.BackRight.setPower(Power);
     }
 
     public void Stop () {
-        FrontLeft.setPower(0);
-        FrontRight.setPower(0);
-        BackLeft.setPower(0);
-        BackRight.setPower(0);
+        r.FrontLeft.setPower(0);
+        r.FrontRight.setPower(0);
+        r.BackLeft.setPower(0);
+        r.BackRight.setPower(0);
     }
 
     public void encoderMotorReset() {
-        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        r.BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void runMotorEncoders () {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void waitForMotorEncoders () {
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
+        while (r.FrontLeft.isBusy() && r.FrontRight.isBusy() && r.BackLeft.isBusy() && r.BackRight.isBusy()) {
             idle();
         }
 
@@ -322,34 +301,34 @@ public class AutonomousBaseBottom extends LinearOpMode {
 
         switch (drive) {
             case FORWARD:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(-target);
+                r.FrontLeft.setTargetPosition(target);
+                r.FrontRight.setTargetPosition(-target);
+                r.BackLeft.setTargetPosition(target);
+                r.BackRight.setTargetPosition(-target);
                 break;
             case TURN_LEFT:
-                FrontLeft.setTargetPosition(-target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(-target);
-                BackRight.setTargetPosition(-target);
+                r.FrontLeft.setTargetPosition(-target);
+                r.FrontRight.setTargetPosition(-target);
+                r.BackLeft.setTargetPosition(-target);
+                r.BackRight.setTargetPosition(-target);
                 break;
             case TURN_RIGHT:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(target);
+                r.FrontLeft.setTargetPosition(target);
+                r.FrontRight.setTargetPosition(target);
+                r.BackLeft.setTargetPosition(target);
+                r.BackRight.setTargetPosition(target);
                 break;
             case STRAFE_LEFT:
-                FrontLeft.setTargetPosition(-target);
-                FrontRight.setTargetPosition(-target);
-                BackLeft.setTargetPosition(target);
-                BackRight.setTargetPosition(target);
+                r.FrontLeft.setTargetPosition(-target);
+                r.FrontRight.setTargetPosition(-target);
+                r.BackLeft.setTargetPosition(target);
+                r.BackRight.setTargetPosition(target);
                 break;
             case STRAFE_RIGHT:
-                FrontLeft.setTargetPosition(target);
-                FrontRight.setTargetPosition(target);
-                BackLeft.setTargetPosition(-target);
-                BackRight.setTargetPosition(-target);
+                r.FrontLeft.setTargetPosition(target);
+                r.FrontRight.setTargetPosition(target);
+                r.BackLeft.setTargetPosition(-target);
+                r.BackRight.setTargetPosition(-target);
                 break;
         }
 
@@ -357,3 +336,4 @@ public class AutonomousBaseBottom extends LinearOpMode {
 
     }
 }
+
