@@ -17,67 +17,86 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Robot {
-    DcMotor FrontLeft;
-    DcMotor BackLeft;
-    DcMotor FrontRight;
-    DcMotor BackRight;
-    DcMotor CarouselMotor;
-    DcMotor LinearSlide;
-    CRServo Intake;
-    Servo LSExtensionServo;
+    DcMotor FrontLeft, BackLeft,
+            FrontRight, BackRight,
+            CarouselMotor, LinearSlide;
+    CRServo Intake, big, small;
+    Servo LSExtensionServo, horizontal, vertical;
     Telemetry telemetry;
     public BNO055IMU imu;
 
     //headings
-    Orientation currentHeading;
-    Orientation lastHeading;
+    Orientation currentHeading, lastAngle;
 
     //angles
-    double currentHeadingZ = 0.0;
-    double lastHeadingZ = 0.0;
-    double headingOffset = 0.0;
+    double globalAngle;
 
-    final double diameter = 5.75;
-    final double ticksInARotation = 537.7;
-    final double theoreticalRadius = 10.9;
+    double s = 0;
+
+    public final double diameter = 5.75;
+    public final double ticksInARotation = 537.7;
+    public final double theoreticalRadius = 10.9;
 
     final double measuredWheelCircumference = Math.PI * 3.9d;
     final double TAU = Math.PI * 2;
 
-    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    final double theoreticalGroundExtension = LinearSlideTicks(3);
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    public final double extenderPower = 0.8d;
 
-    final double up = 0.15d;
+    public final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
+    public final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    //approximately 3 rotations - "2cm"
+    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
+    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
+    // theoretically, we get an approximate number of ticks for the full thing
+    // official information says 3.1 rotations apparently
+    //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
+    //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
+    //so alternate fullExtension to use is LinearSlideTicks(14.7);
+
+    final double bottom = 0.760d;
     // final double middle = 0.45d;
-    final double bottom = 0.75d;
+    final double up = 0.099d;
+
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
          hardwareMap(hardwareMap);
+
+         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+         parameters.mode                = BNO055IMU.SensorMode.IMU;
+         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+         parameters.loggingEnabled      = false;
+
+         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+         // and named "imu".
+         imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+         imu.initialize(parameters);
+
          currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+         lastAngle = currentHeading;
     }
 
-    public void hardwareMap(HardwareMap hardware) {
-        FrontLeft = hardware.get(DcMotor.class, "FrontLeft");
-        BackLeft = hardware.get(DcMotor.class, "BackLeft");
-        FrontRight = hardware.get(DcMotor.class, "FrontRight");
-        BackRight = hardware.get(DcMotor.class, "BackRight");
-        LinearSlide = hardware.get(DcMotor.class, "LinearSlide");
-        CarouselMotor = hardware.get(DcMotor.class, "CarouselMotor");
-        Intake = hardware.get(CRServo.class, "Intake");
-        LSExtensionServo = hardware.get(Servo.class, "LSExtensionServo");
-        imu = hardware.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    public void hardwareMap(HardwareMap hardwareMap) {
+        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
+        BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
+        FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
+        BackRight = hardwareMap.get(DcMotor.class, "BackRight");
+        LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
+        CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
+        Intake = hardwareMap.get(CRServo.class, "Intake");
+//        big = hardwareMap.get(CRServo.class, "big");
+//        small = hardwareMap.get(CRServo.class, "small");
+//        small.setDirection(CRServo.Direction.REVERSE);
 
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json";
-        imu.initialize(parameters);
+        LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
+//        horizontal = hardwareMap.get(Servo.class, "horizontal");
+//        vertical = hardwareMap.get(Servo.class, "vertical");
+
     }
 
     public void Forward(double Power) {
@@ -112,6 +131,13 @@ public class Robot {
 
         FrontRight.setPower(-Power);
         BackRight.setPower(-Power);
+    }
+
+    public void correctAngle() {
+        telemetry.addLine("correcting angle: " + globalAngle);
+        telemetry.update();
+        setMotorTargets(motorArcLength(-globalAngle), Robot.Drive.TURN_LEFT);
+        drive(0.5);
     }
 
     public void TurnRight (double Power) {
@@ -154,17 +180,16 @@ public class Robot {
     }
 
     public void waitForMotorEncoders () {
-        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
-
-        }
+        while (FrontLeft.isBusy() && FrontRight.isBusy()
+                && BackLeft.isBusy() && BackRight.isBusy()) {}
 
         Stop();
     }
 
     public int motorTicks (double inches) {
-        double circumference = Math.PI * diameter;
+//        double circumference = Math.PI * diameter;
 
-        circumference = measuredWheelCircumference;
+        double circumference = measuredWheelCircumference;
 
         double inchesPerTick = circumference / ticksInARotation; // approx 0.0204492733635192 inch
 
@@ -194,7 +219,6 @@ public class Robot {
         encoderMotorReset();
 
         int target = motorTicks(inches);
-//        target = (int) ticksInARotation;
 
         switch (drive) {
             case FORWARD:
@@ -244,8 +268,6 @@ public class Robot {
         double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
         // original measurement was 5in
         //alt circumference ~ 4.75in.
-
-//        circumference = measuredWheelCircumference;
         double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
 
         return (int) Math.floor(inches / inchesPerTick);
@@ -253,8 +275,9 @@ public class Robot {
 
     public void setLinearSlidePosition(double ticks) {
         LinearSlide.setTargetPosition((int) ticks);
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        LinearSlide.setPower(0.75);
+        LinearSlide.setPower(0.9);
         while (LinearSlide.isBusy()) {}
         LinearSlide.setPower(0);
     }
@@ -271,14 +294,6 @@ public class Robot {
         this is likely not true, but I cannot find math online and can't really model it either
         to correct much, just do testing
         */
-    }
-
-    public double getExternalHeading () {
-        return normalizeAngle(currentHeadingZ + headingOffset);
-    }
-
-    public void setExternalHeading (double value) {
-        headingOffset = -currentHeadingZ + value;
     }
 
     public double normalizeAngle (double angle) {
@@ -299,22 +314,13 @@ public class Robot {
         return modifiedAngleDelta;
     }
 
-    public void updateHeading () {
-        currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+    public void updateGlobalAngle() {
+        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
 
-        double delta = normalizeDelta(currentHeadingZ - lastHeadingZ);
+        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
 
-        currentHeadingZ += delta;
+        globalAngle += normalizeDelta(deltaAngle);
 
-        lastHeadingZ = currentHeadingZ;
+        lastAngle = currentOrientation;
     }
-
-//    public void updateGlobalAngle() {
-//        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-//        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
-//
-//        globalAngle += normalizeDelta(deltaAngle);
-//
-//        lastAngle = currentOrientation;
-//    }
 }
