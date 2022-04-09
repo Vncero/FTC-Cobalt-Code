@@ -1,27 +1,93 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Hardware;
 import com.vuforia.VIDEO_BACKGROUND_REFLECTION;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Robot {
     DcMotor FrontLeft;
     DcMotor BackLeft;
     DcMotor FrontRight;
     DcMotor BackRight;
+    DcMotor CarouselMotor;
     DcMotor LinearSlide;
+    CRServo Intake;
+    Servo LSExtensionServo;
+    Telemetry telemetry;
+    public BNO055IMU imu;
 
-    public void hardwareMap(HardwareMap hardwareMap) {
-        FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeftFrontLeft");
-        BackLeft = hardwareMap.get(DcMotor.class, "BackLeftBackLeft");
-        FrontRight = hardwareMap.get(DcMotor.class, "FrontRightFrontRight");
-        BackRight = hardwareMap.get(DcMotor.class, "BackRightBackRight");
+    //headings
+    Orientation currentHeading;
+    Orientation lastHeading;
+
+    //angles
+    double currentHeadingZ = 0.0;
+    double lastHeadingZ = 0.0;
+    double headingOffset = 0.0;
+
+    final double diameter = 5.75;
+    final double ticksInARotation = 537.7;
+    final double theoreticalRadius = 10.9;
+
+    final double measuredWheelCircumference = Math.PI * 3.9d;
+    final double TAU = Math.PI * 2;
+
+    final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    final double theoreticalGroundExtension = LinearSlideTicks(3);
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+
+    final double up = 0.15d;
+    // final double middle = 0.45d;
+    final double bottom = 0.75d;
+
+    public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
+         this.telemetry = telemetry;
+         hardwareMap(hardwareMap);
+         currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+    }
+
+    public void hardwareMap(HardwareMap hardware) {
+        FrontLeft = hardware.get(DcMotor.class, "FrontLeft");
+        BackLeft = hardware.get(DcMotor.class, "BackLeft");
+        FrontRight = hardware.get(DcMotor.class, "FrontRight");
+        BackRight = hardware.get(DcMotor.class, "BackRight");
+        LinearSlide = hardware.get(DcMotor.class, "LinearSlide");
+        CarouselMotor = hardware.get(DcMotor.class, "CarouselMotor");
+        Intake = hardware.get(CRServo.class, "Intake");
+        LSExtensionServo = hardware.get(Servo.class, "LSExtensionServo");
+        imu = hardware.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json";
+        imu.initialize(parameters);
+    }
+
+    public void Forward(double Power) {
+        FrontLeft.setPower(Power);
+        FrontRight.setPower(-Power);
+        BackLeft.setPower(Power);
+        BackRight.setPower(-Power);
     }
 
     public void StrafeRight (double Power) {
-
         FrontLeft.setPower(-Power);
         FrontRight.setPower(Power);
         BackLeft.setPower(Power);
@@ -59,18 +125,196 @@ public class Robot {
         BackRight.setPower(-Power);
     }
 
-    public void LinearSlideSet(int ticks) {
-        LinearSlide.setTargetPosition(ticks);
-
-        while (LinearSlide.isBusy()) {}
-
-        LinearSlide.setPower(0);
-    }
-
     public void Stop () {
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
         BackRight.setPower(0);
     }
+
+    public void encoderMotorReset() {
+        FrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void runMotorEncoders () {
+        FrontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void runUsingEncoders () {
+        FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void waitForMotorEncoders () {
+        while (FrontLeft.isBusy() && FrontRight.isBusy() && BackLeft.isBusy() && BackRight.isBusy()) {
+
+        }
+
+        Stop();
+    }
+
+    public int motorTicks (double inches) {
+        double circumference = Math.PI * diameter;
+
+        circumference = measuredWheelCircumference;
+
+        double inchesPerTick = circumference / ticksInARotation; // approx 0.0204492733635192 inch
+
+        return (int) Math.floor(inches / inchesPerTick);
+    }
+
+    public void drive(double power) {
+        FrontLeft.setPower(power);
+        FrontRight.setPower(power);
+        BackLeft.setPower(power);
+        BackRight.setPower(power);
+
+        waitForMotorEncoders();
+        Stop();
+    }
+
+    public enum Drive {
+        FORWARD,
+        BACKWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT
+    }
+
+    public void setMotorTargets (double inches, Drive drive) {
+        encoderMotorReset();
+
+        int target = motorTicks(inches);
+//        target = (int) ticksInARotation;
+
+        switch (drive) {
+            case FORWARD:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case BACKWARD:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(target);
+                break;
+            case TURN_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case TURN_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_LEFT:
+                FrontLeft.setTargetPosition(-target);
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(target);
+                break;
+            case STRAFE_RIGHT:
+                FrontLeft.setTargetPosition(target);
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(-target);
+                break;
+        }
+
+        runMotorEncoders();
+    }
+
+    public int LinearSlideTicks(double inches) {
+        double diameter = 1.5;
+
+        double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
+        // original measurement was 5in
+        //alt circumference ~ 4.75in.
+
+//        circumference = measuredWheelCircumference;
+        double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
+
+        return (int) Math.floor(inches / inchesPerTick);
+    }
+
+    public void setLinearSlidePosition(double ticks) {
+        LinearSlide.setTargetPosition((int) ticks);
+
+        LinearSlide.setPower(0.75);
+        while (LinearSlide.isBusy()) {}
+        LinearSlide.setPower(0);
+    }
+
+    public double motorArcLength (double theta) {
+        double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
+        return rad * theoreticalRadius; //returns S, the arc length
+        /* old notes
+        all the turning math is done on the assumption that driving a distance as a line
+        is the same as driving that distance around a circumference
+        as in, the turning motion does not counteract movement along the circumference
+        and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
+        they would still drive 10 inches, just along the circumference of their rotation
+        this is likely not true, but I cannot find math online and can't really model it either
+        to correct much, just do testing
+        */
+    }
+
+    public double getExternalHeading () {
+        return normalizeAngle(currentHeadingZ + headingOffset);
+    }
+
+    public void setExternalHeading (double value) {
+        headingOffset = -currentHeadingZ + value;
+    }
+
+    public double normalizeAngle (double angle) {
+        double modifiedAngle = angle % TAU;
+
+        modifiedAngle = (modifiedAngle + TAU) % TAU;
+
+        return modifiedAngle;
+    }
+
+    public double normalizeDelta (double angleDelta) {
+        double modifiedAngleDelta = normalizeAngle(angleDelta);
+
+        if (modifiedAngleDelta > Math.PI) {
+            modifiedAngleDelta -= TAU;
+        }
+
+        return modifiedAngleDelta;
+    }
+
+    public void updateHeading () {
+        currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+
+        double delta = normalizeDelta(currentHeadingZ - lastHeadingZ);
+
+        currentHeadingZ += delta;
+
+        lastHeadingZ = currentHeadingZ;
+    }
+
+//    public void updateGlobalAngle() {
+//        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+//        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
+//
+//        globalAngle += normalizeDelta(deltaAngle);
+//
+//        lastAngle = currentOrientation;
+//    }
 }
