@@ -31,6 +31,8 @@ public class Robot {
     //angles
     double globalAngle;
 
+    double s = 0;
+
     public final double diameter = 5.75;
     public final double ticksInARotation = 537.7;
     public final double theoreticalRadius = 10.9;
@@ -41,7 +43,7 @@ public class Robot {
     public final double extenderPower = 0.8d;
 
     public final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
-    public final double theoreticalGroundExtension = LinearSlideTicks(3);
+    public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
     public final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
     //approximately 3 rotations - "2cm"
     //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
@@ -52,9 +54,9 @@ public class Robot {
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
     //so alternate fullExtension to use is LinearSlideTicks(14.7);
 
-    final double bottom = 0.15d;
+    final double bottom = 0.760d;
     // final double middle = 0.45d;
-    final double up = 0.95d;
+    final double up = 0.099d;
 
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
@@ -76,6 +78,7 @@ public class Robot {
          imu.initialize(parameters);
 
          currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+         lastAngle = currentHeading;
     }
 
     public void hardwareMap(HardwareMap hardwareMap) {
@@ -86,13 +89,13 @@ public class Robot {
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         Intake = hardwareMap.get(CRServo.class, "Intake");
-        big = hardwareMap.get(CRServo.class, "big");
-        small = hardwareMap.get(CRServo.class, "small");
-        small.setDirection(CRServo.Direction.REVERSE);
+//        big = hardwareMap.get(CRServo.class, "big");
+//        small = hardwareMap.get(CRServo.class, "small");
+//        small.setDirection(CRServo.Direction.REVERSE);
 
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-        horizontal = hardwareMap.get(Servo.class, "horizontal");
-        vertical = hardwareMap.get(Servo.class, "vertical");
+//        horizontal = hardwareMap.get(Servo.class, "horizontal");
+//        vertical = hardwareMap.get(Servo.class, "vertical");
 
     }
 
@@ -128,6 +131,13 @@ public class Robot {
 
         FrontRight.setPower(-Power);
         BackRight.setPower(-Power);
+    }
+
+    public void correctAngle() {
+        telemetry.addLine("correcting angle: " + globalAngle);
+        telemetry.update();
+        setMotorTargets(motorArcLength(-globalAngle), Robot.Drive.TURN_LEFT);
+        drive(0.5);
     }
 
     public void TurnRight (double Power) {
@@ -265,8 +275,9 @@ public class Robot {
 
     public void setLinearSlidePosition(double ticks) {
         LinearSlide.setTargetPosition((int) ticks);
+        LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        LinearSlide.setPower(0.75);
+        LinearSlide.setPower(0.9);
         while (LinearSlide.isBusy()) {}
         LinearSlide.setPower(0);
     }
@@ -305,6 +316,7 @@ public class Robot {
 
     public void updateGlobalAngle() {
         Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+
         double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
 
         globalAngle += normalizeDelta(deltaAngle);

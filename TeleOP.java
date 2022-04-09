@@ -102,9 +102,9 @@ public class TeleOP extends OpMode {
         r.BackRight.setPower(-y+x-c);
 
         if (gamepad1.dpad_right) {
-            r.CarouselMotor.setPower(1);
+            r.CarouselMotor.setPower(0.95);
         } else if (gamepad1.dpad_left) {
-            r.CarouselMotor.setPower(-1);
+            r.CarouselMotor.setPower(-0.95);
         } else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up) {
@@ -129,23 +129,41 @@ public class TeleOP extends OpMode {
 
         double verticalIncrement = gamepad2.left_stick_y;
         double horizontalIncrement = gamepad2.right_stick_x;
+        double scale = 1000;
+
+//
+//        if (!gamepad2.x) {
+//            verticalIncrement = 0;
+//            horizontalIncrement = 0;
+//        }
+//
+//        else {
+//            telemetry.addLine("increment not zero");
+//            telemetry.addLine("v: " + verticalIncrement);
+//            telemetry.addLine("h: " + horizontalIncrement);
+//            telemetry.update();
+//        }
 
         if ((r.vertical.getPosition() > 0 && verticalIncrement < 0) ||
                 (r.vertical.getPosition() < 1 && verticalIncrement > 0)) {
-            r.vertical.setPosition(r.vertical.getPosition() + (verticalIncrement / 10));
+            telemetry.addLine("found data input");
+            r.vertical.setPosition(r.vertical.getPosition() + (verticalIncrement / scale));
         }
         if ((r.horizontal.getPosition() > 0 && horizontalIncrement < 0) ||
                 (r.horizontal.getPosition() < 1 && horizontalIncrement > 0)) {
-            r.horizontal.setPosition(r.horizontal.getPosition() + (horizontalIncrement / 10));
+            r.horizontal.setPosition(r.horizontal.getPosition() + (horizontalIncrement / scale));
+            telemetry.addLine("found data input");
         }
+
+         telemetry.update();
 
         if (_level != 1) {
             if (gamepad2.right_bumper) {
                 //0
-                r.LSExtensionServo.setPosition(0.15);
+                r.LSExtensionServo.setPosition(r.up);
             } else if (gamepad2.right_trigger >= 0.5d) {
                 //180
-                r.LSExtensionServo.setPosition(0.85);
+                r.LSExtensionServo.setPosition(r.bottom);
             }
         } else {
             r.LSExtensionServo.setPosition(r.LSExtensionServo.getPosition());
@@ -153,7 +171,7 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            r.LSExtensionServo.setPosition(0.15);
+            r.LSExtensionServo.setPosition(r.up);
         }
 
         if (gamepad2.b) {
@@ -162,7 +180,6 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.a) {
             lsLevelSet(1);
-            telemetry.addData("Ground LS Extension", 0);
         }
 
         telemetry.update();
@@ -170,33 +187,24 @@ public class TeleOP extends OpMode {
 
     public void lsLevelSet (int level) { //method to move ls to preset levels
         this._level = level;
-
-        if (level == 1) { //ground
-            r.LinearSlide.setTargetPosition(0);
-            //Set the Linear Slide's target to the lowest, 0
-        }
+        int target = 0;
 
         if (level == 2) { //middle
-            r.LinearSlide.setTargetPosition((int) r.theoreticalMiddleExtension);
+            target = (int) r.theoreticalMiddleExtension;
+        } else if (level == 3) { //top
+            target = (int) r.theoreticalFullExtension;
         }
 
-        if (level == 3) { //top
-            r.LinearSlide.setTargetPosition((int) r.theoreticalFullExtension);
-        }
-
+        r.LinearSlide.setTargetPosition(target);
         r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //set the motor to run toward the position
+        r.LinearSlide.setPower(0.75);
+        waitForLinearSlide();
+        r.LinearSlide.setPower(0);
 
-        r.LinearSlide.setPower(0.75); //set power to the motor
-
-        waitForLinearSlide(); //while loop for the encoders to run through
-
-        r.LinearSlide.setPower(0); //cut the encoder power
     }
 
     public void waitForLinearSlide() {
         while (r.LinearSlide.isBusy()) {
-            r.LinearSlide.setPower(-0.25);
             telemetry.addData("Linear Slide at position", r.LinearSlide.getCurrentPosition());
             telemetry.update();
 
