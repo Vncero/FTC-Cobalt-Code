@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Hardware;
-import com.vuforia.VIDEO_BACKGROUND_REFLECTION;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -17,34 +15,35 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Robot {
-    DcMotor FrontLeft, BackLeft,
+    public DcMotor FrontLeft, BackLeft,
             FrontRight, BackRight,
             CarouselMotor, LinearSlide;
-    CRServo Intake, big, small;
-    Servo LSExtensionServo, horizontal, vertical;
-    Telemetry telemetry;
+    public CRServo Intake, TurretTop, TurretBottom;
+    public Servo LSExtensionServo, horizontal, vertical;
+    public Telemetry telemetry;
     public BNO055IMU imu;
 
     //headings
     Orientation currentHeading, lastAngle;
 
     //angles
-    double globalAngle;
+    public double globalAngle;
 
-    double s = 0;
-
-    public final double diameter = 5.75;
     public final double ticksInARotation = 537.7;
-    public final double theoreticalRadius = 10.9;
-
-    final double measuredWheelCircumference = Math.PI * 3.9d;
-    final double TAU = Math.PI * 2;
+    public final double theoreticalRadius = 11.1;
 
     public final double extenderPower = 0.8d;
 
-    public final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
+    final double measuredWheelCircumference = Math.PI * 3.9d;
+    final double TAU = Math.PI * 2;
+    public final double theoreticalMiddleExtension = LinearSlideTicks(5.5);
     public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
-    public final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
+    public final double theoreticalFullExtension = (3 * ticksInARotation) - LinearSlideTicks(5);
+
+    // vertical, higher value you go, the lower you get
+    public final double verticalMax = 0.5;
+    public final double verticalMin = 0.75;
+
     //approximately 3 rotations - "2cm"
     //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
     // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
@@ -53,11 +52,6 @@ public class Robot {
     //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
     //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
     //so alternate fullExtension to use is LinearSlideTicks(14.7);
-
-    final double bottom = 0.760d;
-    // final double middle = 0.45d;
-    final double up = 0.099d;
-
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
@@ -69,11 +63,6 @@ public class Robot {
          parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
          parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
          parameters.loggingEnabled      = false;
-
-         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-         // and named "imu".
-         imu = hardwareMap.get(BNO055IMU.class, "imu");
 
          imu.initialize(parameters);
 
@@ -89,55 +78,28 @@ public class Robot {
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         Intake = hardwareMap.get(CRServo.class, "Intake");
-//        big = hardwareMap.get(CRServo.class, "big");
-//        small = hardwareMap.get(CRServo.class, "small");
-//        small.setDirection(CRServo.Direction.REVERSE);
+
 
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-//        horizontal = hardwareMap.get(Servo.class, "horizontal");
-//        vertical = hardwareMap.get(Servo.class, "vertical");
+        horizontal = hardwareMap.get(Servo.class, "horizontal");
+        vertical = hardwareMap.get(Servo.class, "vertical");
+        TurretTop = hardwareMap.get(CRServo.class, "TurretTop");
+        TurretBottom = hardwareMap.get(CRServo.class, "TurretBottom");
+        TurretTop.setDirection(CRServo.Direction.REVERSE);
 
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
     }
 
-    public void Forward(double Power) {
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(-Power);
-    }
-
-    public void StrafeRight (double Power) {
-        FrontLeft.setPower(-Power);
-        FrontRight.setPower(Power);
-        BackLeft.setPower(Power);
-        BackRight.setPower(-Power);
-    }
-
-    public void StrafeLeft (double Power) {
-
-        FrontLeft.setPower(Power);
-        FrontRight.setPower(-Power);
-        BackLeft.setPower(-Power);
-        BackRight.setPower(Power);
-    }
-
-    public void TurnLeft (double Power) {
-        // both left sides go forward
-        // both right sides go backwards
-        // this makes the robot turn left and stationary
-
-        FrontLeft.setPower(Power);
-        BackLeft.setPower(Power);
-
-        FrontRight.setPower(-Power);
-        BackRight.setPower(-Power);
-    }
-
-    public void correctAngle() {
+    public void correctAngle(double power, LinearOpMode auto) {
+        auto.sleep(500);
         telemetry.addLine("correcting angle: " + globalAngle);
         telemetry.update();
-        setMotorTargets(motorArcLength(-globalAngle), Robot.Drive.TURN_LEFT);
-        drive(0.5);
+        setMotorTargets(motorArcLength(-globalAngle * 180.0 / Math.PI), Robot.Drive.TURN_LEFT);
+        telemetry.addLine("correcting angle: " + globalAngle);
+        drive(power);
     }
 
     public void TurnRight (double Power) {
@@ -147,8 +109,8 @@ public class Robot {
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
 
-        FrontRight.setPower(-Power);
-        BackRight.setPower(-Power);
+        FrontRight.setPower(Power);
+        BackRight.setPower(Power);
     }
 
     public void Stop () {
@@ -204,15 +166,6 @@ public class Robot {
 
         waitForMotorEncoders();
         Stop();
-    }
-
-    public enum Drive {
-        FORWARD,
-        BACKWARD,
-        TURN_LEFT,
-        TURN_RIGHT,
-        STRAFE_LEFT,
-        STRAFE_RIGHT
     }
 
     public void setMotorTargets (double inches, Drive drive) {
@@ -296,31 +249,33 @@ public class Robot {
         */
     }
 
-    public double normalizeAngle (double angle) {
-        double modifiedAngle = angle % TAU;
-
-        modifiedAngle = (modifiedAngle + TAU) % TAU;
-
-        return modifiedAngle;
-    }
-
-    public double normalizeDelta (double angleDelta) {
-        double modifiedAngleDelta = normalizeAngle(angleDelta);
-
-        if (modifiedAngleDelta > Math.PI) {
-            modifiedAngleDelta -= TAU;
-        }
-
-        return modifiedAngleDelta;
-    }
-
     public void updateGlobalAngle() {
         Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
 
         double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
 
-        globalAngle += normalizeDelta(deltaAngle);
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
 
         lastAngle = currentOrientation;
+    }
+
+    public static final class LSExtensionServoPosition {
+        public static final double TOP = 0.71799d;
+        public static final double BOTTOM = 0.05899d;
+        // public static final double middle = 0.45d;
+    }
+
+    public enum Drive {
+        FORWARD,
+        BACKWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT
     }
 }

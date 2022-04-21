@@ -65,7 +65,7 @@ public class AutonomousBlueTop extends LinearOpMode {
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         r.setLinearSlidePosition((int) r.theoreticalFullExtension);
-        r.LSExtensionServo.setPosition(r.up);
+        r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.TOP);
 
         sleep(1000); // wait for extension servo to go up
 
@@ -88,7 +88,7 @@ public class AutonomousBlueTop extends LinearOpMode {
         r.setMotorTargets(2, Robot.Drive.BACKWARD);
         r.drive(0.05);
 
-        r.LSExtensionServo.setPosition(r.bottom);
+        r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.BOTTOM);
 
         sleep(100);
 
@@ -117,81 +117,6 @@ public class AutonomousBlueTop extends LinearOpMode {
         TURN_RIGHT,
         STRAFE_LEFT,
         STRAFE_RIGHT
-    }
-
-    public void STRAIGHT_TO_WAREHOUSE() {
-        r.Forward(0.5);
-
-        sleep(200);
-
-        r.TurnRight(0.5);
-
-        sleep(500);
-
-        r.Stop();
-
-        sleep(200);
-
-        r.StrafeRight(0.3);
-
-        sleep(1000);
-
-        r.Forward(0.75);
-
-        sleep(2000);
-    }
-
-    public void AUTOCODE() {
-        r.Forward(0.5);
-
-        sleep(200);
-
-        r.TurnRight(0.5);
-
-        sleep(500);
-
-        r.Stop();
-
-        sleep(200);
-
-        r.Forward(-0.5);
-
-        sleep(400);
-
-        r.StrafeRight(0.3);
-
-        sleep(250);
-
-        r.Stop();
-
-        r.CarouselMotor.setPower(-1);
-
-        sleep(5000);
-
-        r.CarouselMotor.setPower(0);
-
-        r.StrafeLeft(0.5);
-
-        sleep(500);
-
-        r.Forward(0.5);
-
-        sleep(800);
-
-        r.StrafeRight(0.4);
-
-        sleep(1000);
-
-        r.Forward(0.5);
-
-        sleep(800);
-
-        r.StrafeRight(0.4);
-        sleep(600);
-
-        r.Forward(0.5);
-
-        sleep(3500);
     }
 
 }
