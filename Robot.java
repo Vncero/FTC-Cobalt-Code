@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Hardware;
-import com.vuforia.VIDEO_BACKGROUND_REFLECTION;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,12 +12,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+//TODO: add Side enum to class and constructor, then pass robot's Side in for pipeline
 public class Robot {
-    DcMotor FrontLeft, BackLeft,
+    public DcMotor FrontLeft, BackLeft,
             FrontRight, BackRight,
             CarouselMotor, LinearSlide;
-    CRServo Intake, big, small;
-    Servo LSExtensionServo, horizontal, vertical;
+    public CRServo Intake, big, small;
+    public Servo LSExtensionServo, horizontal, vertical;
     Telemetry telemetry;
     public BNO055IMU imu;
 
@@ -31,9 +28,7 @@ public class Robot {
     //angles
     double globalAngle;
 
-    double s = 0;
-
-    public final double diameter = 5.75;
+//    public final double diameter = 5.75;
     public final double ticksInARotation = 537.7;
     public final double theoreticalRadius = 10.9;
 
@@ -45,40 +40,22 @@ public class Robot {
     public final double theoreticalMiddleExtension =  LinearSlideTicks(5.5);
     public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
     public final double theoreticalFullExtension = (3 * ticksInARotation) - (LinearSlideTicks(5));
-    //approximately 3 rotations - "2cm"
-    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
-    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
-    // theoretically, we get an approximate number of ticks for the full thing
-    // official information says 3.1 rotations apparently
-    //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
-    //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
-    //so alternate fullExtension to use is LinearSlideTicks(14.7);
-
-    final double bottom = 0.760d;
-    // final double middle = 0.45d;
-    final double up = 0.099d;
-
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
-         this.telemetry = telemetry;
-         hardwareMap(hardwareMap);
+        this.telemetry = telemetry;
+        hardwareMap(hardwareMap);
 
-         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-         parameters.mode                = BNO055IMU.SensorMode.IMU;
-         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-         parameters.loggingEnabled      = false;
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
 
-         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-         // and named "imu".
-         imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
 
-         imu.initialize(parameters);
-
-         currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-         lastAngle = currentHeading;
+        currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        lastAngle = currentHeading;
     }
 
     public void hardwareMap(HardwareMap hardwareMap) {
@@ -89,13 +66,18 @@ public class Robot {
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
         Intake = hardwareMap.get(CRServo.class, "Intake");
-//        big = hardwareMap.get(CRServo.class, "big");
-//        small = hardwareMap.get(CRServo.class, "small");
-//        small.setDirection(CRServo.Direction.REVERSE);
+        big = hardwareMap.get(CRServo.class, "big");
+        small = hardwareMap.get(CRServo.class, "small");
+        small.setDirection(CRServo.Direction.REVERSE);
 
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-//        horizontal = hardwareMap.get(Servo.class, "horizontal");
-//        vertical = hardwareMap.get(Servo.class, "vertical");
+        horizontal = hardwareMap.get(Servo.class, "horizontal");
+        vertical = hardwareMap.get(Servo.class, "vertical");
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
 
     }
 
@@ -122,10 +104,6 @@ public class Robot {
     }
 
     public void TurnLeft (double Power) {
-        // both left sides go forward
-        // both right sides go backwards
-        // this makes the robot turn left and stationary
-
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
 
@@ -141,9 +119,6 @@ public class Robot {
     }
 
     public void TurnRight (double Power) {
-        // both right sides go forward
-        // both left sides go backwards
-
         FrontLeft.setPower(Power);
         BackLeft.setPower(Power);
 
@@ -206,15 +181,6 @@ public class Robot {
         Stop();
     }
 
-    public enum Drive {
-        FORWARD,
-        BACKWARD,
-        TURN_LEFT,
-        TURN_RIGHT,
-        STRAFE_LEFT,
-        STRAFE_RIGHT
-    }
-
     public void setMotorTargets (double inches, Drive drive) {
         encoderMotorReset();
 
@@ -266,8 +232,7 @@ public class Robot {
         double diameter = 1.5;
 
         double circumference = diameter * Math.PI; // might be wrong if it is then we're FUCKED !
-        // original measurement was 5in
-        //alt circumference ~ 4.75in.
+
         double inchesPerTick = circumference / ticksInARotation;//approx 0.00929886553 inches per tick
 
         return (int) Math.floor(inches / inchesPerTick);
@@ -285,15 +250,6 @@ public class Robot {
     public double motorArcLength (double theta) {
         double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
         return rad * theoreticalRadius; //returns S, the arc length
-        /* old notes
-        all the turning math is done on the assumption that driving a distance as a line
-        is the same as driving that distance around a circumference
-        as in, the turning motion does not counteract movement along the circumference
-        and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
-        they would still drive 10 inches, just along the circumference of their rotation
-        this is likely not true, but I cannot find math online and can't really model it either
-        to correct much, just do testing
-        */
     }
 
     public double normalizeAngle (double angle) {
@@ -323,4 +279,20 @@ public class Robot {
 
         lastAngle = currentOrientation;
     }
+
+    public static final class LSExtensionServoPosition {
+        public static final double TOP = 0.099d;
+        public static final double BOTTOM = 0.760d;
+        // public static final double middle = 0.45d; this is so out of tune
+    }
+
+    public enum Drive {
+        FORWARD,
+        BACKWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT
+    }
+
 }
