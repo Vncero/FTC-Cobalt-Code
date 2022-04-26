@@ -1,0 +1,28 @@
+collection of notes, mainly from writing theoretical code
+(not chronologically ordered)
+
+Robot.java (on theoreticalFullExtension calculation)
+//approximately 3 rotations - "2cm"
+//2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
+// 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
+// theoretically, we get an approximate number of ticks for the full thing
+// official information says 3.1 rotations apparently
+//https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
+//top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
+//so alternate fullExtension to use is LinearSlideTicks(14.7);
+(on LinearSlides diameter and circumference)
+// original measurement was 5in
+//alt circumference ~ 4.75in.
+(on motorArcLength, the Holy Grail of theoretical code)
+/* old notes
+all the turning math is done on the assumption that driving a distance as a line
+is the same as driving that distance around a circumference
+as in, the turning motion does not counteract movement along the circumference
+and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
+they would still drive 10 inches, just along the circumference of their rotation
+this is likely not true, but I cannot find math online and can't really model it either
+to correct much, just do testing
+*/
+Future.java (on theoreticalMiddleExtension)
+/*alliance shipping hub middle level top edge is 8.5 inches up,
+assuming that the extension servo will cover the remaining height to dump freight in*/

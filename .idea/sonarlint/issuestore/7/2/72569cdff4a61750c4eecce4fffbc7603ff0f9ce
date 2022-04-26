@@ -1,0 +1,38 @@
+
+o
+java:S1104"YMake TICKS_PER_REV a static final constant or non-public and provide accessors if needed.(±Éöß
+n
+java:S1104"XMake WHEEL_RADIUS a static final constant or non-public and provide accessors if needed.(ï÷
+q
+java:S1104 "VMake GEAR_RATIO a static final constant or non-public and provide accessors if needed.(šÇ‚Èøÿÿÿÿ
+r
+java:S1104""\Make LATERAL_DISTANCE a static final constant or non-public and provide accessors if needed.( è¬†
+u
+java:S1104#"ZMake FORWARD_OFFSET a static final constant or non-public and provide accessors if needed.(Ù¯æ²øÿÿÿÿ
+I
+java:S1444"3Make this "public static TICKS_PER_REV" field final(±Éöß
+H
+java:S1444"2Make this "public static WHEEL_RADIUS" field final(ï÷
+K
+java:S1444 "0Make this "public static GEAR_RATIO" field final(šÇ‚Èøÿÿÿÿ
+L
+java:S1444""6Make this "public static LATERAL_DISTANCE" field final( è¬†
+O
+java:S1444#"4Make this "public static FORWARD_OFFSET" field final(Ù¯æ²øÿÿÿÿ
+n
+java:S3008"XRename this field "TICKS_PER_REV" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(±Éöß
+m
+java:S3008"WRename this field "WHEEL_RADIUS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ï÷
+p
+java:S3008 "URename this field "GEAR_RATIO" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(šÇ‚Èøÿÿÿÿ
+q
+java:S3008""[Rename this field "LATERAL_DISTANCE" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.( è¬†
+t
+java:S3008#"YRename this field "FORWARD_OFFSET" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ù¯æ²øÿÿÿÿ
+d
+java:S1659%"IDeclare "rightEncoder" and all following declarations on a separate line.(©«îìıÿÿÿÿ
+Q	java:S125"<This block of commented-out lines of code should be removed.(³’’É
+M
+java:S11352"2Complete the task associated to this TODO comment.(Çòù¾ûÿÿÿÿ
+M
+java:S1135F"2Complete the task associated to this TODO comment.(€Ûæúÿÿÿÿ
