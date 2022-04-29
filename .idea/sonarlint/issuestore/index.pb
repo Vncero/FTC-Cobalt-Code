@@ -83,3 +83,19 @@ E
 build.gradle,f\0\f07866736216be0ee2aba49e392191aeae700a35
 I
 build.dependencies.gradle,c\1\c1312577c8860605f7924abd9c4be61c9cd087be
+†
+VTeamCode/src/main/java/org/firstinspires/ftc/teamcode/pipelines/eocvsim_workspace.json,d\8\d8ea67c9391b5a16f3a5e04b9cb0fee1889f00a5
+v
+FTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/Future.java,a\4\a40636054b59c3db057fd069842177d3902e74a2
+o
+?TeamCode/src/main/java/org/firstinspires/ftc/teamcode/notes.txt,e\9\e998fdcb14089014ca5f81c33801657d9c36afc1
+„
+TTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/RoadRunnerAutonomous.java,d\1\d19f50a94d301ec400d1babe0b45dcb14a8351c4
+p
+@TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Robot.java,0\d\0d79483086cae15eb4a9c6a4d539b03fe912bb75
+~
+NTeamCode/src/main/java/org/firstinspires/ftc/teamcode/threads/RobotThread.java,9\0\90d7edc161419b1db65e4d77cb253e52d66cacda
+€
+PTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/TensorflowWebcam.java,6\5\65e8a6fac142d28ba7686166cfcc046ecec5a184
+y
+ITeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/TeleOP.java,6\8\686df7f40f125d192c3f3ea629ef9920f2903ad1

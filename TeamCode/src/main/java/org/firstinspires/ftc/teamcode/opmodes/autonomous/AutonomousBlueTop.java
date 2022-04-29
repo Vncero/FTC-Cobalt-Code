@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.autonomous;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.Robot;
 
 @Autonomous(name="AutonomousBlueTop")
 public class AutonomousBlueTop extends LinearOpMode {
@@ -119,81 +117,6 @@ public class AutonomousBlueTop extends LinearOpMode {
         TURN_RIGHT,
         STRAFE_LEFT,
         STRAFE_RIGHT
-    }
-
-    public void STRAIGHT_TO_WAREHOUSE() {
-        r.Forward(0.5);
-
-        sleep(200);
-
-        r.TurnRight(0.5);
-
-        sleep(500);
-
-        r.Stop();
-
-        sleep(200);
-
-        r.StrafeRight(0.3);
-
-        sleep(1000);
-
-        r.Forward(0.75);
-
-        sleep(2000);
-    }
-
-    public void AUTOCODE() {
-        r.Forward(0.5);
-
-        sleep(200);
-
-        r.TurnRight(0.5);
-
-        sleep(500);
-
-        r.Stop();
-
-        sleep(200);
-
-        r.Forward(-0.5);
-
-        sleep(400);
-
-        r.StrafeRight(0.3);
-
-        sleep(250);
-
-        r.Stop();
-
-        r.CarouselMotor.setPower(-1);
-
-        sleep(5000);
-
-        r.CarouselMotor.setPower(0);
-
-        r.StrafeLeft(0.5);
-
-        sleep(500);
-
-        r.Forward(0.5);
-
-        sleep(800);
-
-        r.StrafeRight(0.4);
-
-        sleep(1000);
-
-        r.Forward(0.5);
-
-        sleep(800);
-
-        r.StrafeRight(0.4);
-        sleep(600);
-
-        r.Forward(0.5);
-
-        sleep(3500);
     }
 
 }
