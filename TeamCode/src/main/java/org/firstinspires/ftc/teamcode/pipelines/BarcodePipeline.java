@@ -18,27 +18,36 @@ public class BarcodePipeline extends OpenCvPipeline {
     private Barcode b = null;
 
     Mat mat = new Mat();
+    private Mat maskedInputMat = new Mat();
+//
+//    public Rect leftROI = new Rect(
+//            new Point(0, 120),
+//            new Point(640.0 / 3.0, 360)
+//    );
+//    public Rect rightROI = new Rect(
+//            new Point(2 * 640.0 / 3.0, 120),
+//            new Point(640, 360)
+//    );
 
-    public static final Rect leftROI = new Rect(
-            new Point(0, 120),
-            new Point(640.0 / 3.0, 360)
+
+    public Rect leftROI = new Rect(
+            new Point(0, 0),
+            new Point(106.67d, 150)
     );
-    public static final Rect rightROI = new Rect(
-            new Point(2 * 640.0 / 3.0, 120),
-            new Point(640, 360)
-    );
+    public Rect rightROI = new Rect(
+            new Point(213.334d, 0),
+            new Point(106.67d, 150)
+    ); //last point should be x: ~320 but the sim is janky
 
 //    public Scalar upper = new Scalar(125, 255, 190);
 //    public Scalar lower = new Scalar(110, 25, 0);
-    public Scalar upper = new Scalar(245, 100, 255);
-    public Scalar lower = new Scalar(206, 100, 255);
+//    public Scalar upper = new Scalar(245 / 2.0, 125, 255);
+//    public Scalar lower = new Scalar(206 / 2.0, 0, 255);
+    public Scalar upper = new Scalar(255, 255, 255);
+    public Scalar lower = new Scalar(85, 125, 0);
     //H(200, 250/255) - from a color picker (divide by 2)
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
-//    public Scalar upper = s == Side.RED ? new Scalar(255, 255, 255) : new Scalar(125, 255, 190);
-//    public Scalar lower = s == Side.RED ? new Scalar(0, 175, 95) : new Scalar(110, 25, 0);
-                                            //red values            //blue values
-    public double threshold = 0.4;
 
     public BarcodePipeline (Telemetry t) {
         this.t = t;
@@ -73,8 +82,8 @@ public class BarcodePipeline extends OpenCvPipeline {
         rROI.release();
 
         //determine if the element is there (threshold can probably be lowered)
-        boolean lElement = l > threshold;
-        boolean rElement = r > threshold;
+        boolean lElement = l > r;
+        boolean rElement = r > l;
 
         //ternary operators to determine Barcode
         b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : Barcode.MIDDLE;
@@ -92,15 +101,9 @@ public class BarcodePipeline extends OpenCvPipeline {
         Imgproc.rectangle(mat, leftROI, b ==  Barcode.LEFT ? barcodePosition : empty);
         Imgproc.rectangle(mat, rightROI, b == Barcode.RIGHT ? barcodePosition : empty);
 
-        //this if is messing around but it maybe is helpful for testing
-//        if (b == Barcode.MIDDLE) {
-//            //means that it is neither left nor right
-//            Imgproc.putText(mat,
-//                    "Element is either in the middle or not in frame", new Point(426, 200),
-//                    Imgproc.FONT_HERSHEY_DUPLEX, 1.5, new Scalar(0, 0, 255));
-//        }
-
         t.update();
+
+//        Core.bitwise_and(input, input, maskedInputMat, mat);
 
         return mat;
     }

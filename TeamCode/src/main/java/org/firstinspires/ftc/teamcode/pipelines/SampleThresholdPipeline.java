@@ -2,12 +2,16 @@ package org.firstinspires.ftc.teamcode.pipelines;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 public class SampleThresholdPipeline extends OpenCvPipeline {
 
+    BarcodePipeline.Barcode b = null;
+    double threshold = 0.4;
     /*
      * These are our variables that will be
      * modifiable from the variable tuner.
@@ -39,6 +43,15 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
     private Mat binaryMat      = new Mat();
     private Mat maskedInputMat = new Mat();
 
+    public Rect leftROI = new Rect(
+            new Point(0, 0),
+            new Point(106.67d, 150)
+    );
+    public Rect rightROI = new Rect(
+            new Point(213.334d, 0),
+            new Point(106.67d, 150)
+    );
+
     @Override
     public Mat processFrame(Mat input) {
         /*
@@ -67,12 +80,21 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
          * 255 represents our pixels that are inside the bounds
          */
         Core.inRange(ycrcbMat, lower, upper, binaryMat);
+//        split the image into left and right sides*/
+        Mat lROI = binaryMat.submat(leftROI);
+        Mat rROI = binaryMat.submat(rightROI);
+
+        //finds the percentage of white on left and right
+        double l = Core.sumElems(lROI).val[0] / leftROI.area() / 255;
+        double r = Core.sumElems(rROI).val[0] / rightROI.area() / 255;
 
         /*
          * Release the reusable Mat so that old data doesn't
          * affect the next step in the current processing
          */
         maskedInputMat.release();
+        lROI.release();
+        rROI.release();
 
         /*
          * Now, with our binary Mat, we perform a "bitwise and"
@@ -82,6 +104,14 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
          * the range) and will discard any other pixel outside the
          * range (RGB 0, 0, 0. All discarded pixels will be black)
          */
+
+        //determine if the element is there (threshold can probably be lowered)
+        boolean lElement = l > threshold;
+        boolean rElement = r > threshold;
+
+        //ternary operators to determine Barcode
+        b = lElement ? BarcodePipeline.Barcode.LEFT : rElement ? BarcodePipeline.Barcode.RIGHT : BarcodePipeline.Barcode.MIDDLE;
+
         Core.bitwise_and(input, input, maskedInputMat, binaryMat);
 
         /*
@@ -93,6 +123,13 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
          * pixel from the input Mat that were inside
          * the threshold range.
          */
+        Scalar barcodePosition = new Scalar(0, 255, 0);
+        Scalar empty = new Scalar(255, 0, 0);
+
+        //draw the rectangles and color based on the barcode position
+        Imgproc.rectangle(maskedInputMat, leftROI, b ==  BarcodePipeline.Barcode.LEFT ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, rightROI, b == BarcodePipeline.Barcode.RIGHT ? barcodePosition : empty);
+
         return maskedInputMat;
     }
 

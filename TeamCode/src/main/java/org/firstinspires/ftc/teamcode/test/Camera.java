@@ -38,7 +38,7 @@ public class Camera extends LinearOpMode {
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(320, 180, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
