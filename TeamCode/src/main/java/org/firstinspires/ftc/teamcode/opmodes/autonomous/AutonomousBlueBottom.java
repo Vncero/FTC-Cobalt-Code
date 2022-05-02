@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.opmodes.autonomous.base.AutonomousBaseBott
 public class AutonomousBlueBottom extends AutonomousBaseBottom {
 
     @Override
-    protected void setup() {
+    public void setup() {
         super.setMult(Multiplier.BLUE);
     }
 }

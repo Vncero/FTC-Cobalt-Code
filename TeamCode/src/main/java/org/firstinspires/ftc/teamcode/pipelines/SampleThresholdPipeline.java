@@ -26,8 +26,8 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
      * min and max values here for now, meaning
      * that all pixels will be shown.
      */
-    public Scalar lower = new Scalar(0, 0, 0);
     public Scalar upper = new Scalar(255, 255, 255);
+    public Scalar lower = new Scalar(0, 0, 0);
 
     /*
      * A good practice when typing EOCV pipelines is
@@ -45,11 +45,11 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
 
     public Rect leftROI = new Rect(
             new Point(0, 0),
-            new Point(106.67d, 150)
+            new Point(10, 10)
     );
     public Rect rightROI = new Rect(
-            new Point(213.334d, 0),
-            new Point(106.67d, 150)
+            new Point(20, 0),
+            new Point(30, 10)
     );
 
     @Override
@@ -63,7 +63,7 @@ public class SampleThresholdPipeline extends OpenCvPipeline {
          * Takes our "input" mat as an input, and outputs
          * to a separate Mat buffer "ycrcbMat"
          */
-        Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2YCrCb);
+        Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2HSV);
 
         /*
          * This is where our thresholding actually happens.

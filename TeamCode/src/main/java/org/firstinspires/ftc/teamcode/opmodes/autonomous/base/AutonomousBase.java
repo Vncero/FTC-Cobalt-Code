@@ -6,8 +6,8 @@ import org.firstinspires.ftc.teamcode.threads.RobotThread;
 import org.firstinspires.ftc.teamcode.util.BitUtils;
 
 public abstract class AutonomousBase extends LinearOpMode {
-    Robot robot;
-    RobotThread robotThread;
+    protected Robot robot;
+    protected RobotThread robotThread;
 
     private final int activations;
 
@@ -22,6 +22,7 @@ public abstract class AutonomousBase extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(telemetry, hardwareMap);
+
         robotThread = new RobotThread(robot, this);
         if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) robotThread.start();
         setup();
@@ -30,9 +31,9 @@ public abstract class AutonomousBase extends LinearOpMode {
 //        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) robotThread.interrupt(); // nvm don't need this
     }
 
-    abstract void runAuto() throws InterruptedException;
+    public abstract void runAuto() throws InterruptedException;
 
-    protected abstract void setup() throws InterruptedException;
+    public abstract void setup() throws InterruptedException;
 
     // hopefully, static works
     // TODO: check if this works cuz jason really wants it to work
