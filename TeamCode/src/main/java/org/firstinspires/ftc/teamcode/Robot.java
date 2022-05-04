@@ -15,11 +15,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 public class Robot {
     public DcMotor FrontLeft, BackLeft,
@@ -29,20 +28,26 @@ public class Robot {
     public Servo LSExtensionServo, horizontal, vertical;
     public Telemetry telemetry;
     public BNO055IMU imu;
+    public OpenCvWebcam webcam;
 
     //headings
-    Orientation currentHeading, lastAngle;
+    Orientation currentOrientation, lastOrientation;
 
     //angles
-    public double globalAngle;
+    public double lastHeading = 0.0;
+    public double headingOffset;
+    private double rawHeading = 0.0;
+    private double currentHeading = 0.0;
 
     public final double ticksInARotation = 537.7;
-    public final double theoreticalRadius = 11.1;
+    public double theoreticalRadius = 11.1;
+
+    final double TAU = Math.PI * 2;
 
     public final double extenderPower = 0.8d;
 
     final double measuredWheelCircumference = Math.PI * 3.9d;
-    final double TAU = Math.PI * 2;
+
     public final double theoreticalMiddleExtension = LinearSlideTicks(5.5);
     public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
     public final double theoreticalFullExtension = (3 * ticksInARotation) - LinearSlideTicks(5);
@@ -53,34 +58,10 @@ public class Robot {
 
     public final double horizontalMin = 0.1378d;
     public final double horizontalMax = 0.5388d;
-    private HardwareMap hardwareMap;
-    public OpenCvCamera camera;
-
-    //approximately 3 rotations - "2cm"
-    //2cm ~ 0.787402 inches, 0.00929886553 / 0.787402 inches = ticks for 2cm (0.011809552856614936), 3*537.7 ~ 1613.1
-    // 1613.1 - 0.00732194531 ~ ticks for full extension if not we're f'd
-    // theoretically, we get an approximate number of ticks for the full thing
-    // official information says 3.1 rotations apparently
-    //https://www.gobilda.com/low-side-cascading-kit-two-stage-376mm-travel/
-    //top of the alliance shipping hub is 14.7, assuming the above is the correct slides, it reaches 14.8
-    //so alternate fullExtension to use is LinearSlideTicks(14.7);
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
-         this.hardwareMap = hardwareMap;
          hardwareMap(hardwareMap);
-
-         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-
-         parameters.mode                = BNO055IMU.SensorMode.IMU;
-         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-         parameters.loggingEnabled      = false;
-
-         imu.initialize(parameters);
-
-         currentHeading = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-         lastAngle = currentHeading;
     }
 
     public void hardwareMap(HardwareMap hardwareMap) {
@@ -88,34 +69,93 @@ public class Robot {
         BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
         FrontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         BackRight = hardwareMap.get(DcMotor.class, "BackRight");
+
         LinearSlide = hardwareMap.get(DcMotor.class, "LinearSlide");
         CarouselMotor = hardwareMap.get(DcMotor.class, "CarouselMotor");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
 
         LSExtensionServo = hardwareMap.get(Servo.class, "LSExtensionServo");
-        LSExtensionServo.scaleRange(LSExtensionServoPosition.TOP, LSExtensionServoPosition.BOTTOM);
-
         horizontal = hardwareMap.get(Servo.class, "horizontal");
         vertical = hardwareMap.get(Servo.class, "vertical");
+
+        Intake = hardwareMap.get(CRServo.class, "Intake");
         TurretTop = hardwareMap.get(CRServo.class, "TurretTop");
         TurretBottom = hardwareMap.get(CRServo.class, "TurretBottom");
-        TurretTop.setDirection(CRServo.Direction.REVERSE);
 
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+        FrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        FrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        BackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        BackRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        TurretTop.setDirection(DcMotorSimple.Direction.REVERSE);
+        LSExtensionServo.scaleRange(LSExtensionServoPosition.TOP, LSExtensionServoPosition.BOTTOM);
+        //0 is top, 1 is bottom
 
         vertical.scaleRange(verticalMin, verticalMax);
         horizontal.scaleRange(horizontalMin, horizontalMax);
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+
+        imu.initialize(parameters);
+
+        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        lastOrientation = currentOrientation;
+
+        headingOffset = currentOrientation.firstAngle;
+        updateHeading();
+    }
+
+    public void setupWebcam(HardwareMap hardwareMap) {
+        int cameraMonitorViewId = hardwareMap
+                .appContext
+                .getResources()
+                .getIdentifier("cameraMonitorViewId",
+                        "id",
+                        hardwareMap
+                                .appContext
+                                .getPackageName());
+        WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
+        webcam = OpenCvCameraFactory
+                .getInstance()
+                .createWebcam(wN, cameraMonitorViewId);
+        FtcDashboard
+                .getInstance()
+                .startCameraStream(webcam, 30);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {}
+        });
+
+        webcam.showFpsMeterOnViewport(true);
+    }
+
+    public void closeWebcam() {
+        webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
+            @Override
+            public void onClose() {
+                webcam.stopStreaming();
+            }
+        });
     }
 
     public void correctAngle(double power, LinearOpMode auto) {
         auto.sleep(500);
-        telemetry.addLine("correcting angle: " + globalAngle);
+        telemetry.addLine("correcting angle: " + currentHeading);
         telemetry.update();
-        setMotorTargets(motorArcLength(-globalAngle * 180.0 / Math.PI), Robot.Drive.TURN_LEFT);
-        telemetry.addLine("correcting angle: " + globalAngle);
+        setMotorTargets(motorArcLength(-currentHeading * 180.0 / Math.PI), Robot.Drive.TURN_LEFT);
+        telemetry.addLine("correcting angle: " + currentHeading);
         drive(power);
     }
 
@@ -149,13 +189,6 @@ public class Robot {
         FrontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         BackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void runUsingEncoders () {
-        FrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        FrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void waitForMotorEncoders () {
@@ -227,6 +260,22 @@ public class Robot {
                 BackLeft.setTargetPosition(-target);
                 BackRight.setTargetPosition(-target);
                 break;
+            case DIAG_NW:
+                FrontRight.setTargetPosition(-target);
+                BackLeft.setTargetPosition(target);
+                break;
+            case DIAG_NE:
+                FrontLeft.setTargetPosition(target);
+                BackRight.setTargetPosition(-target);
+                break;
+            case DIAG_SW:
+                FrontLeft.setTargetPosition(-target);
+                BackRight.setTargetPosition(target);
+                break;
+            case DIAG_SE:
+                FrontRight.setTargetPosition(target);
+                BackLeft.setTargetPosition(-target);
+                break;
         }
 
         runMotorEncoders();
@@ -255,34 +304,39 @@ public class Robot {
     public double motorArcLength (double theta) {
         double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
         return rad * theoreticalRadius; //returns S, the arc length
-        /* old notes
-        all the turning math is done on the assumption that driving a distance as a line
-        is the same as driving that distance around a circumference
-        as in, the turning motion does not counteract movement along the circumference
-        and if all 4 wheels drive for 10 inches, then if half the wheels drive opposite to start turning,
-        they would still drive 10 inches, just along the circumference of their rotation
-        this is likely not true, but I cannot find math online and can't really model it either
-        to correct much, just do testing
-        */
     }
 
-    public void updateGlobalAngle() {
-        Orientation currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+    public double normalizeAngle (double angle) {
+        double modifiedAngle = angle % TAU;
 
-        double deltaAngle = currentOrientation.firstAngle - lastAngle.firstAngle;
+        modifiedAngle = (modifiedAngle + TAU) % TAU;
 
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
-
-        globalAngle += deltaAngle;
-
-        lastAngle = currentOrientation;
+        return modifiedAngle;
     }
 
-    public void setCameraPipeline(OpenCvPipeline pipeline) {
-        camera.setPipeline(pipeline);
+    public double normDelta (double delta) {
+        double modifiedAngleDelta = normalizeAngle(delta);
+
+        if (modifiedAngleDelta > Math.PI) {
+            modifiedAngleDelta -= TAU;
+        }
+
+        return modifiedAngleDelta;
+    }
+
+    public double getHeading() {
+        return normalizeAngle(rawHeading + headingOffset);
+    }
+
+    public void updateHeading() {
+        lastOrientation = currentOrientation;
+        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZXY, AngleUnit.RADIANS);
+
+        rawHeading = currentOrientation.firstAngle;
+
+        double delta = normDelta(currentOrientation.firstAngle - lastOrientation.firstAngle);
+
+        currentHeading = getHeading() + delta;
     }
 
     public static final class LSExtensionServoPosition {
@@ -297,6 +351,10 @@ public class Robot {
         TURN_LEFT,
         TURN_RIGHT,
         STRAFE_LEFT,
-        STRAFE_RIGHT
+        STRAFE_RIGHT,
+        DIAG_NW,
+        DIAG_NE,
+        DIAG_SW,
+        DIAG_SE
     }
 }

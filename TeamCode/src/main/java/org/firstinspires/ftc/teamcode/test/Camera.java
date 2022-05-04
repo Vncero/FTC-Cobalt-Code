@@ -20,7 +20,6 @@ public class Camera extends LinearOpMode {
     @Override
     public void runOpMode () {
         //possibly put this into robot as a separate camera setup method
-//        r = new Robot(telemetry, hardwareMap);
         bP = new BarcodePipeline(telemetry);
         int cameraMonitorViewId = hardwareMap
                 .appContext
@@ -57,7 +56,7 @@ public class Camera extends LinearOpMode {
 
         while (opModeIsActive() && !gamepad1.x) {
         } //suspicious
-//
+
         if (bP.getBarcode() != BarcodePipeline.Barcode.LEFT) {
             r.setLinearSlidePosition(bP.getBarcode() == BarcodePipeline.Barcode.RIGHT
                     ? r.theoreticalFullExtension : r.theoreticalMiddleExtension);

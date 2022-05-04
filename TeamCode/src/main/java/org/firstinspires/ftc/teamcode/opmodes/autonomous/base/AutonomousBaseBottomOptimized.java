@@ -13,29 +13,22 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Autonomous (name = "AutoBaseBottomOptimized")
 public class AutonomousBaseBottomOptimized extends AutonomousBase {
     Robot r;
-
-    private OpenCvCamera camera;
-    private BarcodePipeline bP;
+    BarcodePipeline bP;
 
     public int mult = 1;
 
     @Override
     public void setup() {
         r = new Robot(telemetry, hardwareMap);
-        setupCamera();
+        bP = new BarcodePipeline(telemetry);
+        r.setupWebcam(hardwareMap);
+        r.webcam.setPipeline(bP);
     }
 
     @Override
     public void runAuto() {
-//        BarcodePipeline pipeline = new BarcodePipeline(telemetry);
-//        r.setCameraPipeline(pipeline);
-
         switch (bP.getBarcode()) {
             case LEFT:
-                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
-                r.LSExtensionServo.setPosition(1);
-                r.setLinearSlidePosition(r.theoreticalGroundExtension);
-                break;
             case MIDDLE:
                 r.setLinearSlidePosition(r.theoreticalMiddleExtension);
                 break;
@@ -44,42 +37,10 @@ public class AutonomousBaseBottomOptimized extends AutonomousBase {
                 break;
         }
 
-        while (opModeIsActive()) {}
-    }
+        r.LSExtensionServo.setPosition(0);
 
-    public void setupCamera() {
-        bP = new BarcodePipeline(telemetry);
-        int cameraMonitorViewId = hardwareMap
-                .appContext
-                .getResources()
-                .getIdentifier("cameraMonitorViewId",
-                        "id",
-                        hardwareMap
-                                .appContext
-                                .getPackageName());
-        WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        camera = OpenCvCameraFactory
-                .getInstance()
-                .createWebcam(wN, cameraMonitorViewId);
+        if (bP.getBarcode() == BarcodePipeline.Barcode.LEFT) r.setLinearSlidePosition(r.theoreticalGroundExtension);
 
-        FtcDashboard
-                .getInstance()
-                .startCameraStream(camera, 30);
 
-        camera.setPipeline(bP);
-
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {
-
-            }
-        });
-
-        camera.showFpsMeterOnViewport(true);
     }
 }
