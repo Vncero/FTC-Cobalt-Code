@@ -104,7 +104,7 @@ public class ColorSensors extends LinearOpMode {
         telemetry.update();
         r.setMotorTargets(12, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.5);
-        r.correctAngle();
+        r.correctAngle(0.3, this );
         r.setLinearSlidePosition(target);
         r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.TOP);
         sleep(500);

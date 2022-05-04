@@ -1,26 +1,53 @@
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Autonomous (name = "(camera) eocv testing")
-public class Camera extends LinearOpMode {
+@Autonomous (name = "AutoBaseBottomOptimized")
+public class AutonomousBaseBottomOptimized extends AutonomousBase {
     Robot r;
-    BarcodePipeline bP;
+
+    private OpenCvCamera camera;
+    private BarcodePipeline bP;
+
+    public int mult = 1;
 
     @Override
-    public void runOpMode () {
-        //possibly put this into robot as a separate camera setup method
-//        r = new Robot(telemetry, hardwareMap);
+    public void setup() {
+        r = new Robot(telemetry, hardwareMap);
+        setupCamera();
+    }
+
+    @Override
+    public void runAuto() {
+//        BarcodePipeline pipeline = new BarcodePipeline(telemetry);
+//        r.setCameraPipeline(pipeline);
+
+        switch (bP.getBarcode()) {
+            case LEFT:
+                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
+                r.LSExtensionServo.setPosition(1);
+                r.setLinearSlidePosition(r.theoreticalGroundExtension);
+                break;
+            case MIDDLE:
+                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
+                break;
+            case RIGHT:
+                r.setLinearSlidePosition(r.theoreticalFullExtension);
+                break;
+        }
+
+        while (opModeIsActive()) {}
+    }
+
+    public void setupCamera() {
         bP = new BarcodePipeline(telemetry);
         int cameraMonitorViewId = hardwareMap
                 .appContext
@@ -28,17 +55,18 @@ public class Camera extends LinearOpMode {
                 .getIdentifier("cameraMonitorViewId",
                         "id",
                         hardwareMap
-                        .appContext
-                        .getPackageName());
+                                .appContext
+                                .getPackageName());
         WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        OpenCvCamera camera = OpenCvCameraFactory
+        camera = OpenCvCameraFactory
                 .getInstance()
                 .createWebcam(wN, cameraMonitorViewId);
-        camera.setPipeline(bP);
 
         FtcDashboard
                 .getInstance()
                 .startCameraStream(camera, 30);
+
+        camera.setPipeline(bP);
 
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -53,22 +81,5 @@ public class Camera extends LinearOpMode {
         });
 
         camera.showFpsMeterOnViewport(true);
-        waitForStart();
-
-        while (opModeIsActive() && !gamepad1.x) {
-        } //suspicious
-//
-        if (bP.getBarcode() != BarcodePipeline.Barcode.LEFT) {
-            r.setLinearSlidePosition(bP.getBarcode() == BarcodePipeline.Barcode.RIGHT
-                    ? r.theoreticalFullExtension : r.theoreticalMiddleExtension);
-        }
-
-        camera.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
-            @Override
-            public void onClose() {
-                camera.stopStreaming();
-            }
-        });
-        //continue auto
     }
 }

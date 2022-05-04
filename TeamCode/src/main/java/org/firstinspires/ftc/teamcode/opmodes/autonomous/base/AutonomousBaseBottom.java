@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.threads.RobotThread;
 
 public abstract class AutonomousBaseBottom extends AutonomousBase {
 
@@ -51,7 +52,8 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
     @Override
     public void runAuto() {
         r = new Robot(telemetry, hardwareMap);
-
+        RobotThread thread = new RobotThread(r, this);
+        thread.start();
         waitForStart();
 
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -61,7 +63,7 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         while (r.LinearSlide.isBusy()) {}
         r.LinearSlide.setPower(0);
 
-        r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.TOP);
+        r.LSExtensionServo.setPosition(1);
 
         sleep(100);
 
@@ -71,29 +73,26 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         sleep(100);
 
         r.setMotorTargets(1, Robot.Drive.BACKWARD);
-        r.drive(0.1);
+        r.drive(0.3);
 
         r.setMotorTargets(16, Robot.Drive.FORWARD);
-        r.drive(0.2);
+        r.drive(0.3);
         sleep(200);
 
         // aroudn here, for some reason, the robot turns
         // use the global angle to turn the robot back
 
-        r.correctAngle();
+        r.correctAngle(0.1, this);
 
         sleep(100);
 
         r.Intake.setPower(0.75);
         sleep(1000);
 
-        telemetry.addLine("i am here, the intake is set power to: " + r.Intake.getPower());
-        telemetry.update();
-
         r.Intake.setPower(0);
 
         r.setMotorTargets(22, Robot.Drive.BACKWARD);
-        r.drive(0.15);
+        r.drive(0.3);
 
         sleep(200);
 
@@ -107,21 +106,23 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
-        r.correctAngle();
+        r.correctAngle(0.1, this);
 
         // for whatever reason, the robot moves BACKWARDS when strafing.
         // move backwards again to ensure that the robot will face forward when turning
 
         r.setMotorTargets(4.5, Robot.Drive.BACKWARD);
-        r.drive(0.1);
+        r.drive(0.3);
 
         r.setMotorTargets(12.55, Robot.Drive.FORWARD);
-        r.drive(0.15);
+        r.drive(0.3);
 
         sleep(100);
 
         r.setMotorTargets(mult * (15.5), Robot.Drive.STRAFE_LEFT);
-        r.drive(0.15);
+        r.drive(0.3);
+
+        // right now the robot is next to carousel, a diagonal from the carousel
 
         if (mult == 1) { // red side
             telemetry.update();
@@ -129,17 +130,17 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
             r.drive(0.3);
 
             r.setMotorTargets(4, Robot.Drive.STRAFE_RIGHT);
-            r.drive(0.2);
+            r.drive(0.3);
 
             r.setMotorTargets(3, Robot.Drive.BACKWARD);
-            r.drive(0.1);
+            r.drive(0.3);
         }
 
         else {
             r.setMotorTargets(mult * (5), Robot.Drive.STRAFE_LEFT);
-            r.drive(0.15);
+            r.drive(0.3);
             r.setMotorTargets(7.8, Robot.Drive.BACKWARD);
-            r.drive(0.05);
+            r.drive(0.1);
         }
 
         r.CarouselMotor.setPower(mult * 0.5);
@@ -158,16 +159,16 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         r.CarouselMotor.setPower(0);
 
-        r.correctAngle();
+        r.correctAngle(0.1, this);
 
         sleep(100);
 
-        if (mult == 1) {
-            r.Stop();
-        }
-
-        r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.BOTTOM);
+        r.LSExtensionServo.setPosition(0);
         sleep(1000);
+
+        r.setMotorTargets(12, Robot.Drive.FORWARD);
+        r.drive(0.5);
+
         r.setLinearSlidePosition(0);
     }
 
@@ -179,7 +180,6 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
     public enum Multiplier {
         BLUE(-1),
         RED(1);
-
         public final int multiplier;
 
         Multiplier(int multiplier) {
@@ -187,3 +187,4 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         }
     }
 }
+

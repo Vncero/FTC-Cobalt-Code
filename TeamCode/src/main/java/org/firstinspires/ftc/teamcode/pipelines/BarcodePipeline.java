@@ -17,7 +17,8 @@ public class BarcodePipeline extends OpenCvPipeline {
     Telemetry t;
     private Barcode b = null;
 
-    Mat mat = new Mat();
+    Mat hsvMat = new Mat();
+    Mat filteredMat = new Mat();
     private Mat maskedInputMat = new Mat();
 //
 //    public Rect leftROI = new Rect(
@@ -32,19 +33,19 @@ public class BarcodePipeline extends OpenCvPipeline {
 
     public Rect leftROI = new Rect(
             new Point(0, 0),
-            new Point(106.67d, 150)
+            new Point(213, 320)
     );
     public Rect rightROI = new Rect(
-            new Point(213.334d, 0),
-            new Point(106.67d, 150)
+            new Point(426, 0),
+            new Point(640, 320)
     ); //last point should be x: ~320 but the sim is janky
 
-//    public Scalar upper = new Scalar(125, 255, 190);
+    //    public Scalar upper = new Scalar(125, 255, 190);
 //    public Scalar lower = new Scalar(110, 25, 0);
 //    public Scalar upper = new Scalar(245 / 2.0, 125, 255);
 //    public Scalar lower = new Scalar(206 / 2.0, 0, 255);
     public Scalar upper = new Scalar(255, 255, 255);
-    public Scalar lower = new Scalar(85, 125, 0);
+    public Scalar lower = new Scalar(104.8d, 178.5d, 194.1d);
     //H(200, 250/255) - from a color picker (divide by 2)
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
@@ -56,19 +57,20 @@ public class BarcodePipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         //convert image to hsv, easier colorspace for processing
-        Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
+        Imgproc.cvtColor(input, hsvMat, Imgproc.COLOR_RGB2HSV);
 
         //these roughly represent yellow, for exclusive duck detection
 //        upper = new Scalar(65, 100, 100);
 //        lower = new Scalar(60, 50, 70);
 
-        Core.inRange(mat, lower, upper, mat);
+        Core.inRange(hsvMat, lower, upper, filteredMat);
+        hsvMat.release();
         /*everything that falls into the range of blue specified by lower and upper
           turns into white, everything else turns into black
 
         split the image into left and right sides*/
-        Mat lROI = mat.submat(leftROI);
-        Mat rROI = mat.submat(rightROI);
+        Mat lROI = filteredMat.submat(leftROI);
+        Mat rROI = filteredMat.submat(rightROI);
 
         //finds the percentage of white on left and right
         double l = Core.sumElems(lROI).val[0] / leftROI.area() / 255;
@@ -78,6 +80,7 @@ public class BarcodePipeline extends OpenCvPipeline {
         t.addData("right percentage", Math.round(r * 100) + "%");
 
         //make sure to release the submatrices after using them
+        maskedInputMat.release();
         lROI.release();
         rROI.release();
 
@@ -91,21 +94,21 @@ public class BarcodePipeline extends OpenCvPipeline {
         t.addData("Barcode: ", b.toString());
 
         //convert back to rgb to visually show Barcode determination
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
+//        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
+
+        t.update();
+
+        Core.bitwise_and(input, input, maskedInputMat, filteredMat);
 
         //green for detected position, red for not detected
         Scalar barcodePosition = new Scalar(0, 255, 0);
         Scalar empty = new Scalar(255, 0, 0);
 
         //draw the rectangles and color based on the barcode position
-        Imgproc.rectangle(mat, leftROI, b ==  Barcode.LEFT ? barcodePosition : empty);
-        Imgproc.rectangle(mat, rightROI, b == Barcode.RIGHT ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, leftROI, b ==  Barcode.LEFT ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, rightROI, b == Barcode.RIGHT ? barcodePosition : empty);
 
-        t.update();
-
-//        Core.bitwise_and(input, input, maskedInputMat, mat);
-
-        return mat;
+        return maskedInputMat;
     }
 
     public Barcode getBarcode () {
