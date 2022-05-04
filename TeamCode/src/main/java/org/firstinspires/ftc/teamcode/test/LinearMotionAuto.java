@@ -4,20 +4,27 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name="LinearMotionAuto")
 public class LinearMotionAuto extends LinearOpMode {
+    double FPS = 2;
+
     @Override
     public void runOpMode() {
-        double x = 1;
-        double y = eq(x);
+        double x = 0;
+        while (opModeIsActive()) {
+            double y = eq(x);
 
-        r.FrontLeft.setPower(y+x);
-        r.FrontRight.setPower(-y+x);
-        r.BackLeft.setPower(y-x);
-        r.BackRight.setPower(-y-c);
+            r.FrontLeft.setPower(y+x);
+            r.FrontRight.setPower(-y+x);
+            r.BackLeft.setPower(y-x);
+            r.BackRight.setPower(-y-x);
 
-        sleep(1000);
+            sleep(1000 / FPS);
+
+            x += 0.5;
+        }
     }
 
     public double eq(int x) {
-        double y = 0.5 * x;
+        double y = 1d - Math.pow(2d, -x);
+        return y;
     }
 }
