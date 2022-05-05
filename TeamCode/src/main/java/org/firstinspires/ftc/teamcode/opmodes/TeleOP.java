@@ -60,19 +60,6 @@ public class TeleOP extends OpMode {
         double x = gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
         double y = -gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : 0.9);
 
-//        c *= -1;
-//        x *= -1;
-//        y *= -1;
-
-//        // DO NOT D ELETE idk why tf it flips it wasnt like this last time someone did
-//        // something, but im too lazy to go through each method rn
-//        // oh shit it might fuck up during auto
-//        // if it does then we have to change everything
-//        // can you reverse motor directions????????????
-//        // if you can that would save a lot of time
-//        // not tryna go through each method and change it one by one
-//        // thats disgusting
-
         r.FrontLeft.setPower(y+x+c);
         r.FrontRight.setPower(-y+x+c);
         r.BackLeft.setPower(y+x-c);

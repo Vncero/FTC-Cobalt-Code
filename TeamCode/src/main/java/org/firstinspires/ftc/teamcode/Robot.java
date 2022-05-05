@@ -150,12 +150,25 @@ public class Robot {
         });
     }
 
+    //correct to 0 (in deg)
     public void correctAngle(double power, LinearOpMode auto) {
         auto.sleep(500);
-        telemetry.addLine("correcting angle: " + currentHeading);
+        telemetry.addLine("correcting angle: " + currentHeading * 180.0 / Math.PI);
         telemetry.update();
-        setMotorTargets(motorArcLength(-currentHeading * 180.0 / Math.PI), Robot.Drive.TURN_LEFT);
-        telemetry.addLine("correcting angle: " + currentHeading);
+        setMotorTargets(motorArcLength(-currentHeading * 180 / Math.PI), Robot.Drive.TURN_LEFT);
+        telemetry.addLine("correcting angle: " + currentHeading * 180.0 / Math.PI);
+        telemetry.update();
+        drive(power);
+    }
+
+    //correct to lastCalled (in deg)
+    public void correctAngle(double power, double angle) {
+        telemetry.addLine("correcting to angle: " + angle);
+        telemetry.update();
+        setMotorTargets(motorArcLength(-(currentHeading - normalizeAngle(angle))), Robot.Drive.TURN_LEFT);
+        //blurry lines with normalized and diff angle units
+        telemetry.addLine("correcting angle: " + currentHeading * 180.0 / Math.PI);
+        telemetry.update();
         drive(power);
     }
 
@@ -336,6 +349,7 @@ public class Robot {
 
         double delta = normDelta(currentOrientation.firstAngle - lastOrientation.firstAngle);
 
+        lastHeading = currentHeading;
         currentHeading = getHeading() + delta;
     }
 
