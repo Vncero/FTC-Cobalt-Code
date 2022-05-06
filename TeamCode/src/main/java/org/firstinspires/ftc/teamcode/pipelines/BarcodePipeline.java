@@ -9,12 +9,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import org.openftc.easyopencv.OpenCvPipeline;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 public class BarcodePipeline extends OpenCvPipeline {
 
     //TODO: test all of this, make sure it works somewhat
 
     Telemetry t;
+    OpMode opMode;
     private Barcode b = null;
 
     Mat hsvMat = new Mat();
@@ -56,8 +58,9 @@ public class BarcodePipeline extends OpenCvPipeline {
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
 
-    public BarcodePipeline (Telemetry t) {
+    public BarcodePipeline (Telemetry t, OpMode opMode) {
         this.t = t;
+        this.opMode = opMode;
     }
 
     @Override
@@ -66,8 +69,8 @@ public class BarcodePipeline extends OpenCvPipeline {
         Imgproc.cvtColor(input, hsvMat, Imgproc.COLOR_RGB2HSV);
 
         //these roughly represent yellow, for exclusive duck detection
-//        upper = new Scalar(65, 100, 100);
-//        lower = new Scalar(60, 50, 70);
+        //upper = new Scalar(65, 100, 100);
+        //lower = new Scalar(60, 50, 70);
 
         Core.inRange(hsvMat, lower, upper, filteredMat);
         hsvMat.release();
@@ -94,19 +97,18 @@ public class BarcodePipeline extends OpenCvPipeline {
         mROI.release();
         rROI.release();
 
-        //determine if the element is there (threshold can probably be lowered)
+        //determine if the element is there
         boolean lElement = l > r && l > m;
         boolean mElement = m > l && m > r;
         boolean rElement = r > l && r > m;
 
         //ternary operators to determine Barcode
         b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : null;
-        t.addData("b == Barcode.RIGHT:", b == Barcode.RIGHT);
 
         if (b != null) t.addData("Barcode", b.toString());
 
         //convert back to rgb to visually show Barcode determination
-//        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
+        //Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
 
         t.update();
 
@@ -125,7 +127,7 @@ public class BarcodePipeline extends OpenCvPipeline {
     }
 
     public Barcode getBarcode () {
-        while (b == null) {}
+        while (b == null && opMode.opModeIsActive()) {}
         return b;
     }
 

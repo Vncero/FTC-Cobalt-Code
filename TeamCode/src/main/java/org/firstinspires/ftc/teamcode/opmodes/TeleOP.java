@@ -79,7 +79,7 @@ public class TeleOP extends OpMode {
         r.BackRight.setPower(-y+x-c);
 
         if (gamepad1.dpad_right || gamepad1.dpad_left) {
-            r.CarouselMotor.setPower(gamepad1.dpad_right ? 0.95 : -0.95);
+            r.CarouselMotor.setPower(gamepad1.dpad_right ? 0.8 : -0.8); // CHANGED: from .95 to .8 <- Henry Zhang
         } else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up || gamepad2.dpad_down) {
