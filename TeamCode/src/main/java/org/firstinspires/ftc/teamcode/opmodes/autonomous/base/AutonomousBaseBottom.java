@@ -3,42 +3,60 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 import org.firstinspires.ftc.teamcode.threads.RobotThread;
 
 public abstract class AutonomousBaseBottom extends AutonomousBase {
 
     Robot r;
-    BarcodePipeline bP;
     private ElapsedTime runtime = new ElapsedTime();
 
     int mult = 1;
 
+    /* a lot of notes
+    the objective - get radius of turning circle
+    when the r turns, the edges of the wheel hit points that make up its turning circle
+    relating the turning circle to the r, we can deduce that the diameter of this circle can be found by
+    finding the diagonal measure between wheels, like r.FrontLeft and r.BackRight.
+    without being able to directly measure, we can estimate this diagonal by figuring out the r's dimensions
+    we know that it fits between the barrier gap, meaning the width is at max 13.68in, use 13.65in
+    for length, the r fits in the 2ft by 2ft squares, but the size limit is 18, so use 17in
+    now we have two measures for pythagorean theorem
+    13.65^2 + 17^2 = c^2
+    186.3225 + 289 = c^2
+    475.3225 = c^2
+    sqrt(475.3225) ~ 21.8in diameter
+    21.8 / 2 = 10.9in radius
+    * */
+
+    /* previous turn circle radius estimate
+    the r must be within 18*18*18
+    therefore, the circle it rotates has diameter 18 at max
+    18 / 2 = 9
+    previously, I made the judgment that the circle it rotates needs the same area as the 18*18 square
+    however, this would create a circle larger than the square
+    anyway, here's the math
+    18*18 = 324 sq. in., max area of the circle
+    324 >= Math.PI * Math.pow(r, 2)
+    324 / Math.PI ~ 103.13240312354819
+    103.13240312354819 >~ Math.pow(r, 2)
+    Math.sqrt(103.13240312354819) ~ 10.155
+    10.155 >~ r
+    20.310 >~ d
+    round diameter down a little to 20, then circumference is about 62.83185
+    */
+
     public AutonomousBaseBottom() {
         super(Activation.UPDATE_ANGLE);
     }
-//
-//    @Override
-//    public void setup() {
-//        r = new Robot(telemetry, hardwareMap);
-//
-//    }
 
     @Override
     public void runAuto() {
-        //setup robot, barcode reading, and thread for imu
         r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry);
-        r.setupWebcam(hardwareMap);
-        r.webcam.setPipeline(bP);
         RobotThread thread = new RobotThread(r, this);
         thread.start();
-
-        //ensure extension is at lowest
-        r.LSExtensionServo.setPosition(1);
-
         waitForStart();
 
+<<<<<<< HEAD
         //strafe to center robot for barcode
         r.setMotorTargets(mult * 6.0, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.5);
@@ -50,39 +68,33 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         r.closeWebcam();
 
         //move linear slides based on barcode
+=======
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        switch (barcode) {
-            case LEFT:
-            case MIDDLE:
-                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
-                break;
-            case RIGHT:
-                telemetry.addLine("detected aslkdfjlsa");
-                telemetry.update();
-                r.setLinearSlidePosition(r.theoreticalFullExtension);
-                break;
-        }
+        r.LinearSlide.setTargetPosition((int) r.theoreticalFullExtension);
+        r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        r.LinearSlide.setPower(0.75);
+        while (r.LinearSlide.isBusy()) {}
+        r.LinearSlide.setPower(0);
 
-        //flip
-        r.LSExtensionServo.setPosition(0);
+        r.LSExtensionServo.setPosition(1);
 
-        //if ground level, lower linear slides back to bottom
-        if (barcode == BarcodePipeline.Barcode.LEFT) r.setLinearSlidePosition(r.theoreticalGroundExtension);
+        sleep(100);
 
-        //adjust for middle level of hub
-        if (barcode == BarcodePipeline.Barcode.MIDDLE) {
-            sleep(700);
-            r.setLinearSlidePosition(r.theoreticalGroundExtension + r.ticksInARotation / 2.0);
-        }
-
-        //strafe to center with shipping hub
-        r.setMotorTargets(mult * (28), Robot.Drive.STRAFE_RIGHT);
+        r.setMotorTargets(mult * (34), Robot.Drive.STRAFE_RIGHT);
         r.drive(0.3);
 
         sleep(100);
 
+<<<<<<< HEAD
         //drive up to shipping hub
         r.setMotorTargets(15, Robot.Drive.FORWARD);
+=======
+        r.setMotorTargets(1, Robot.Drive.BACKWARD);
+        r.drive(0.3);
+
+        r.setMotorTargets(16, Robot.Drive.FORWARD);
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.drive(0.3);
         sleep(200);
 
@@ -93,15 +105,31 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
+<<<<<<< HEAD
         // push out the cargo within our intake
         r.Intake.setPower(1);
+=======
+        r.Intake.setPower(0.75);
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         sleep(1000);
         r.Intake.setPower(0);
+<<<<<<< HEAD
         
         // move backwards towards the wall
         r.setMotorTargets(19, Robot.Drive.BACKWARD);
         r.drive(0.3);
 
+=======
+
+        r.setMotorTargets(22, Robot.Drive.BACKWARD);
+        r.drive(0.3);
+
+        sleep(200);
+
+        r.setMotorTargets(3, Robot.Drive.FORWARD);
+        r.drive(0.3);
+
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         sleep(500);
 
         // move towards the carousel
@@ -113,7 +141,16 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         // correct angle so that the robot faces foward
         r.correctAngle(0.1, this);
 
+<<<<<<< HEAD
         // move forward to be diagonal (top left or right) from the carousel
+=======
+        // for whatever reason, the robot moves BACKWARDS when strafing.
+        // move backwards again to ensure that the robot will face forward when turning
+
+        r.setMotorTargets(4.5, Robot.Drive.BACKWARD);
+        r.drive(0.3);
+
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.setMotorTargets(12.55, Robot.Drive.FORWARD);
         r.drive(0.3);
 
@@ -141,11 +178,18 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         }
 
         else {
+<<<<<<< HEAD
             // turn 45 degrees to the left, move backwards 8 inches
             r.setMotorTargets(r.motorArcLength(45), Robot.Drive.TURN_LEFT);
             r.drive(0.5);
             r.setMotorTargets(8, Robot.Drive.BACKWARD);
             r.drive(0.5);
+=======
+            r.setMotorTargets(mult * (5), Robot.Drive.STRAFE_LEFT);
+            r.drive(0.3);
+            r.setMotorTargets(7.8, Robot.Drive.BACKWARD);
+            r.drive(0.1);
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         }
 
         // by the end of that, the robot should be oriented in a way where the carousel motor is touching the carousel disk
@@ -180,6 +224,7 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
             r.TurnRight(0.5);
         }
     }
+
 
     public void setMult(Multiplier mult) {
         this.mult = mult.multiplier;

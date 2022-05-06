@@ -1,9 +1,7 @@
-package org.firstinspires.ftc.teamcode.opmodes.autonomous;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import org.firstinspires.ftc.teamcode.Robot;
 
 @Autonomous(name="AutonomousBlueTop")
 public class AutonomousBlueTop extends LinearOpMode {

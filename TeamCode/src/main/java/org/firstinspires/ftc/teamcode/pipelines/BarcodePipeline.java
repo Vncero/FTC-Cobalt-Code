@@ -37,12 +37,6 @@ public class BarcodePipeline extends OpenCvPipeline {
             new Point(0, 0),
             new Point(213, 320)
     );
-
-    public Rect middleROI = new Rect(
-            new Point(213, 0),
-            new Point(426, 320)
-    );
-
     public Rect rightROI = new Rect(
             new Point(426, 0),
             new Point(640, 320)
@@ -52,8 +46,8 @@ public class BarcodePipeline extends OpenCvPipeline {
 //    public Scalar lower = new Scalar(110, 25, 0);
 //    public Scalar upper = new Scalar(245 / 2.0, 125, 255);
 //    public Scalar lower = new Scalar(206 / 2.0, 0, 255);
-    public Scalar upper = new Scalar(113.3d, 255, 255);
-    public Scalar lower = new Scalar(106.3d, 144.5d, 0d);
+    public Scalar upper = new Scalar(255, 255, 255);
+    public Scalar lower = new Scalar(104.8d, 178.5d, 194.1d);
     //H(200, 250/255) - from a color picker (divide by 2)
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
@@ -79,24 +73,21 @@ public class BarcodePipeline extends OpenCvPipeline {
 
         split the image into left and right sides*/
         Mat lROI = filteredMat.submat(leftROI);
-        Mat mROI = filteredMat.submat(middleROI);
         Mat rROI = filteredMat.submat(rightROI);
 
         //finds the percentage of white on left and right
         double l = Core.sumElems(lROI).val[0] / leftROI.area() / 255;
-        double m = Core.sumElems(mROI).val[0] / middleROI.area() / 255;
         double r = Core.sumElems(rROI).val[0] / rightROI.area() / 255;
 
         t.addData("left percentage", Math.round(l * 100) + "%");
-        t.addData("middle percentage", Math.round(m * 100)  + "%");
         t.addData("right percentage", Math.round(r * 100) + "%");
 
         //make sure to release the submatrices after using them
         maskedInputMat.release();
         lROI.release();
-        mROI.release();
         rROI.release();
 
+<<<<<<< HEAD
         //determine if the element is there
         boolean lElement = l > r && l > m;
         boolean mElement = m > l && m > r;
@@ -104,8 +95,16 @@ public class BarcodePipeline extends OpenCvPipeline {
 
         //ternary operators to determine Barcode
         b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : null;
+=======
+        //determine if the element is there (threshold can probably be lowered)
+        boolean lElement = l > r;
+        boolean rElement = r > l;
 
-        if (b != null) t.addData("Barcode", b.toString());
+        //ternary operators to determine Barcode
+        b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : Barcode.MIDDLE;
+>>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
+
+        t.addData("Barcode: ", b.toString());
 
         //convert back to rgb to visually show Barcode determination
         //Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
@@ -120,7 +119,6 @@ public class BarcodePipeline extends OpenCvPipeline {
 
         //draw the rectangles and color based on the barcode position
         Imgproc.rectangle(maskedInputMat, leftROI, b ==  Barcode.LEFT ? barcodePosition : empty);
-        Imgproc.rectangle(maskedInputMat, middleROI, b == Barcode.MIDDLE ? barcodePosition : empty);
         Imgproc.rectangle(maskedInputMat, rightROI, b == Barcode.RIGHT ? barcodePosition : empty);
 
         return maskedInputMat;
