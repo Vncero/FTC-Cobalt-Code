@@ -14,8 +14,8 @@ public class RobotThread extends Thread {
 
     public void run() {
         while (auto.opModeIsActive()) {
-            r.updateGlobalAngle();
-//            r.telemetry.addLine("global angles: " + r.globalAngle * 180d / Math.PI);
+            r.updateHeading();
+//            r.telemetry.addLine("global angles: " + r.getHeading());
 //            r.telemetry.update();
         }
     }

@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import org.firstinspires.ftc.teamcode.Robot;
 
 @Autonomous(name="LinearMotionAuto")
 public class LinearMotionAuto extends LinearOpMode {
     double FPS = 2;
+
+    Robot r;
 
     @Override
     public void runOpMode() {
@@ -17,13 +22,13 @@ public class LinearMotionAuto extends LinearOpMode {
             r.BackLeft.setPower(y-x);
             r.BackRight.setPower(-y-x);
 
-            sleep(1000 / FPS);
+            sleep((long) (1000 / FPS));
 
             x += 0.5;
         }
     }
 
-    public double eq(int x) {
+    public double eq(double x) {
         double y = 1d - Math.pow(2d, -x);
         return y;
     }
