@@ -1,0 +1,9 @@
+
+i
+java:S1104"SMake RUNTIME a static final constant or non-public and provide accessors if needed.(þé¾š
+C
+java:S1444"-Make this "public static RUNTIME" field final(þé¾š
+h
+java:S3008"RRename this field "RUNTIME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(þé¾š
+o
+java:S1450"TRemove the "timer" field and declare it as a local variable in the relevant methods.(ŽúŽæùÿÿÿÿ

@@ -1,0 +1,21 @@
+
+g
+java:S1104'"QMake ANGLE a static final constant or non-public and provide accessors if needed.(ÓÔÿ­
+q
+java:S1104("VMake NUM_TRIALS a static final constant or non-public and provide accessors if needed.(¿Ü¾˜üÿÿÿÿ
+l
+java:S1104)"QMake DELAY a static final constant or non-public and provide accessors if needed.(ÄÙáüýÿÿÿÿ
+A
+java:S1444'"+Make this "public static ANGLE" field final(ÓÔÿ­
+K
+java:S1444("0Make this "public static NUM_TRIALS" field final(¿Ü¾˜üÿÿÿÿ
+F
+java:S1444)"+Make this "public static DELAY" field final(ÄÙáüýÿÿÿÿ
+c
+java:S3518V"HMake sure "headingAccumulator" can't be zero before doing this division.(›È´ßýÿÿÿÿ
+f
+java:S3008'"PRename this field "ANGLE" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÓÔÿ­
+p
+java:S3008("URename this field "NUM_TRIALS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¿Ü¾˜üÿÿÿÿ
+k
+java:S3008)"PRename this field "DELAY" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÄÙáüýÿÿÿÿ

@@ -1,0 +1,7 @@
+
+p
+java:S1104C"UMake NUM_TURNS a static final constant or non-public and provide accessors if needed.(©Åà¿ùÿÿÿÿ
+J
+java:S1444C"/Make this "public static NUM_TURNS" field final(©Åà¿ùÿÿÿÿ
+o
+java:S3008C"TRename this field "NUM_TURNS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(©Åà¿ùÿÿÿÿ

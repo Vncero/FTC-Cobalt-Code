@@ -1,0 +1,11 @@
+
+`
+java:S2259Á"JA "NullPointerException" could be thrown; "closestPoint" is nullable here.(®× 
+<
+java:S1170 "!Make this final field static too.(Â÷£¢øÿÿÿÿ
+i	java:S100…"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(‚é«ãüÿÿÿÿ
+d	java:S100Ÿ"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ëÎ‘é
+@
+java:S1940é")Use the opposite operator (">=") instead.(Ã‰ÌÃ
+^
+java:S1117ö"GRename "currentDisplacement" which hides the field declared at line 62.(ßÄ£ˆ
