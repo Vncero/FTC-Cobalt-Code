@@ -56,7 +56,6 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         thread.start();
         waitForStart();
 
-<<<<<<< HEAD
         //strafe to center robot for barcode
         r.setMotorTargets(mult * 6.0, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.5);
@@ -68,8 +67,6 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         r.closeWebcam();
 
         //move linear slides based on barcode
-=======
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         r.LinearSlide.setTargetPosition((int) r.theoreticalFullExtension);
         r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -86,15 +83,8 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
-<<<<<<< HEAD
         //drive up to shipping hub
         r.setMotorTargets(15, Robot.Drive.FORWARD);
-=======
-        r.setMotorTargets(1, Robot.Drive.BACKWARD);
-        r.drive(0.3);
-
-        r.setMotorTargets(16, Robot.Drive.FORWARD);
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.drive(0.3);
         sleep(200);
 
@@ -105,31 +95,15 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
-<<<<<<< HEAD
         // push out the cargo within our intake
         r.Intake.setPower(1);
-=======
-        r.Intake.setPower(0.75);
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         sleep(1000);
         r.Intake.setPower(0);
-<<<<<<< HEAD
         
         // move backwards towards the wall
         r.setMotorTargets(19, Robot.Drive.BACKWARD);
         r.drive(0.3);
 
-=======
-
-        r.setMotorTargets(22, Robot.Drive.BACKWARD);
-        r.drive(0.3);
-
-        sleep(200);
-
-        r.setMotorTargets(3, Robot.Drive.FORWARD);
-        r.drive(0.3);
-
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         sleep(500);
 
         // move towards the carousel
@@ -141,16 +115,7 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         // correct angle so that the robot faces foward
         r.correctAngle(0.1, this);
 
-<<<<<<< HEAD
         // move forward to be diagonal (top left or right) from the carousel
-=======
-        // for whatever reason, the robot moves BACKWARDS when strafing.
-        // move backwards again to ensure that the robot will face forward when turning
-
-        r.setMotorTargets(4.5, Robot.Drive.BACKWARD);
-        r.drive(0.3);
-
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         r.setMotorTargets(12.55, Robot.Drive.FORWARD);
         r.drive(0.3);
 
@@ -178,18 +143,11 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         }
 
         else {
-<<<<<<< HEAD
             // turn 45 degrees to the left, move backwards 8 inches
             r.setMotorTargets(r.motorArcLength(45), Robot.Drive.TURN_LEFT);
             r.drive(0.5);
             r.setMotorTargets(8, Robot.Drive.BACKWARD);
             r.drive(0.5);
-=======
-            r.setMotorTargets(mult * (5), Robot.Drive.STRAFE_LEFT);
-            r.drive(0.3);
-            r.setMotorTargets(7.8, Robot.Drive.BACKWARD);
-            r.drive(0.1);
->>>>>>> 8476fcdb941f5ea30f69dad6b7fed9b54878be64
         }
 
         // by the end of that, the robot should be oriented in a way where the carousel motor is touching the carousel disk
