@@ -35,8 +35,8 @@ public class Robot {
 
     //angles
     public double lastHeading = 0.0;
-//    public double headingOffset;
-//    private double rawHeading = 0.0;
+    public double headingOffset;
+    private double rawHeading = 0.0;
     private double currentHeading = 0.0;
 
     public final double ticksInARotation = 537.7;
@@ -98,16 +98,16 @@ public class Robot {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
         parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled      = false;
 
         imu.initialize(parameters);
 
-        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         lastOrientation = currentOrientation;
 
-//        headingOffset = currentOrientation.firstAngle;
+        headingOffset = currentOrientation.firstAngle;
         updateHeading();
     }
 
@@ -154,7 +154,8 @@ public class Robot {
         auto.sleep(500);
         telemetry.addLine("correcting angle: " + currentHeading);
         telemetry.update();
-        setMotorTargets(motorArcLength(-currentHeading), Robot.Drive.TURN_LEFT);
+        setMotorTargets(motorArcLength(-currentHeading * 180.0 / Math.PI), Robot.Drive.TURN_LEFT);
+        telemetry.addLine("correcting angle: " + currentHeading);
         drive(power);
     }
 
@@ -301,7 +302,7 @@ public class Robot {
     }
 
     public double motorArcLength (double theta) {
-        double rad = theta * (Math.PI / 180); //converts angle theta in degrees to degrees
+        double rad = theta * (Math.PI / 180); //converts angle theta in degrees to radians
         return rad * theoreticalRadius; //returns S, the arc length
     }
 
@@ -324,23 +325,18 @@ public class Robot {
     }
 
     public double getHeading() {
-        return currentHeading;
+        return normalizeAngle(rawHeading + headingOffset);
     }
 
     public void updateHeading() {
         lastOrientation = currentOrientation;
-        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES);
+        currentOrientation = imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZXY, AngleUnit.RADIANS);
 
-        double delta = currentOrientation.firstAngle - lastOrientation.firstAngle;
+        rawHeading = currentOrientation.firstAngle;
 
-        if (delta < -180)
-            delta += 360;
-        else if (delta > 180)
-            delta -= 360;
+        double delta = normDelta(currentOrientation.firstAngle - lastOrientation.firstAngle);
 
-        currentHeading += delta;
-
-        lastOrientation = currentOrientation;
+        currentHeading = getHeading() + delta;
     }
 
     public static final class LSExtensionServoPosition {

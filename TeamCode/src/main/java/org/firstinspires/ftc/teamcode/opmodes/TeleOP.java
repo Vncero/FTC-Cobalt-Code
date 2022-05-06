@@ -87,7 +87,7 @@ public class TeleOP extends OpMode {
         } else r.Intake.setPower(0);
 
         double verticalIncrement = gamepad2.left_stick_y;
-        double horizontalIncrement = gamepad2.right_stick_x;
+        double horizontalIncrement = gamepad2.left_stick_x;
         double scale = 0.00075d;
 
         if (horizontalIncrement > 0) horizontalIncrement = 1;
@@ -144,7 +144,7 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            r.LSExtensionServo.setPosition(0);
+            r.LSExtensionServo.setPosition(1);
         }
 
         if (gamepad2.b) {
