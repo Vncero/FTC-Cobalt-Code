@@ -1,8 +1,0 @@
-
-P
-java:S1118
-":Add a private constructor to hide the implicit public one.(êßÝ×
-P
-java:S1133x"5Do not forget to remove this deprecated code someday.(È–½Øÿÿÿÿÿ
-C
-java:S1123x"(Add the missing @deprecated Javadoc tag.(È–½Øÿÿÿÿÿ

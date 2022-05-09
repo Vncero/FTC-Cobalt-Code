@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -26,9 +27,10 @@ public class Robot {
             CarouselMotor, LinearSlide;
     public CRServo Intake, TurretTop, TurretBottom;
     public Servo LSExtensionServo, horizontal, vertical;
-    public Telemetry telemetry;
+    public TouchSensor linearSlidesHome;
     public BNO055IMU imu;
     public OpenCvWebcam webcam;
+    public Telemetry telemetry;
 
     //headings
     Orientation currentOrientation, lastOrientation;

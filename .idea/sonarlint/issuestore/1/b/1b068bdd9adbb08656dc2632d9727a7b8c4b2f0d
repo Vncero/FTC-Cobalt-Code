@@ -1,11 +1,0 @@
-
-h
-java:S1104"SMake RUNTIME a static final constant or non-public and provide accessors if needed.(†³¼
-B
-java:S1444"-Make this "public static RUNTIME" field final(†³¼
-g
-java:S3008"RRename this field "RUNTIME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(†³¼
-~
-java:S1450""cRemove the "batteryVoltageSensor" field and declare it as a local variable in the relevant methods.(ñ×¨ïþÿÿÿÿ
-o
-java:S1450"TRemove the "timer" field and declare it as a local variable in the relevant methods.(ŽúŽæùÿÿÿÿ
