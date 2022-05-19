@@ -56,9 +56,9 @@ public class TeleOP extends OpMode {
          *          left_stick_y vertical, right_stick_x horizontal
          * */
 
-        double c = gamepad1.left_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double x = gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double y = -gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : 0.9);
+        double c = gamepad1.left_stick_x * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9);
+        double x = gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9);
+        double y = -gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9);
 
 //        c *= -1;
 //        x *= -1;
@@ -83,7 +83,8 @@ public class TeleOP extends OpMode {
         } else r.CarouselMotor.setPower(0);
 
         if (gamepad2.dpad_up || gamepad2.dpad_down) {
-            r.Intake.setPower(gamepad2.dpad_up ? 1 : -1);
+            double power = gamepad2.left_trigger > 0 ? 0.5 : 1;
+            r.Intake.setPower(gamepad2.dpad_up ? power : -power);
         } else r.Intake.setPower(0);
 
         double verticalIncrement = gamepad2.left_stick_y;
@@ -104,8 +105,6 @@ public class TeleOP extends OpMode {
             horizontalIncrement = 0;
         }
 
-        if (gamepad2.left_trigger > 0) horizontalIncrement *= 0.05;
-
         // pos flipped - higher vert pos -> lower position vert
         if ((vert_pos > 0 && verticalIncrement < 0) ||
                 (vert_pos < 1 && verticalIncrement > 0)) {
@@ -115,7 +114,8 @@ public class TeleOP extends OpMode {
         if ((hor_pos > 0 && horizontalIncrement < 0) ||
                 (hor_pos < 1 && horizontalIncrement > 0)) {
             telemetry.addLine("horizontal servo position: " + hor_pos);
-            r.horizontal.setPosition(hor_pos + (horizontalIncrement * scale));
+            r.horizontal.setPosition(hor_pos + (horizontalIncrement * scale * (gamepad2.left_trigger > 0 ? 0.5d : 1d)));
+            r.horizontal.setPosition(hor_pos + (horizontalIncrement * scale * (gamepad2.left_trigger > 0 ? 0.5d : 1d)));
         }
 
          telemetry.update();
@@ -126,7 +126,7 @@ public class TeleOP extends OpMode {
                 r.TurretTop.setPower(r.extenderPower);
             }else if (_level != 1) {
                 //0
-                r.LSExtensionServo.setPosition(1);
+                r.LSExtensionServo.setPosition(0);
             }
         } else if (gamepad2.right_trigger > 0) {
             if (gamepad2.left_bumper) {
@@ -134,7 +134,7 @@ public class TeleOP extends OpMode {
                 r.TurretTop.setPower(-r.extenderPower);
             }  else if (_level != 1) {
                 //180
-                r.LSExtensionServo.setPosition(0);
+                r.LSExtensionServo.setPosition(1);
             }
         } else {
             r.TurretBottom.setPower(0);

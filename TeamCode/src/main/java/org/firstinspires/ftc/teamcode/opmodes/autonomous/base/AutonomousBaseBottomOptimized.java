@@ -22,7 +22,7 @@ public class AutonomousBaseBottomOptimized extends AutonomousBase {
     @Override
     public void setup() {
         r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry);
+        bP = new BarcodePipeline(telemetry, this);
         r.setupWebcam(hardwareMap);
         r.webcam.setPipeline(bP);
     }
@@ -30,7 +30,7 @@ public class AutonomousBaseBottomOptimized extends AutonomousBase {
     @Override
     public void runAuto() {
         r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry);
+        bP = new BarcodePipeline(telemetry, this);
         r.setupWebcam(hardwareMap);
         r.webcam.setPipeline(bP);
         RobotThread thread = new RobotThread(r, this);

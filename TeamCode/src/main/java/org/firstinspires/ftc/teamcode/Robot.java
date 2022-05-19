@@ -46,7 +46,8 @@ public class Robot {
 
     public final double extenderPower = 0.8d;
 
-    final double measuredWheelCircumference = Math.PI * 3.9d;
+
+    final double measuredWheelCircumference = 14.5625;
 
     public final double theoreticalMiddleExtension = LinearSlideTicks(5.5);
     public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
@@ -58,6 +59,8 @@ public class Robot {
 
     public final double horizontalMin = 0.1378d;
     public final double horizontalMax = 0.5388d;
+
+    public boolean cameraIsOpen;
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
@@ -123,7 +126,7 @@ public class Robot {
         WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
         webcam = OpenCvCameraFactory
                 .getInstance()
-                .createWebcam(wN, cameraMonitorViewId);
+                .createWebcam(wN, R.id.cameraMonitorViewId);
         FtcDashboard
                 .getInstance()
                 .startCameraStream(webcam, 30);
@@ -135,18 +138,20 @@ public class Robot {
             }
 
             @Override
-            public void onError(int errorCode) {}
+            public void onError(int errorCode) {
+                telemetry.addData("error", errorCode);
+                telemetry.update();
+            }
         });
 
         webcam.showFpsMeterOnViewport(true);
     }
 
     public void closeWebcam() {
+        webcam.stopStreaming();
         webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
             @Override
-            public void onClose() {
-                webcam.stopStreaming();
-            }
+            public void onClose() {}
         });
     }
 

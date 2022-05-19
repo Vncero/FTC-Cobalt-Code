@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pipelines;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Mat;
 import org.opencv.core.Core;
@@ -10,12 +12,15 @@ import org.opencv.imgproc.Imgproc;
 
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.Random;
+
 public class BarcodePipeline extends OpenCvPipeline {
 
     //TODO: test all of this, make sure it works somewhat
 
     Telemetry t;
-    private Barcode b = null;
+    LinearOpMode opMode;
+    private Barcode b;
 
     Mat hsvMat = new Mat();
     Mat filteredMat = new Mat();
@@ -56,8 +61,9 @@ public class BarcodePipeline extends OpenCvPipeline {
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
 
-    public BarcodePipeline (Telemetry t) {
+    public BarcodePipeline (Telemetry t, LinearOpMode opMode) {
         this.t = t;
+        this.opMode = opMode;
     }
 
     @Override
@@ -100,9 +106,7 @@ public class BarcodePipeline extends OpenCvPipeline {
         boolean rElement = r > l && r > m;
 
         //ternary operators to determine Barcode
-        b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : null;
-        t.addData("b == Barcode.RIGHT:", b == Barcode.RIGHT);
-
+        b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : randomRead();
         if (b != null) t.addData("Barcode", b.toString());
 
         //convert back to rgb to visually show Barcode determination
@@ -124,8 +128,16 @@ public class BarcodePipeline extends OpenCvPipeline {
         return maskedInputMat;
     }
 
+    public Barcode randomRead() {
+        Barcode[] values = Barcode.values();
+        Random random = new Random();
+
+        Barcode choice = values[random.nextInt(values.length)];
+        return choice;
+    }
+
     public Barcode getBarcode () {
-        while (b == null) {}
+        while (b == null && (!opMode.isStopRequested() && opMode.opModeIsActive())) {}
         return b;
     }
 
