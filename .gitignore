@@ -38,9 +38,6 @@ proguard/
 # Android Studio captures folder
 captures/
 
-#gitpod
-*.yml
-
 # IntelliJ
 *.iml
 .idea/workspace.xml
