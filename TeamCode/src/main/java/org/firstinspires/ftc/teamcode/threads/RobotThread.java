@@ -30,6 +30,7 @@ public class RobotThread extends Thread {
             if (cameraOpenRequested) {
                 openCamera();
                 this.cameraOpenRequested = false;
+            }
         }
     }
 
