@@ -39,7 +39,7 @@ proguard/
 captures/
 
 #gitpod
-./gitpod.yml
+./.gitpod.yml
 
 # IntelliJ
 *.iml
