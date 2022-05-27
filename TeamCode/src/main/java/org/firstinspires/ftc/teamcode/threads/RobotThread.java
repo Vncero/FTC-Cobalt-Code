@@ -15,6 +15,8 @@ public class RobotThread extends Thread {
     public Robot r;
     public LinearOpMode auto;
 
+    boolean cameraOpenRequested;
+
     public RobotThread(Robot r, LinearOpMode auto) {
         this.auto = auto;
         this.r = r;
@@ -25,11 +27,14 @@ public class RobotThread extends Thread {
             r.updateHeading();
 //            r.telemetry.addLine("global angles: " + r.getHeading());
 //            r.telemetry.update();
+            if (cameraOpenRequested) {
+                openCamera();
+                this.cameraOpenRequested = false;
         }
     }
 
-    public void requestCameraOpen(HardwareMap hardwareMap) {
-        int cameraMonitorViewId = hardwareMap
+    public void openCamera() {
+        int cameraMonitorViewId = auto.hardwareMap
                 .appContext
                 .getResources()
                 .getIdentifier("cameraMonitorViewId",
@@ -37,17 +42,19 @@ public class RobotThread extends Thread {
                         hardwareMap
                                 .appContext
                                 .getPackageName());
-        WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        r.webcam = OpenCvCameraFactory
-                .getInstance()
-                .createWebcam(wN, R.id.cameraMonitorViewId);
+        WebcamName wN = auto.hardwareMap.get(WebcamName.class, "Camera 1");
 
         r.webcam.showFpsMeterOnViewport(true);
         r.webcam.setMillisecondsPermissionTimeout(1500);
+        
+        attemptCameraOpen(R.id.cameraMonitorViewId);
+        if (!r.cameraIsOpen) attemptCameraOpen(cameraMonitorViewId);
+    }
 
-        FtcDashboard
+    public void attemptCameraOpen (int cameraMonitorViewId) {
+        r.webcam = OpenCvCameraFactory
                 .getInstance()
-                .startCameraStream(r.webcam, 30);
+                .createWebcam(wN, cameraMonitorViewId);
 
         r.webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -60,10 +67,10 @@ public class RobotThread extends Thread {
             public void onError(int errorCode) {
                 r.cameraIsOpen = false;
                 r.telemetry.addData("error", errorCode);
-                r.telemetry.addLine("barcode will be a randomRead()");
                 r.telemetry.update();
             }
         });
+
     }
 
     public void requestCameraClose() {

@@ -114,47 +114,6 @@ public class Robot {
         updateHeading();
     }
 
-    public void setupWebcam(HardwareMap hardwareMap) {
-        int cameraMonitorViewId = hardwareMap
-                .appContext
-                .getResources()
-                .getIdentifier("cameraMonitorViewId",
-                        "id",
-                        hardwareMap
-                                .appContext
-                                .getPackageName());
-        WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        webcam = OpenCvCameraFactory
-                .getInstance()
-                .createWebcam(wN, R.id.cameraMonitorViewId);
-        FtcDashboard
-                .getInstance()
-                .startCameraStream(webcam, 30);
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {
-                telemetry.addData("error", errorCode);
-                telemetry.update();
-            }
-        });
-
-        webcam.showFpsMeterOnViewport(true);
-    }
-
-    public void closeWebcam() {
-        webcam.stopStreaming();
-        webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
-            @Override
-            public void onClose() {}
-        });
-    }
-
     public void correctAngle(double power, LinearOpMode auto) {
         auto.sleep(500);
         telemetry.addLine("correcting angle: " + currentHeading);

@@ -24,12 +24,9 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
     @Override
     public void runAuto() {
         //setup robot, barcode reading, and thread for imu
-        r = new Robot(telemetry, hardwareMap);
         bP = new BarcodePipeline(telemetry, this);
-        rThread.requestCameraOpen(hardwareMap);
-        r.webcam.setPipeline(bP);
-        RobotThread thread = new RobotThread(r, this);
-        thread.start();
+        rThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
+        if (r.cameraIsOpen) r.webcam.setPipeline(bP);
 
         //ensure extension is at lowest
         r.LSExtensionServo.setPosition(1);
