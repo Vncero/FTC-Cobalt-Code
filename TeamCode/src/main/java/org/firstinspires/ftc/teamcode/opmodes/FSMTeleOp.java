@@ -11,10 +11,10 @@ import java.util.ArrayList;
 @TeleOp (name = "FSMTeleOp")
 public class FSMTeleOp extends OpMode {
     Robot r;
+    Gamepad prevGamepad1, prevGamepad2, currGamepad1, currGamepad2;
     LinearSlideStates linearSlideState;
 
-    //implement cancelling into different presets
-    ArrayList<Boolean> liftButtons = new ArrayList<>(3);
+    final double buffer = 100;
     boolean pressed;
 
     @Override
@@ -22,9 +22,12 @@ public class FSMTeleOp extends OpMode {
         r = new Robot(telemetry, hardwareMap);
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linearSlideState = LinearSlideStates.IDLE;
-        liftButtons.add(gamepad2.a);
-        liftButtons.add(gamepad2.b);
-        liftButtons.add(gamepad2.y);
+
+        currGamepad1 = new Gamepad();
+        currGamepad2 = new Gamepad();
+
+        prevGamepad1 = new Gamepad();
+        prevGamepad2 = new Gamepad();
 
         r.LSExtensionServo.setPosition(1);
         r.vertical.setPosition(0);
@@ -33,10 +36,18 @@ public class FSMTeleOp extends OpMode {
 
     @Override
     public void loop() {
+        try {
+            prevGamepad1.copy(currGamepad1);
+            prevGamepad2.copy(currGamepad2);
 
-        double c = gamepad1.left_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double x = gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double y = -gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : 0.9);
+            currGamepad1.copy(gamepad1);
+            currGamepad2.copy(gamepad2);
+        } catch (RobotCoreException e) {}
+
+
+        double c = currGamepad1.left_stick_x * (currGamepad1.left_bumper ? 0.3 : 0.9);
+        double x = currGamepad1.right_stick_x * (currGamepad1.left_bumper ? 0.3 : 0.9);
+        double y = -currGamepad1.left_stick_y * (currGamepad1.left_bumper ? 0.3 : 0.9);
 
         r.FrontLeft.setPower(y+x+c);
         r.FrontRight.setPower(-y+x+c);
@@ -45,23 +56,11 @@ public class FSMTeleOp extends OpMode {
 
         switch (linearSlideState) {
             case IDLE:
-                if (liftButtons.get(0)) {
 
-                }
-
-                if (liftButtons.get(1)) {
-
-                }
-
-                if (liftButtons.get(2)) {
-
-                }
                 break;
             case MOVING:
-                //make 100 a position buffer
-                if (r.LinearSlide.getCurrentPosition() - 100 >= r.LinearSlide.getTargetPosition()) {
-                    r.LinearSlide.setPower(0); //cut power to avoid snapping
-                }
+                if (Math.abs(r.LinearSlide.getTargetPosition() - r.LinearSlide.getCurrentPosition()) <= this.buffer) r.LinearSlide.setPower(0);
+                this.linearSlideState = LinearSlideStates.IDLE;
                 break;
         }
     }
