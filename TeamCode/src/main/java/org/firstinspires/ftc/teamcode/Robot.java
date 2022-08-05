@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -15,17 +17,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+
 public class Robot {
     public DcMotor FrontLeft, BackLeft,
-            FrontRight, BackRight,
-            CarouselMotor, LinearSlide;
+           FrontRight, BackRight,
+           CarouselMotor, LinearSlide;
     public CRServo Intake, TurretTop, TurretBottom;
     public Servo LSExtensionServo, horizontal, vertical;
+    public TouchSensor linearSlideHome;
+
     public Telemetry telemetry;
     public BNO055IMU imu;
     public OpenCvWebcam webcam;
@@ -83,6 +90,8 @@ public class Robot {
         Intake = hardwareMap.get(CRServo.class, "Intake");
         TurretTop = hardwareMap.get(CRServo.class, "TurretTop");
         TurretBottom = hardwareMap.get(CRServo.class, "TurretBottom");
+
+        linearSlideHome = hardwareMap.get(TouchSensor.class, "lsHome");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
 

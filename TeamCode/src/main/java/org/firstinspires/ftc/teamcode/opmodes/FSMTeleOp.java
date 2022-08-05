@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
-import java.util.ArrayList;
-
 @TeleOp (name = "FSMTeleOp")
 public class FSMTeleOp extends OpMode {
     Robot r;
@@ -15,7 +13,6 @@ public class FSMTeleOp extends OpMode {
     LinearSlideStates linearSlideState;
 
     final double buffer = 100;
-    boolean pressed;
 
     @Override
     public void init() {
@@ -55,18 +52,48 @@ public class FSMTeleOp extends OpMode {
         r.BackRight.setPower(-y+x-c);
 
         switch (linearSlideState) {
-            case IDLE:
-
+            case IDLE: 
+                checkLSInput();
                 break;
             case MOVING:
-                if (Math.abs(r.LinearSlide.getTargetPosition() - r.LinearSlide.getCurrentPosition()) <= this.buffer) r.LinearSlide.setPower(0);
-                this.linearSlideState = LinearSlideStates.IDLE;
+                if (Math.abs(r.LinearSlide.getTargetPosition() - r.LinearSlide.getCurrentPosition()) <= this.buffer) {
+                    r.LinearSlide.setPower(0);
+                    this.linearSlideState = LinearSlideStates.IDLE;
+                }
+                checkLSInput();
                 break;
+            case HOMING:
+                telemetry.addLine("HOMING: input is cut (this may be changed after testing)");
+                telemetry.addData("Linear Slide Position", r.LinearSlide.getCurrentPosition());
+                if (r.linearSlideHome.isPressed()) {
+                    r.LinearSlide.setPower(0);
+                    r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    this.linearSlideState = LinearSlideStates.IDLE;
+                } else r.LinearSlide.setPower(-0.8);
+                break;
+        }
+        telemetry.update();
+    }
+
+    private void checkLSInput() {
+        // what if ternary?
+        if (currGamepad2.y && !prevGamepad2.y) {
+            r.LinearSlide.setTargetPosition(r.theoreticalFullExtension);
+            this.linearSlideState = LinearSlideStates.MOVING;
+        } else if (currGamepad2.b && !prevGamepad2.b) {
+            r.LinearSlide.setTargetPosition(r.theoreticalMiddleExtension);
+            this.linearSlideState = LinearSlideStates.MOVING;
+        } else if (currGamepad2.a && !prevGamepad2.a) {
+            r.LinearSlide.setTargetPosition(0);
+            this.linearSlideState = LinearSlideStates.MOVING;
+        } else if (currGamepad2.x && !prevGamepad2.x) {
+            this.linearSlideState = LinearSlideStates.HOMING;
         }
     }
 
     public enum LinearSlideStates {
         IDLE,
-        MOVING
+        MOVING,
+        HOMING
     }
 }
