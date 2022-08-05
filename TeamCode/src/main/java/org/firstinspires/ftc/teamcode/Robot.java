@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -10,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -27,11 +26,13 @@ import com.acmerobotics.dashboard.FtcDashboard;
 
 public class Robot {
     public DcMotor FrontLeft, BackLeft,
-           FrontRight, BackRight,
-           CarouselMotor, LinearSlide;
+            FrontRight, BackRight,
+            CarouselMotor, LinearSlide;
+    public TouchSensor linearSlideHome;
     public CRServo Intake, TurretTop, TurretBottom;
     public Servo LSExtensionServo, horizontal, vertical;
-    public TouchSensor linearSlideHome;
+
+    
 
     public Telemetry telemetry;
     public BNO055IMU imu;

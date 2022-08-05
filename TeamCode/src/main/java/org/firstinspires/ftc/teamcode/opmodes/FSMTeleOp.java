@@ -11,7 +11,6 @@ public class FSMTeleOp extends OpMode {
     Robot r;
     Gamepad prevGamepad1, prevGamepad2, currGamepad1, currGamepad2;
     LinearSlideStates linearSlideState;
-
     final double buffer = 100;
 
     @Override
