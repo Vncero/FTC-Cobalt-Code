@@ -4,43 +4,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7cfe3fe6-6865-463f-9668-c73bb1c52afd" name="Default Changelist" comment="fixed gradle, worked on barcode, heading, &amp; FSMTeleOp">
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/0/a/0a7c0f9e9cd7b5b9db9c4c6b229cb9e137c3571d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/0/c/0c25948e5359463443a28a357ab77376ac81f6d9" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/0/c/0c589a4b15c1fc8926a4b502d5595e561f92560f" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/1/7/17e3e1c804062b4a05c6fb4414a05230d4c9ca83" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/1/b/1b068bdd9adbb08656dc2632d9727a7b8c4b2f0d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/2/d/2d43de65646eb4fc1302263466109827200730e0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/2/e/2ec4c852e58650dc09396af5b345540742272284" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/4/44e28a3a8f8e777b594453ef012af8f42a11b1f2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/8/481e1f3a78481eb601e989f3055b258bbf7bdb74" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/c/4c90325d53e0e19e52d20f904d5d44df1f3258d1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/e/4e8845754c47a8907629dabb85dbce67803e7daa" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/5/0/50c5c272642b296c5a93a3fa48206df1cf331555" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/6/6/669de1119ae3442ed641b08d7e7ac8b8051fac13" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/6/a/6a0f92b25c1f4e1935b88bb20bd901d9e0c17c72" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/7/2/72569cdff4a61750c4eecce4fffbc7603ff0f9ce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/7/6/76966fd3992c9e85040a3ec1fd82a6e70f3d5114" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/7/7/7743ee651d3754f07839ce8576c165f429784eb5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/7/8/78b9a0096224dbe782f60e9e5803f0eacaf1f8be" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/7/8/78d0cb7978c1623395381552a1f1f682010c9954" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/9/c/9cc1c5937f027b6ac091c041abd9727967dcf54d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/a/1/a10b90f190beb246dd547268045cb3f295f9805b" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/a/1/a143dc84d2f7aff835882c9e852d171bff8b222b" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/a/c/ac02725e530f016b55bf7203cad60a3b7ce68b87" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/b/6/b61551637c49df80eed5dc455f9d59344f0415c8" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/c/0/c08f2799b12f2fb8c66f757b8fec04d8433c136e" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/c/6/c6ffdd2b3da759144a69452729417b7bb3c15dcd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/d/2/d26435d337e6dce1ce4b5ab0850e27a630cb6263" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/e/4/e490d0d0b7deea87ec2210d138d44ab9800850e1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/e/4/e4d0515617073e90d4160bc773ddd0a8b01ef48d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/e/7/e7cfeab2094c7203de7a97f7a1b0f2438855bebc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/f/4/f4bdb6565948a1537061f66e681b92dc10cfabce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/f/7/f7bc3b01e6ac850513cd810ce4584aeceadc0d1d" beforeDir="false" />
+    <list default="true" id="7cfe3fe6-6865-463f-9668-c73bb1c52afd" name="Default Changelist" comment="worked on FSMTeleOp&#10;-might have finished Linear Slides FSM">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Robot.java" beforeDir="false" afterPath="$PROJECT_DIR$/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Robot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/FSMTeleOp.java" beforeDir="false" afterPath="$PROJECT_DIR$/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/FSMTeleOp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +26,23 @@
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
     </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="FtcRobotController-master" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -79,11 +64,11 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/build.dependencies.gradle" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/TeamCode/build.gradle" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FtcRobotController/build.gradle" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/build.gradle" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TeamCode/build.gradle" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/build.common.gradle" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/build.dependencies.gradle" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/build.gradle" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="23TCzluchsVvwIsetVxOgPUx5yz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -97,11 +82,11 @@
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
     <property name="cidr.known.project.marker" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../cobaltMaster" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../CobaltLibDev" />
     <property name="project.structure.last.edited" value="Dependencies" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="experimental" />
   </component>
   <component name="PsdUISettings">
     <option name="LAST_EDITED_BUILD_TYPE" value="release" />
@@ -129,8 +114,6 @@
       <option name="MODE" value="default_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
-      <option name="FORCE_STOP_RUNNING_APP" value="true" />
       <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
       <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
@@ -243,7 +226,14 @@
       <option name="project" value="LOCAL" />
       <updated>1651722178484</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="worked on FSMTeleOp&#10;-might have finished Linear Slides FSM">
+      <created>1652069760639</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1652069760639</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <option name="trackContextForNewChangelist" value="true" />
     <servers />
   </component>
@@ -286,6 +276,7 @@
     <MESSAGE value="added camera code&#10;-TensorFlow&#10;-EasyOpenCV Pipelines and a test OpMode" />
     <MESSAGE value="fixed and tuned camera&#10;hopefully the changes work and barcode detection works" />
     <MESSAGE value="fixed gradle, worked on barcode, heading, &amp; FSMTeleOp" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed gradle, worked on barcode, heading, &amp; FSMTeleOp" />
+    <MESSAGE value="worked on FSMTeleOp&#10;-might have finished Linear Slides FSM" />
+    <option name="LAST_COMMIT_MESSAGE" value="worked on FSMTeleOp&#10;-might have finished Linear Slides FSM" />
   </component>
 </project>

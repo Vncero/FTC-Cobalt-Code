@@ -4,7 +4,13 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/FtcRobotController-master.iml" filepath="$PROJECT_DIR$/.idea/modules/FtcRobotController-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.iml" filepath="$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.main.iml" filepath="$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/FtcRobotController/FtcRobotController-master.FtcRobotController.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.iml" filepath="$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.main.iml" filepath="$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/TeamCode/FtcRobotController-master.TeamCode.unitTest.iml" />
     </modules>
   </component>
 </project>
