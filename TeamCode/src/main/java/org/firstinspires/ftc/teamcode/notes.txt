@@ -26,3 +26,13 @@ to correct much, just do testing
 Future.java (on theoreticalMiddleExtension)
 /*alliance shipping hub middle level top edge is 8.5 inches up,
 assuming that the extension servo will cover the remaining height to dump freight in*/
+
+TeleOP.java (henry L)
+//        // DO NOT D ELETE idk why tf it flips it wasnt like this last time someone did
+//        // something, but im too lazy to go through each method rn
+//        // oh shit it might fuck up during auto
+//        // if it does then we have to change everything
+//        // can you reverse motor directions????????????
+//        // if you can that would save a lot of time
+//        // not tryna go through each method and change it one by one
+//        // thats disgusting

@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,17 +16,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+
 public class Robot {
     public DcMotor FrontLeft, BackLeft,
             FrontRight, BackRight,
             CarouselMotor, LinearSlide;
+    public TouchSensor linearSlideHome;
     public CRServo Intake, TurretTop, TurretBottom;
     public Servo LSExtensionServo, horizontal, vertical;
+
+    
+
     public Telemetry telemetry;
     public BNO055IMU imu;
     public OpenCvWebcam webcam;
@@ -46,7 +54,8 @@ public class Robot {
 
     public final double extenderPower = 0.8d;
 
-    final double measuredWheelCircumference = Math.PI * 3.9d;
+
+    final double measuredWheelCircumference = 14.5625;
 
     public final double theoreticalMiddleExtension = LinearSlideTicks(5.5);
     public final double theoreticalGroundExtension = LinearSlideTicks(0.2);
@@ -58,6 +67,8 @@ public class Robot {
 
     public final double horizontalMin = 0.1378d;
     public final double horizontalMax = 0.5388d;
+
+    public boolean cameraIsOpen;
 
     public Robot (Telemetry telemetry, HardwareMap hardwareMap) {
          this.telemetry = telemetry;
@@ -80,6 +91,8 @@ public class Robot {
         Intake = hardwareMap.get(CRServo.class, "Intake");
         TurretTop = hardwareMap.get(CRServo.class, "TurretTop");
         TurretBottom = hardwareMap.get(CRServo.class, "TurretBottom");
+
+        linearSlideHome = hardwareMap.get(TouchSensor.class, "lsHome");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
 
@@ -109,45 +122,6 @@ public class Robot {
 
         headingOffset = currentOrientation.firstAngle;
         updateHeading();
-    }
-
-    public void setupWebcam(HardwareMap hardwareMap) {
-        int cameraMonitorViewId = hardwareMap
-                .appContext
-                .getResources()
-                .getIdentifier("cameraMonitorViewId",
-                        "id",
-                        hardwareMap
-                                .appContext
-                                .getPackageName());
-        WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        webcam = OpenCvCameraFactory
-                .getInstance()
-                .createWebcam(wN, cameraMonitorViewId);
-        FtcDashboard
-                .getInstance()
-                .startCameraStream(webcam, 30);
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-        webcam.showFpsMeterOnViewport(true);
-    }
-
-    public void closeWebcam() {
-        webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
-            @Override
-            public void onClose() {
-                webcam.stopStreaming();
-            }
-        });
     }
 
     public void correctAngle(double power, LinearOpMode auto) {

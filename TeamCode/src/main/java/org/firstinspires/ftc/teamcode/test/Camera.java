@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous (name = "(camera) eocv testing")
 public class Camera extends LinearOpMode {
@@ -19,8 +20,9 @@ public class Camera extends LinearOpMode {
 
     @Override
     public void runOpMode () {
+        r = new Robot(telemetry, hardwareMap);
         //possibly put this into robot as a separate camera setup method
-        bP = new BarcodePipeline(telemetry);
+        bP = new BarcodePipeline(telemetry, this);
         int cameraMonitorViewId = hardwareMap
                 .appContext
                 .getResources()
@@ -30,9 +32,10 @@ public class Camera extends LinearOpMode {
                         .appContext
                         .getPackageName());
         WebcamName wN = hardwareMap.get(WebcamName.class, "Camera 1");
-        OpenCvCamera camera = OpenCvCameraFactory
+        OpenCvWebcam camera = OpenCvCameraFactory
                 .getInstance()
-                .createWebcam(wN, cameraMonitorViewId);
+                .createWebcam(wN, R.id.cameraMonitorViewId);
+        camera.setMillisecondsPermissionTimeout(1500);
         camera.setPipeline(bP);
 
         FtcDashboard
@@ -65,7 +68,8 @@ public class Camera extends LinearOpMode {
         camera.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
             @Override
             public void onClose() {
-                camera.stopStreaming();
+
+//                camera.stopStreaming();
             }
         });
         //continue auto
