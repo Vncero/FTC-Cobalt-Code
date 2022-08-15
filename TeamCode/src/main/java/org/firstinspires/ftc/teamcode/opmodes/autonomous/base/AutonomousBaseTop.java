@@ -16,8 +16,16 @@ public class AutonomousBaseTop extends AutonomousBase {
     int bottom = 1;
 
     @Override
+    public void setup() {
+        r = new Robot(telemetry, hardwareMap);
+        bP = new BarcodePipeline(telemetry);
+        rThread.openCamera();
+        r.webcam.setPipeline(bP);
+    }
+
+    @Override
     public void runAuto() throws InterruptedException {
-        bP = new BarcodePipeline(telemetry, this);
+        bP = new BarcodePipeline(telemetry);
         rThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
         if (r.cameraIsOpen) r.webcam.setPipeline(bP);
 
@@ -29,7 +37,7 @@ public class AutonomousBaseTop extends AutonomousBase {
 //        r.setMotorTargets(mult * 3.0, Robot.Drive.STRAFE_LEFT);
 //        r.drive(0.5);
 
-        barcode = r.cameraIsOpen ? bP.getBarcode() : bP.randomRead();
+        BarcodePipeline.Barcode barcode = r.cameraIsOpen ? bP.getBarcode(this) : bP.randomRead();
         if (r.cameraIsOpen) rThread.requestCameraClose();
 
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

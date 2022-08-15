@@ -22,20 +22,13 @@ public class AutonomousBaseBottomOptimized extends AutonomousBase {
     @Override
     public void setup() {
         r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry, this);
-        r.setupWebcam(hardwareMap);
+        bP = new BarcodePipeline(telemetry);
+        rThread.openCamera();
         r.webcam.setPipeline(bP);
     }
 
     @Override
     public void runAuto() {
-        r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry, this);
-        r.setupWebcam(hardwareMap);
-        r.webcam.setPipeline(bP);
-        RobotThread thread = new RobotThread(r, this);
-        thread.start();
-
         r.LSExtensionServo.setPosition(1);
 
         waitForStart();
@@ -43,7 +36,7 @@ public class AutonomousBaseBottomOptimized extends AutonomousBase {
         r.setMotorTargets(mult * 6.0, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.5);
 
-        BarcodePipeline.Barcode barcode = bP.getBarcode();
+        BarcodePipeline.Barcode barcode = bP.getBarcode(this);
 
         r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         switch (barcode) {

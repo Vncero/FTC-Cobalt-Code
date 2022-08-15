@@ -22,7 +22,7 @@ public class Camera extends LinearOpMode {
     public void runOpMode () {
         r = new Robot(telemetry, hardwareMap);
         //possibly put this into robot as a separate camera setup method
-        bP = new BarcodePipeline(telemetry, this);
+        bP = new BarcodePipeline(telemetry);
         int cameraMonitorViewId = hardwareMap
                 .appContext
                 .getResources()
@@ -60,17 +60,14 @@ public class Camera extends LinearOpMode {
         while (opModeIsActive() && !gamepad1.x) {
         } //suspicious
 
-        if (bP.getBarcode() != BarcodePipeline.Barcode.LEFT) {
-            r.setLinearSlidePosition(bP.getBarcode() == BarcodePipeline.Barcode.RIGHT
+        if (bP.getBarcode(this) != BarcodePipeline.Barcode.LEFT) {
+            r.setLinearSlidePosition(bP.getBarcode(this) == BarcodePipeline.Barcode.RIGHT
                     ? r.theoreticalFullExtension : r.theoreticalMiddleExtension);
         }
 
-        camera.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
-            @Override
-            public void onClose() {
+        camera.closeCameraDeviceAsync(() -> {
 
 //                camera.stopStreaming();
-            }
         });
         //continue auto
     }

@@ -24,7 +24,7 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
     @Override
     public void runAuto() {
         //setup robot, barcode reading, and thread for imu
-        bP = new BarcodePipeline(telemetry, this);
+        bP = new BarcodePipeline(telemetry);
         rThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
         if (r.cameraIsOpen) r.webcam.setPipeline(bP);
 
@@ -40,7 +40,7 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
         r.setMotorTargets(mult * (mult == -1 ? blueSideStrafe: 0), Robot.Drive.STRAFE_RIGHT);
         r.drive(mult == -1 ? 0.5: 0);
 
-        barcode = r.cameraIsOpen ? bP.getBarcode() : bP.randomRead();
+        barcode = r.cameraIsOpen ? bP.getBarcode(this) : bP.randomRead();
         if (r.cameraIsOpen) rThread.requestCameraClose();
 
         //flip

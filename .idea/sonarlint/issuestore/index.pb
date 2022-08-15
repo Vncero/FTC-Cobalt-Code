@@ -89,8 +89,6 @@ v
 FTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/Future.java,a\4\a40636054b59c3db057fd069842177d3902e74a2
 Ñ
 TTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/RoadRunnerAutonomous.java,d\1\d19f50a94d301ec400d1babe0b45dcb14a8351c4
-~
-NTeamCode/src/main/java/org/firstinspires/ftc/teamcode/threads/RobotThread.java,9\0\90d7edc161419b1db65e4d77cb253e52d66cacda
 Ä
 PTeamCode/src/main/java/org/firstinspires/ftc/teamcode/test/TensorflowWebcam.java,6\5\65e8a6fac142d28ba7686166cfcc046ecec5a184
 è
@@ -99,5 +97,3 @@ _TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/autonomous/Autono
 \TeamCode/src/main/java/org/firstinspires/ftc/teamcode/pipelines/SampleThresholdPipeline.java,f\f\fff4930ae116719c9cf9e616eaa67453286ba861
 Ñ
 TTeamCode/src/main/java/org/firstinspires/ftc/teamcode/pipelines/FreightPipeline.java,c\2\c2abe959b26f306b5aef84304385b4f4d842f921
-Ñ
-TTeamCode/src/main/java/org/firstinspires/ftc/teamcode/pipelines/BarcodePipeline.java,0\f\0f0b9060b7deef359fc5a39dc3ff0cbcc72ed55a

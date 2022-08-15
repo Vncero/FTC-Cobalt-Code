@@ -19,7 +19,6 @@ public class BarcodePipeline extends OpenCvPipeline {
     //TODO: test all of this, make sure it works somewhat
 
     Telemetry t;
-    LinearOpMode opMode;
     private Barcode b;
 
     Mat hsvMat = new Mat();
@@ -61,9 +60,8 @@ public class BarcodePipeline extends OpenCvPipeline {
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
 
-    public BarcodePipeline (Telemetry t, LinearOpMode opMode) {
+    public BarcodePipeline (Telemetry t) {
         this.t = t;
-        this.opMode = opMode;
     }
 
     @Override
@@ -136,7 +134,7 @@ public class BarcodePipeline extends OpenCvPipeline {
         return choice;
     }
 
-    public Barcode getBarcode () {
+    public Barcode getBarcode (LinearOpMode opMode) {
         while (b == null && (!opMode.isStopRequested() && opMode.opModeIsActive())) {}
         return b;
     }

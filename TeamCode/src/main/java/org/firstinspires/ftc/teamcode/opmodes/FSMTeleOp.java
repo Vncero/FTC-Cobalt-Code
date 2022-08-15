@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
@@ -77,10 +79,10 @@ public class FSMTeleOp extends OpMode {
     private void checkLSInput() {
         // what if ternary?
         if (currGamepad2.y && !prevGamepad2.y) {
-            r.LinearSlide.setTargetPosition(r.theoreticalFullExtension);
+            r.LinearSlide.setTargetPosition((int) r.theoreticalFullExtension);
             this.linearSlideState = LinearSlideStates.MOVING;
         } else if (currGamepad2.b && !prevGamepad2.b) {
-            r.LinearSlide.setTargetPosition(r.theoreticalMiddleExtension);
+            r.LinearSlide.setTargetPosition((int) r.theoreticalMiddleExtension);
             this.linearSlideState = LinearSlideStates.MOVING;
         } else if (currGamepad2.a && !prevGamepad2.a) {
             r.LinearSlide.setTargetPosition(0);

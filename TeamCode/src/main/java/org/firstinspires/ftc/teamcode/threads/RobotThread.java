@@ -15,7 +15,7 @@ public class RobotThread extends Thread {
     public Robot r;
     public LinearOpMode auto;
 
-    boolean cameraOpenRequested;
+    public boolean cameraOpenRequested;
 
     public RobotThread(Robot r, LinearOpMode auto) {
         this.auto = auto;
@@ -24,7 +24,7 @@ public class RobotThread extends Thread {
 
     public void run() {
         while (auto.opModeIsActive()) {
-            r.updateGlobalAngle();
+            r.updateHeading();
 //            r.telemetry.addLine("global angles: " + r.globalAngle * 180d / Math.PI);
 //            r.telemetry.update();
             if (cameraOpenRequested) {
@@ -40,7 +40,7 @@ public class RobotThread extends Thread {
                 .getResources()
                 .getIdentifier("cameraMonitorViewId",
                         "id",
-                        hardwareMap
+                        auto.hardwareMap
                                 .appContext
                                 .getPackageName());
         WebcamName wN = auto.hardwareMap.get(WebcamName.class, "Camera 1");
@@ -48,11 +48,11 @@ public class RobotThread extends Thread {
         r.webcam.showFpsMeterOnViewport(true);
         r.webcam.setMillisecondsPermissionTimeout(1500);
         
-        attemptCameraOpen(R.id.cameraMonitorViewId);
-        if (!r.cameraIsOpen) attemptCameraOpen(cameraMonitorViewId);
+        attemptCameraOpen(wN, R.id.cameraMonitorViewId);
+        if (!r.cameraIsOpen) attemptCameraOpen(wN, cameraMonitorViewId);
     }
 
-    public void attemptCameraOpen (int cameraMonitorViewId) {
+    private void attemptCameraOpen (WebcamName wN, int cameraMonitorViewId) {
         r.webcam = OpenCvCameraFactory
                 .getInstance()
                 .createWebcam(wN, cameraMonitorViewId);
@@ -76,12 +76,7 @@ public class RobotThread extends Thread {
 
     public void requestCameraClose() {
         r.webcam.stopStreaming();
-        r.webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
-            @Override
-            public void onClose() {
-                r.cameraIsOpen = false;
-            }
-        });
+        r.webcam.closeCameraDeviceAsync(() -> r.cameraIsOpen = false);
     }
 
 }

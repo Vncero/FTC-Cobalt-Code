@@ -32,8 +32,6 @@ public class Robot {
     public CRServo Intake, TurretTop, TurretBottom;
     public Servo LSExtensionServo, horizontal, vertical;
 
-    
-
     public Telemetry telemetry;
     public BNO055IMU imu;
     public OpenCvWebcam webcam;
