@@ -1,16 +1,11 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.teamcode.Robot;
 
 @TeleOp
@@ -37,17 +32,17 @@ public class TeleOP extends OpMode {
     }
 
     @Override
-    public void init_loop () {
+    public void init_loop() {
         if (gamepad1.dpad_right) {
             r.CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             //reverse motor, now turns CW - blue, dpad_right
-        } if (gamepad1.dpad_left) {
+        } else if (gamepad1.dpad_left) {
             r.CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         }
     }
 
     @Override
-    public void loop () {
+    public void loop() {
 
         /* button config
          *   gamepad1: movement on joysticks, carousel dir set (dpad) and activate (button)
@@ -56,96 +51,82 @@ public class TeleOP extends OpMode {
          *          left_stick_y vertical, right_stick_x horizontal
          * */
 
-        double c = gamepad1.left_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double x = gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : 0.9);
-        double y = -gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : 0.9);
+        double c = Math.pow(gamepad1.left_stick_x * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9), 3);
+        double x = Math.pow(gamepad1.right_stick_x * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9), 3);
+        double y = Math.pow(-gamepad1.left_stick_y * (gamepad1.left_bumper ? 0.3 : gamepad1.right_bumper ? 1.0 : 0.9), 3);
 
-        r.FrontLeft.setPower(y+x+c);
-        r.FrontRight.setPower(-y+x+c);
-        r.BackLeft.setPower(y+x-c);
-        r.BackRight.setPower(-y+x-c);
+        double denominator = Math.max(Math.abs(c) + Math.abs(x) + Math.abs(y), 1.0);
 
-        if (gamepad1.dpad_right || gamepad1.dpad_left) {
-            r.CarouselMotor.setPower(gamepad1.dpad_right ? 0.95 : -0.95);
-        } else r.CarouselMotor.setPower(0);
+        r.FrontLeft.setPower((y + x + c) / denominator);
+        r.FrontRight.setPower((-y + x + c) / denominator);
+        r.BackLeft.setPower((y + x - c) / denominator);
+        r.BackRight.setPower((-y + x - c) / denominator);
 
-        if (gamepad2.dpad_up || gamepad2.dpad_down) {
-            r.Intake.setPower(gamepad2.dpad_up ? 1 : -1);
-        } else r.Intake.setPower(0);
+        r.CarouselMotor.setPower(
+                (gamepad1.dpad_right || gamepad1.dpad_left)
+                        ? gamepad1.dpad_right
+                        ? 0.95
+                        : -0.95
+                        : 0
+        );
 
-        double verticalIncrement = gamepad2.left_stick_y;
-        double horizontalIncrement = gamepad2.left_stick_x;
-        double scale = 0.00075d;
+        double power = gamepad2.left_trigger > 0 ? 0.5 : 1;
+        r.Intake.setPower(
+                (gamepad2.dpad_up || gamepad2.dpad_down)
+                        ? gamepad2.dpad_up
+                        ? power
+                        : -power
+                        : 0
+        );
 
-        if (horizontalIncrement > 0) horizontalIncrement = 1;
-        else if (horizontalIncrement < 0) horizontalIncrement = -1;
-
-        if (verticalIncrement > 0) verticalIncrement = 1;
-        else if (verticalIncrement < 0) verticalIncrement = -1;
+        double verticalDelta = gamepad2.left_bumper ? Math.signum(gamepad2.left_stick_y) : 0;
+        double horizontalDelta = gamepad2.left_bumper ? Math.signum(gamepad2.right_stick_x) : 0;
+        double scale = 0.00075;
 
         double vert_pos = r.vertical.getPosition();
         double hor_pos = r.horizontal.getPosition();
 
-        if (!gamepad2.left_bumper) {
-            verticalIncrement = 0;
-            horizontalIncrement = 0;
-        }
-
-        if (gamepad2.left_trigger > 0) horizontalIncrement *= 0.05;
+        telemetry.addLine("vertical servo position: " + vert_pos);
+        telemetry.addLine("horizontal servo position: " + hor_pos);
 
         // pos flipped - higher vert pos -> lower position vert
-        if ((vert_pos > 0 && verticalIncrement < 0) ||
-                (vert_pos < 1 && verticalIncrement > 0)) {
-            telemetry.addLine("vertical servo position: " + vert_pos);
-            r.vertical.setPosition(vert_pos + (verticalIncrement * scale));
-        }
-        if ((hor_pos > 0 && horizontalIncrement < 0) ||
-                (hor_pos < 1 && horizontalIncrement > 0)) {
-            telemetry.addLine("horizontal servo position: " + hor_pos);
-            r.horizontal.setPosition(hor_pos + (horizontalIncrement * scale));
-        }
+        if ((vert_pos > 0 && verticalDelta < 0)
+                || (vert_pos < 1 && verticalDelta > 0))
+            r.vertical.setPosition(vert_pos + (verticalDelta * scale));
 
-         telemetry.update();
+        if ((hor_pos > 0 && horizontalDelta < 0)
+                || (hor_pos < 1 && horizontalDelta > 0))
+            r.horizontal.setPosition(hor_pos + (horizontalDelta * scale * (gamepad2.left_trigger > 0 ? 0.5d : 1d)));
 
         if (gamepad2.right_bumper) {
             if (gamepad2.left_bumper) {
                 r.TurretBottom.setPower(r.extenderPower);
                 r.TurretTop.setPower(r.extenderPower);
-            }else if (_level != 1) {
-                //0
-                r.LSExtensionServo.setPosition(1);
-            }
+            } else if (_level != 1) r.LSExtensionServo.setPosition(0); // 0
         } else if (gamepad2.right_trigger > 0) {
             if (gamepad2.left_bumper) {
                 r.TurretBottom.setPower(-r.extenderPower);
                 r.TurretTop.setPower(-r.extenderPower);
-            }  else if (_level != 1) {
-                //180
+            } else if (_level != 1) {
+                r.LSExtensionServo.setPosition(1); //180
+            } else {
+                r.TurretBottom.setPower(0);
+                r.TurretTop.setPower(0);
+            }
+
+            if (gamepad2.y) {
+                lsLevelSet(3);
                 r.LSExtensionServo.setPosition(0);
             }
-        } else {
-            r.TurretBottom.setPower(0);
-            r.TurretTop.setPower(0);
-//            r.LSExtensionServo.setPosition(r.LSExtensionServo.getPosition());
-        }
 
-        if (gamepad2.y) {
-            lsLevelSet(3);
-            r.LSExtensionServo.setPosition(1);
-        }
+            if (gamepad2.b) lsLevelSet(2);
 
-        if (gamepad2.b) {
-            lsLevelSet(2);
-        }
+            if (gamepad2.a) lsLevelSet(1);
 
-        if (gamepad2.a) {
-            lsLevelSet(1);
+            telemetry.update();
         }
-
-        telemetry.update();
     }
-
-    public void lsLevelSet (int level) { //method to move ls to preset levels
+    private void lsLevelSet (int level){ //method to move ls to preset levels
         this._level = level;
         int target = 0;
 
@@ -162,10 +143,9 @@ public class TeleOP extends OpMode {
         r.LinearSlide.setPower(0);
     }
 
-    public void waitForLinearSlide() {
+    private void waitForLinearSlide() {
         while (r.LinearSlide.isBusy()) {
             telemetry.addData("Linear Slide at position", r.LinearSlide.getCurrentPosition());
-            telemetry.update();
 
             double c = gamepad1.left_stick_x;
             double x = gamepad1.right_stick_x;
@@ -181,10 +161,10 @@ public class TeleOP extends OpMode {
                 x *= 0.9;
             }
 
-            r.FrontLeft.setPower(y+x+c);
-            r.FrontRight.setPower(-y+x+c);
-            r.BackLeft.setPower(y+x-c);
-            r.BackRight.setPower(-y+x-c);
+            r.FrontLeft.setPower(y + x + c);
+            r.FrontRight.setPower(-y + x + c);
+            r.BackLeft.setPower(y + x - c);
+            r.BackRight.setPower(-y + x - c);
         }
     }
 }

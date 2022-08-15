@@ -34,11 +34,12 @@ public class Tuner extends OpMode {
     @Override
     public void init_loop() {
         telemetry.addLine("Press Y for Servo");
+        telemetry.addLine("Press X for EXTENSION");
         telemetry.addLine("Press B for Radius");
         telemetry.addLine("Press A for Circumference");
 
         state = gamepad1.a ? TunerStates.CIRCUMFERENCE :
-                gamepad1.b ? TunerStates.RADIUS : gamepad1.y ? TunerStates.SERVO : TunerStates.UNSELECTED;
+                gamepad1.b ? TunerStates.RADIUS : gamepad1.y ? TunerStates.SERVO : gamepad1.x ? TunerStates.EXTENSION : TunerStates.UNSELECTED;
 
         telemetry.update();
     }
@@ -47,7 +48,6 @@ public class Tuner extends OpMode {
     public void loop() {
         switch (state) {
             case SERVO:
-
                 telemetry.addLine("Press Y for ExtensionServo");
                 telemetry.addLine("Press B for horizontal");
                 telemetry.addLine("Press A for vertical");
@@ -106,13 +106,28 @@ public class Tuner extends OpMode {
                 telemetry.addLine("It represents the circumference of the wheels");
                 telemetry.update();
                 break;
+            case EXTENSION:
+                if (gamepad1.dpad_up || gamepad1.dpad_down) {
+                    r.LinearSlide.setPower(gamepad1.dpad_up ? 0.1 : -0.1);
+                }
+
+                if (gamepad2.right_bumper || gamepad2.right_trigger > 0) {
+                    r.LSExtensionServo.setPosition(gamepad2.right_bumper ? 0 : 1);
+                }
+
+                telemetry.addData("Linear slide position", r.LinearSlide.getCurrentPosition());
+                telemetry.update();
+                break;
             case UNSELECTED:
                 telemetry.addLine("Press Y for Servo");
+                telemetry.addLine("Press X for EXTENSION");
                 telemetry.addLine("Press B for Radius");
                 telemetry.addLine("Press A for Circumference");
 
                 state = gamepad1.a ? TunerStates.CIRCUMFERENCE :
-                        gamepad1.b ? TunerStates.RADIUS : gamepad1.y ? TunerStates.SERVO : TunerStates.UNSELECTED;
+                        gamepad1.b ? TunerStates.RADIUS :
+                                gamepad1.y ? TunerStates.SERVO :
+                                        gamepad1.x ? TunerStates.EXTENSION : TunerStates.UNSELECTED;
 
                 telemetry.update();
                 break;
@@ -121,9 +136,9 @@ public class Tuner extends OpMode {
         telemetry.addData("delta", delta);
         telemetry.addData("pos", pos);
         telemetry.addData("theoreticalRadius", r.theoreticalRadius);
-        telemetry.addLine("Press X for the menu");
+        telemetry.addLine("Press left bumper for the menu");
         telemetry.update();
-        if (gamepad1.x) state = TunerStates.UNSELECTED;
+        if (gamepad1.left_bumper) state = TunerStates.UNSELECTED;
 
     }
 
@@ -131,6 +146,7 @@ public class Tuner extends OpMode {
         SERVO,
         RADIUS,
         CIRCUMFERENCE,
+        EXTENSION,
         UNSELECTED
     }
 }

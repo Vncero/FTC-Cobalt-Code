@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.threads.RobotThread;
 import org.firstinspires.ftc.teamcode.util.BitUtils;
 
 public abstract class AutonomousBase extends LinearOpMode {
-    protected Robot robot;
-    protected RobotThread robotThread;
+    protected Robot r;
+    protected RobotThread rThread;
 
     private final int activations;
 
@@ -21,14 +22,14 @@ public abstract class AutonomousBase extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot = new Robot(telemetry, hardwareMap);
+        r = new Robot(telemetry, hardwareMap);
 
-        robotThread = new RobotThread(robot, this);
-        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) robotThread.start();
+        rThread = new RobotThread(r, this);
+        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) rThread.start();
         setup();
         waitForStart();
         runAuto();
-//        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) robotThread.interrupt(); // nvm don't need this
+//        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) rThread.interrupt(); // nvm don't need this
     }
 
     public abstract void runAuto() throws InterruptedException;

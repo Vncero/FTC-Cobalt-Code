@@ -8,6 +8,6 @@ public class AutonomousRedBottom extends AutonomousBaseBottom {
 
     @Override
     public void setup() {
-        super.setMult(Multiplier.RED); // just to be more verbose
+        setMult(Multiplier.RED); // just to be more verbose
     }
 }

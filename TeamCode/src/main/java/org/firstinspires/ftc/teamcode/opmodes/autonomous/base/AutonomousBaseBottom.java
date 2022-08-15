@@ -8,58 +8,77 @@ import org.firstinspires.ftc.teamcode.threads.RobotThread;
 
 public abstract class AutonomousBaseBottom extends AutonomousBase {
 
-    Robot r;
     BarcodePipeline bP;
-
+    BarcodePipeline.Barcode barcode;
     private ElapsedTime runtime = new ElapsedTime();
 
     int mult = 1;
-    double lastCalledAngle; //store the current heading (normalized, convert to deg) to correct to
+
+    int top = 0;
+    int bottom = 1;
 
     public AutonomousBaseBottom() {
         super(Activation.UPDATE_ANGLE);
     }
 
     @Override
-    public void setup() {
-        r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry);
-        r.setupWebcam(hardwareMap);
-        r.webcam.setPipeline(bP);
-    }
-
-    @Override
     public void runAuto() {
-        r = new Robot(telemetry, hardwareMap);
-        RobotThread thread = new RobotThread(r, this);
-        thread.start();
+        //setup robot, barcode reading, and thread for imu
+        bP = new BarcodePipeline(telemetry);
+        rThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
+        if (r.cameraIsOpen) r.webcam.setPipeline(bP);
+
+        //ensure extension is at lowest
+        r.LSExtensionServo.setPosition(1);
+
         waitForStart();
 
-        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        switch (bP.getBarcode()) {
-            case LEFT:
-            case MIDDLE:
-                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
-                break;
-            case RIGHT:
-                r.setLinearSlidePosition(r.theoreticalFullExtension);
-                break;
+        double blueSideStrafe = 8;
+
+        //strafe to center robot for barcode
+        // mult == -1 means blue side
+        r.setMotorTargets(mult * (mult == -1 ? blueSideStrafe: 0), Robot.Drive.STRAFE_RIGHT);
+        r.drive(mult == -1 ? 0.5: 0);
+
+        barcode = r.cameraIsOpen ? bP.getBarcode(this) : bP.randomRead();
+        if (r.cameraIsOpen) rThread.requestCameraClose();
+
+        //flip
+        r.LSExtensionServo.setPosition(top);
+
+        sleep(700);
+
+        double forwardInches = 20.5;
+        int leftTakeAway = 0; // take away this value when barcode left
+
+        //if ground level, get the move extension up and linear slide back down
+        if (barcode == BarcodePipeline.Barcode.LEFT) {
+            // add shit here right now it dont matter
+//            forwardInches -= leftTakeAway;
+//            sleep(300);
+//            r.setLinearSlidePosition(r.theoreticalGroundExtension);
         }
 
-        r.LSExtensionServo.setPosition(0);
+        //adjust for middle level of hub
+        if (barcode == BarcodePipeline.Barcode.MIDDLE) {
+            r.setLinearSlidePosition(r.theoreticalGroundExtension + r.ticksInARotation / 4.0);
+        }
 
-        if (bP.getBarcode() == BarcodePipeline.Barcode.LEFT) r.setLinearSlidePosition(r.theoreticalGroundExtension);
-
-        r.setMotorTargets(mult * (34), Robot.Drive.STRAFE_RIGHT);
+        //strafe to center with shipping hub
+        r.setMotorTargets(mult * (mult == -1 ? 34 - blueSideStrafe : 34), Robot.Drive.STRAFE_RIGHT);
         r.drive(0.3);
 
         sleep(100);
 
+        //correct against the wall
         r.setMotorTargets(1, Robot.Drive.BACKWARD);
         r.drive(0.3);
+        r.correctAngle(0.1, this);
 
-        r.setMotorTargets(16, Robot.Drive.FORWARD);
-        r.drive(0.3);
+        //drive up to shipping hub
+        // forward inches 16 if middle or left, else 16 - leftTakeAway
+        r.setMotorTargets(forwardInches, Robot.Drive.FORWARD);
+        r.drive(0.5);
         sleep(200);
 
         // aroudn here, for some reason, the robot turns
@@ -69,77 +88,52 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
-        r.Intake.setPower(0.75);
-        sleep(1000);
+        r.Intake.setPower(1);
+
+        sleep(1500);
 
         r.Intake.setPower(0);
 
-        r.setMotorTargets(22, Robot.Drive.BACKWARD);
+        r.setMotorTargets(19 - leftTakeAway, Robot.Drive.BACKWARD);
         r.drive(0.3);
 
-        sleep(200);
+        // HERE
 
-        r.setMotorTargets(3, Robot.Drive.FORWARD);
-        r.drive(0.3);
+        sleep(100);
 
-        sleep(500);
-
-        r.setMotorTargets(mult * 43, Robot.Drive.STRAFE_LEFT);
+        r.setMotorTargets(mult * 49, Robot.Drive.STRAFE_LEFT);
         r.drive(0.3);
 
         sleep(100);
 
         r.correctAngle(0.1, this);
 
-        // for whatever reason, the robot moves BACKWARDS when strafing.
-        // move backwards again to ensure that the robot will face forward when turning
-
-        r.setMotorTargets(4.5, Robot.Drive.BACKWARD);
-        r.drive(0.3);
-
-        r.setMotorTargets(12.55, Robot.Drive.FORWARD);
+        r.setMotorTargets(10, Robot.Drive.FORWARD);
         r.drive(0.3);
 
         sleep(100);
 
-        r.setMotorTargets(mult * (15.5), Robot.Drive.STRAFE_LEFT);
+        r.setMotorTargets(mult * (14.5), Robot.Drive.STRAFE_LEFT);
         r.drive(0.3);
-
         // right now the robot is next to carousel, a diagonal from the carousel
 
+        r.setMotorTargets(3, Robot.Drive.BACKWARD);
+        r.drive(0.3);
+
         if (mult == 1) { // red side
-            telemetry.update();
-            r.setMotorTargets(r.motorArcLength(55), Robot.Drive.TURN_RIGHT);
-            r.drive(0.3);
-            //save this heading
-            lastCalledAngle = r.getHeading() * 180 / Math.PI;
-
-            r.setMotorTargets(4, Robot.Drive.STRAFE_RIGHT);
-            r.drive(0.3);
-
             r.setMotorTargets(3, Robot.Drive.BACKWARD);
             r.drive(0.3);
-        }
 
-        else {
-            r.setMotorTargets(mult * (5), Robot.Drive.STRAFE_LEFT);
-            r.drive(0.3);
-            r.setMotorTargets(7.8, Robot.Drive.BACKWARD);
-            r.drive(0.1);
+        } else {
+            r.setMotorTargets(r.motorArcLength(45), Robot.Drive.TURN_LEFT);
+            r.drive(0.5);
+            r.setMotorTargets(1.5 , Robot.Drive.BACKWARD);
+            r.drive(0.5);
         }
 
         r.CarouselMotor.setPower(mult * 0.5);
 
-        if (mult == 1) { // red
-            r.TurnRight(0.01);
-            sleep(2000);
-            r.Stop();
-            sleep(3000);
-        }
-
-        else {
-            sleep(5000);
-        }
+        sleep(5000);
         r.Stop();
 
         r.CarouselMotor.setPower(0);
@@ -148,15 +142,15 @@ public abstract class AutonomousBaseBottom extends AutonomousBase {
 
         sleep(100);
 
-        r.LSExtensionServo.setPosition(0);
-        sleep(1000);
+        r.LSExtensionServo.setPosition(1);
+        sleep(750);
 
-        r.setMotorTargets(12, Robot.Drive.FORWARD);
+        r.setMotorTargets(25, Robot.Drive.FORWARD);
+
         r.drive(0.5);
 
         r.setLinearSlidePosition(0);
     }
-
 
     public void setMult(Multiplier mult) {
         this.mult = mult.multiplier;
