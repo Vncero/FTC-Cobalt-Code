@@ -13,22 +13,22 @@ import org.firstinspires.ftc.teamcode.Robot;
 
 @TeleOp (name = "Tuner")
 public class Tuner extends OpMode {
-    Robot r;
-    TunerStates state;
+    private Robot robot;
+    private TunerState state;
 
-    Servo servo;
-    double pos = 0;
+    private Servo servo;
+    private double pos = 0;
 
-    boolean turned = false;
-    int i = 0; //exists purely for changing delta
-    double[] deltas = {1, 0.1, 0.01, 0.001};
-    double delta = deltas[i];
+    private boolean turned = false;
+    private int i = 0; //exists purely for changing delta
+    private double[] deltas = {1, 0.1, 0.01, 0.001};
+    private double delta = deltas[i];
 
-    boolean run = false;
+    private boolean run = false;
 
     @Override
     public void init() {
-        r = new Robot(telemetry, hardwareMap);
+        robot = new Robot(telemetry, hardwareMap);
     }
 
     @Override
@@ -38,8 +38,8 @@ public class Tuner extends OpMode {
         telemetry.addLine("Press B for Radius");
         telemetry.addLine("Press A for Circumference");
 
-        state = gamepad1.a ? TunerStates.CIRCUMFERENCE :
-                gamepad1.b ? TunerStates.RADIUS : gamepad1.y ? TunerStates.SERVO : gamepad1.x ? TunerStates.EXTENSION : TunerStates.UNSELECTED;
+        state = gamepad1.a ? TunerState.CIRCUMFERENCE :
+                gamepad1.b ? TunerState.RADIUS : gamepad1.y ? TunerState.SERVO : gamepad1.x ? TunerState.EXTENSION : TunerState.UNSELECTED;
 
         telemetry.update();
     }
@@ -51,7 +51,13 @@ public class Tuner extends OpMode {
                 telemetry.addLine("Press Y for ExtensionServo");
                 telemetry.addLine("Press B for horizontal");
                 telemetry.addLine("Press A for vertical");
-                servo = gamepad1.y ? r.LSExtensionServo : gamepad1.b ? r.horizontal : gamepad1.a ? r.vertical : null;
+                servo = gamepad1.y
+                        ? robot.lsExtensionServo
+                        : gamepad1.b
+                        ? robot.horizontal
+                        : gamepad1.a
+                        ? robot.vertical
+                        : null;
 
                 if (gamepad1.dpad_left || gamepad1.dpad_right)
                     i = gamepad1.dpad_left ? i == 0 ? 3 : i-- : i == 3 ? 0 : i++;
@@ -68,37 +74,28 @@ public class Tuner extends OpMode {
                     telemetry.addLine("Turning 90 degrees CCW");
                     telemetry.update();
 
-                    r.setMotorTargets(r.motorArcLength(90), Robot.Drive.TURN_LEFT);
-                    r.drive(0.5);
+                    robot.setMotorTargets(robot.motorArcLength(90), false, Robot.Drive.TURN_LEFT);
+                    robot.drive(0.5);
                     turned = true;
                 }
 
                 if (gamepad1.dpad_left || gamepad1.dpad_right)
-                    i = gamepad1.dpad_left ? i == 0 ? 3 : i-- : i == 3 ? 0 : i++;
+                    i = gamepad1.dpad_left
+                        ? i == 0
+                            ? 3
+                            : i--
+                        : i == 3
+                            ? 0
+                            : i++;
 
                 if (gamepad1.dpad_up || gamepad1.dpad_down) {
-                    r.theoreticalRadius += gamepad1.dpad_up ? delta : -delta;
+                    Robot.theoreticalRadius += gamepad1.dpad_up ? delta : -delta;
                 }
                 break;
             case CIRCUMFERENCE:
                 if (!run) {
-                    r.encoderMotorReset();
-
-                    r.FrontLeft.setTargetPosition((int) r.ticksInARotation);
-                    r.FrontRight.setTargetPosition((int) -r.ticksInARotation);
-                    r.BackLeft.setTargetPosition((int) r.ticksInARotation);
-                    r.BackRight.setTargetPosition((int) -r.ticksInARotation);
-
-                    r.runMotorEncoders();
-
-                    //low power to reduce momentum
-                    r.FrontLeft.setPower(0.3);
-                    r.FrontRight.setPower(0.3);
-                    r.BackLeft.setPower(0.3);
-                    r.BackRight.setPower(0.3);
-
-                    r.waitForMotorEncoders();
-                    r.Stop();
+                    robot.setMotorTargets(Robot.ticksInARotation, true, Robot.Drive.FORWARD);
+                    robot.drive(0.3);
                     run = true;
                 }
 
@@ -108,14 +105,14 @@ public class Tuner extends OpMode {
                 break;
             case EXTENSION:
                 if (gamepad1.dpad_up || gamepad1.dpad_down) {
-                    r.LinearSlide.setPower(gamepad1.dpad_up ? 0.1 : -0.1);
+                    robot.linearSlide.setPower(gamepad1.dpad_up ? 0.1 : -0.1);
                 }
 
                 if (gamepad2.right_bumper || gamepad2.right_trigger > 0) {
-                    r.LSExtensionServo.setPosition(gamepad2.right_bumper ? 0 : 1);
+                    robot.lsExtensionServo.setPosition(gamepad2.right_bumper ? 0 : 1);
                 }
 
-                telemetry.addData("Linear slide position", r.LinearSlide.getCurrentPosition());
+                telemetry.addData("Linear slide position", robot.linearSlide.getCurrentPosition());
                 telemetry.update();
                 break;
             case UNSELECTED:
@@ -124,10 +121,10 @@ public class Tuner extends OpMode {
                 telemetry.addLine("Press B for Radius");
                 telemetry.addLine("Press A for Circumference");
 
-                state = gamepad1.a ? TunerStates.CIRCUMFERENCE :
-                        gamepad1.b ? TunerStates.RADIUS :
-                                gamepad1.y ? TunerStates.SERVO :
-                                        gamepad1.x ? TunerStates.EXTENSION : TunerStates.UNSELECTED;
+                state = gamepad1.a ? TunerState.CIRCUMFERENCE :
+                        gamepad1.b ? TunerState.RADIUS :
+                                gamepad1.y ? TunerState.SERVO :
+                                        gamepad1.x ? TunerState.EXTENSION : TunerState.UNSELECTED;
 
                 telemetry.update();
                 break;
@@ -135,14 +132,13 @@ public class Tuner extends OpMode {
 
         telemetry.addData("delta", delta);
         telemetry.addData("pos", pos);
-        telemetry.addData("theoreticalRadius", r.theoreticalRadius);
+        telemetry.addData("theoreticalRadius", robot.theoreticalRadius);
         telemetry.addLine("Press left bumper for the menu");
-        telemetry.update();
-        if (gamepad1.left_bumper) state = TunerStates.UNSELECTED;
-
+        if (gamepad1.left_bumper) state = TunerState.UNSELECTED;
+        //        telemetry.update();
     }
 
-    public enum TunerStates {
+    public enum TunerState {
         SERVO,
         RADIUS,
         CIRCUMFERENCE,

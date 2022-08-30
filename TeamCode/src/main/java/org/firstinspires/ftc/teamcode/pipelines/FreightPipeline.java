@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.pipelines;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.core.Core;
 
 import org.openftc.easyopencv.OpenCvPipeline;
 

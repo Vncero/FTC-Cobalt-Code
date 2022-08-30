@@ -1,108 +1,99 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 
 public class AutonomousBaseTop extends AutonomousBase {
-    Robot r;
-    BarcodePipeline bP;
+    private int mult = 1;
 
-    int mult = 1;
-
-    int top = 0;
-    int bottom = 1;
-
-    @Override
-    public void setup() {
-        r = new Robot(telemetry, hardwareMap);
-        bP = new BarcodePipeline(telemetry);
-        rThread.openCamera();
-        r.webcam.setPipeline(bP);
+    protected AutonomousBaseTop() {
+        super(Activation.UPDATE_ANGLE);
     }
 
     @Override
+    public void setup() throws InterruptedException {}
+
+    @Override
     public void runAuto() throws InterruptedException {
-        bP = new BarcodePipeline(telemetry);
-        rThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
-        if (r.cameraIsOpen) r.webcam.setPipeline(bP);
+        robotThread.cameraOpenRequested = true; //theoretically triggers attempts to open camera
+        if (robot.isCameraOpen()) robot.webcam.setPipeline(barcodePipeline);
 
-        r.LSExtensionServo.setPosition(1); // ensure extension at lowest
-        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.lsExtensionServo.setPosition(1); // ensure extension at lowest
+        robot.linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         waitForStart();
-//        r.CarouselMotor.setPower(1);
+    //      robot.CarouselMotor.setPower(1);
         // get to the correct position to read barcode
-//        r.setMotorTargets(mult * 3.0, Robot.Drive.STRAFE_LEFT);
-//        r.drive(0.5);
+    //      robot.setMotorTargets(mult * 3.0, Robot.Drive.STRAFE_LEFT);
+    //      robot.drive(0.5);
 
-        BarcodePipeline.Barcode barcode = r.cameraIsOpen ? bP.getBarcode(this) : bP.randomRead();
-        if (r.cameraIsOpen) rThread.requestCameraClose();
+        BarcodePipeline.Barcode barcode = robot.isCameraOpen() ? barcodePipeline.getBarcode(this) : barcodePipeline.randomRead();
+        if (robot.isCameraOpen()) robotThread.requestCameraClose();
 
-        r.LinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         switch (barcode) {
             case LEFT:
             case MIDDLE:
-                r.setLinearSlidePosition(r.theoreticalMiddleExtension);
+                robot.setLinearSlidePosition(Robot.LinearSlidePosition.theoreticalMiddleExtension);
                 break;
             case RIGHT:
-                r.setLinearSlidePosition(r.theoreticalFullExtension);
+                robot.setLinearSlidePosition(Robot.LinearSlidePosition.theoreticalFullExtension);
                 break;
         }
 
-        r.LSExtensionServo.setPosition(0);
+        robot.lsExtensionServo.setPosition(0);
 
         double forward = 25;
 
-        r.setMotorTargets(mult * 24, Robot.Drive.STRAFE_LEFT);
-        r.drive(0.5);
+        robot.setMotorTargets(mult * 24, false, Robot.Drive.STRAFE_LEFT);
+        robot.drive(0.5);
 
         sleep(1000); // wait for extension servo to go up
 
-        r.setMotorTargets(forward, Robot.Drive.FORWARD);
-        r.drive(0.15);
+        robot.setMotorTargets(forward, false, Robot.Drive.FORWARD);
+        robot.drive(0.15);
 
         sleep(200);
         if (barcode == BarcodePipeline.Barcode.MIDDLE) {
-            r.setLinearSlidePosition(r.theoreticalGroundExtension + r.ticksInARotation / 4.0);
+            robot.setLinearSlidePosition(Robot.LinearSlidePosition.theoreticalGroundExtension + Robot.ticksInARotation / 4.0);
         }
         if (barcode == BarcodePipeline.Barcode.LEFT) {
 
         }
 
-        r.Intake.setPower(1);
+        robot.intake.setPower(1);
 
         sleep(2000);
 
-        r.Intake.setPower(0);
+        robot.intake.setPower(0);
 
         sleep(100);
 
-        r.setMotorTargets(forward, Robot.Drive.BACKWARD);
-        r.drive(0.5);
+        robot.setMotorTargets(forward, false, Robot.Drive.BACKWARD);
+        robot.drive(0.5);
 
         sleep(100);
 
-        r.LSExtensionServo.setPosition(bottom);
+        robot.lsExtensionServo.setPosition(1);
 
         sleep(100);
 
-        r.setLinearSlidePosition((int) r.theoreticalMiddleExtension);
-        r.setMotorTargets(mult * 34, Robot.Drive.STRAFE_RIGHT);
-        r.drive(0.3);
+        robot.setLinearSlidePosition((int) Robot.LinearSlidePosition.theoreticalMiddleExtension);
+        robot.setMotorTargets(mult * 34, false, Robot.Drive.STRAFE_RIGHT);
+        robot.drive(0.3);
 
-        r.setMotorTargets(1, Robot.Drive.BACKWARD);
-        r.drive(0.05);
+        robot.setMotorTargets(1, false, Robot.Drive.BACKWARD);
+        robot.drive(0.05);
 
-        r.setMotorTargets(mult * 30, Robot.Drive.STRAFE_RIGHT);
-        r.drive(0.5);
+        robot.setMotorTargets(mult * 30, false, Robot.Drive.STRAFE_RIGHT);
+        robot.drive(0.5);
 
-        r.setLinearSlidePosition(0);
-        r.setMotorTargets(20, Robot.Drive.FORWARD);
-        r.drive(0.5);
+        robot.setLinearSlidePosition(0);
+        robot.setMotorTargets(20, false, Robot.Drive.FORWARD);
+        robot.drive(0.5);
 
-        r.CarouselMotor.setPower(0);
+        robot.carouselMotor.setPower(0);
     }
 
     public void setBlue() {

@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.R;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /*

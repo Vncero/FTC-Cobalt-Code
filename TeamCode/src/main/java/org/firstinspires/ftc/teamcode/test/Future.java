@@ -4,13 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Robot;
 
 //this is eventually supposed to test field-centric if imu ever gets setup well enough
@@ -21,9 +15,9 @@ public class Future extends OpMode {
     final double ticksInARotation = 537.7;
 
     // final double theoreticalFullExtension = (3 * ticksInARotation) - (r.LinearSlideTicks(0.787402));
-    final double theoreticalFullExtension = (3 * ticksInARotation) - (r.LinearSlideTicks(5));
-    final double theoreticalMiddleExtension =  r.LinearSlideTicks(5.5);
-    final double theoreticalGroundExtension = r.LinearSlideTicks(3);
+    final double theoreticalFullExtension = (3 * ticksInARotation) - (Robot.linearSlideTicks(5));
+    final double theoreticalMiddleExtension =  Robot.linearSlideTicks(5.5);
+    final double theoreticalGroundExtension = Robot.linearSlideTicks(3);
 
     public int _level = 1;
 
@@ -38,18 +32,17 @@ public class Future extends OpMode {
 
         // need to clear it first - set to 0
 
-        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + r.LinearSlide.getTargetPosition());
+        telemetry.addLine("DURING INIT - SET TARGET POSITION TO " + r.linearSlide.getTargetPosition());
 
         telemetry.update();
 
         r = new Robot(telemetry, hardwareMap);
-        r.hardwareMap(hardwareMap);
     }
 
     @Override
     public void init_loop () {
         if (gamepad1.dpad_right) {
-            r.CarouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            r.carouselMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             telemetry.clear();
 
             telemetry.addLine("Changed r.carousel direction to CW (red)");
@@ -57,7 +50,7 @@ public class Future extends OpMode {
 
             //reverse motor, now turns CW - blue, dpad_right
         } if (gamepad1.dpad_left) {
-            r.CarouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            r.carouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             telemetry.clear();
 
             telemetry.addLine("Changed r.carousel direction to CCW (blue)");
@@ -108,47 +101,47 @@ public class Future extends OpMode {
         telemetry.addData("rightS_x", x);
         telemetry.update();
 
-        r.FrontLeft.setPower(y+x+c);
-        r.FrontRight.setPower(-y+x+c);
-        r.BackLeft.setPower(y+x-c);
-        r.BackRight.setPower(-y+x-c);
+        r.frontLeft.setPower(y+x+c);
+        r.frontRight.setPower(-y+x+c);
+        r.backLeft.setPower(y+x-c);
+        r.backRight.setPower(-y+x-c);
 
 
         if (gamepad1.dpad_right) {
-            r.CarouselMotor.setPower(1);
+            r.carouselMotor.setPower(1);
         }
 
         else if (gamepad1.dpad_left) {
-            r.CarouselMotor.setPower(-1);
+            r.carouselMotor.setPower(-1);
         }
 
-        else r.CarouselMotor.setPower(0);
+        else r.carouselMotor.setPower(0);
 
         if (gamepad2.dpad_up) {
-            r.Intake.setPower(1);
+            r.intake.setPower(1);
             telemetry.update();
         }
 
         else if (gamepad2.dpad_down) {
-            r.Intake.setPower(-1);
+            r.intake.setPower(-1);
         }
 
-        else r.Intake.setPower(0);
+        else r.intake.setPower(0);
         if (_level != 1) {
             if (gamepad2.right_bumper) {
                 //0
-                r.LSExtensionServo.setPosition(0.15);
+                r.lsExtensionServo.setPosition(0.15);
             }
 
             else if (gamepad2.right_trigger >= 0.5d) {
                 //180
-                r.LSExtensionServo.setPosition(0.85);
+                r.lsExtensionServo.setPosition(0.85);
             }
         }
 
         if (gamepad2.y) {
             lsLevelSet(3);
-            r.LSExtensionServo.setPosition(0.15);
+            r.lsExtensionServo.setPosition(0.15);
         }
 
         if (gamepad2.b) {
@@ -167,51 +160,51 @@ public class Future extends OpMode {
         this._level = level;
         if (level == 1) { //ground
 
-            r.LinearSlide.setTargetPosition(0);
+            r.linearSlide.setTargetPosition(0);
             //Set the Linear Slide's target to the lowest, 0
 
-            r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            r.linearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             //set the motor to run toward the position
 
-            r.LinearSlide.setPower(0.75); //set power to the motor
+            r.linearSlide.setPower(0.75); //set power to the motor
 
             waitForLinearSlide(); //while loop for the encoders to run through
 
-            r.LinearSlide.setPower(0); //cut the encoder power
+            r.linearSlide.setPower(0); //cut the encoder power
         }
 
         if (level == 2) { //middle
-            telemetry.addLine("target position before: " + r.LinearSlide.getTargetPosition());
-            r.LinearSlide.setTargetPosition((int) theoreticalMiddleExtension);
+            telemetry.addLine("target position before: " + r.linearSlide.getTargetPosition());
+            r.linearSlide.setTargetPosition((int) theoreticalMiddleExtension);
 
             // telemetry.addLine("middle extension is " + theoreticalMiddleExtension);
 
-            r.LinearSlide.setPower(0.75);
+            r.linearSlide.setPower(0.75);
 
-            telemetry.addLine("the target position should be " + theoreticalMiddleExtension + " , and is: " + r.LinearSlide.getTargetPosition());
+            telemetry.addLine("the target position should be " + theoreticalMiddleExtension + " , and is: " + r.linearSlide.getTargetPosition());
 
             waitForLinearSlide();
 
-            r.LinearSlide.setPower(0);
+            r.linearSlide.setPower(0);
         }
 
         if (level == 3) { //top
 
-            r.LinearSlide.setTargetPosition((int) theoreticalFullExtension);
+            r.linearSlide.setTargetPosition((int) theoreticalFullExtension);
 
-            r.LinearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            r.linearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            r.LinearSlide.setPower(0.75);
+            r.linearSlide.setPower(0.75);
 
             waitForLinearSlide();
 
-            r.LinearSlide.setPower(0);
+            r.linearSlide.setPower(0);
         }
     }
 
     public void waitForLinearSlide() {
-        while (r.LinearSlide.isBusy()) {
-            telemetry.addData("Linear Slide at position", r.LinearSlide.getCurrentPosition());
+        while (r.linearSlide.isBusy()) {
+            telemetry.addData("Linear Slide at position", r.linearSlide.getCurrentPosition());
             telemetry.update();
 
             double c = gamepad1.left_stick_x;
@@ -228,10 +221,10 @@ public class Future extends OpMode {
                 x *= 0.9;
             }
 
-            r.FrontLeft.setPower(y+x+c);
-            r.FrontRight.setPower(-y+x+c);
-            r.BackLeft.setPower(y+x-c);
-            r.BackRight.setPower(-y+x-c);
+            r.frontLeft.setPower(y+x+c);
+            r.frontRight.setPower(-y+x+c);
+            r.backLeft.setPower(y+x-c);
+            r.backRight.setPower(-y+x-c);
         }
     }
 

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.test;
 
-import android.app.Activity;
 import android.graphics.Color;
-import android.view.View;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -52,7 +50,7 @@ public class ColorSensors extends LinearOpMode {
 
         //34.25 is distance from drive team area to near edge of marker
         //robot is ~17in length-wise
-        r.setMotorTargets(17.25, Robot.Drive.FORWARD);
+        r.setMotorTargets(17.25, false, Robot.Drive.FORWARD);
         r.drive(0.5);
 
         // convert the RGB values to HSV values.
@@ -86,7 +84,7 @@ public class ColorSensors extends LinearOpMode {
 
         String duckPos = "middle";
         String level = "middle";
-        double target = r.theoreticalMiddleExtension;
+        double target = Robot.LinearSlidePosition.theoreticalMiddleExtension;
 
         if (hueIsYellow(lValues[0])) {
             duckPos = "left";
@@ -95,22 +93,22 @@ public class ColorSensors extends LinearOpMode {
         } else if (hueIsYellow(rValues[0])) {
             duckPos = "right";
             level = "top";
-            target = r.theoreticalFullExtension;
+            target = Robot.LinearSlidePosition.theoreticalFullExtension;
         }
 
         telemetry.addData("Position Detected", duckPos);
         telemetry.addData("Level", level);
 
         telemetry.update();
-        r.setMotorTargets(12, Robot.Drive.STRAFE_RIGHT);
+        r.setMotorTargets(12, false, Robot.Drive.STRAFE_RIGHT);
         r.drive(0.5);
         r.correctAngle(0.3, this );
         r.setLinearSlidePosition(target);
-        r.LSExtensionServo.setPosition(Robot.LSExtensionServoPosition.TOP);
+        r.lsExtensionServo.setPosition(Robot.LSExtensionServoPosition.TOP);
         sleep(500);
-        r.Intake.setPower(1);
+        r.intake.setPower(1);
         sleep(1000);
-        r.Intake.setPower(0);
+        r.intake.setPower(0);
 
         telemetry.addLine("did it even work?");
         telemetry.update();

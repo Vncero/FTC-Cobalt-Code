@@ -17,10 +17,10 @@ public class LinearMotionAuto extends LinearOpMode {
         while (opModeIsActive()) {
             double y = eq(x);
 
-            r.FrontLeft.setPower(y+x);
-            r.FrontRight.setPower(-y+x);
-            r.BackLeft.setPower(y-x);
-            r.BackRight.setPower(-y-x);
+            r.frontLeft.setPower(y+x);
+            r.frontRight.setPower(-y+x);
+            r.backLeft.setPower(y-x);
+            r.backRight.setPower(-y-x);
 
             sleep((long) (1000 / FPS));
 

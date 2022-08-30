@@ -16,7 +16,7 @@ public class CorrectAngleTest extends LinearOpMode {
         RobotThread thread = new RobotThread(r, this);
         thread.start();
         waitForStart();
-        r.setMotorTargets(r.motorArcLength(90), Robot.Drive.TURN_LEFT);
+        r.setMotorTargets(r.motorArcLength(90), false, Robot.Drive.TURN_LEFT);
         r.drive(0.5);
         r.correctAngle(0.5, this);
         sleep(1000);

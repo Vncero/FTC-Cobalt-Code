@@ -48,10 +48,10 @@ public class GraphFollow extends LinearOpMode {
                 powers[i] *= (max/Math.abs(highest)); // clamps it between [-1 and 1]
             }
 
-            r.FrontLeft.setPower(powers[0]);
-            r.FrontRight.setPower(powers[1]);
-            r.BackLeft.setPower(powers[2]);
-            r.BackRight.setPower(powers[3]);
+            r.frontLeft.setPower(powers[0]);
+            r.frontRight.setPower(powers[1]);
+            r.backLeft.setPower(powers[2]);
+            r.backRight.setPower(powers[3]);
 
             telemetry.addData("powers[0]", powers[0]);
             telemetry.addData("powers[1]", powers[1]);

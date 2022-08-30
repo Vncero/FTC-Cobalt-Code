@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous.base;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.pipelines.BarcodePipeline;
 import org.firstinspires.ftc.teamcode.threads.RobotThread;
 import org.firstinspires.ftc.teamcode.util.BitUtils;
 
 public abstract class AutonomousBase extends LinearOpMode {
-    protected Robot r;
-    protected RobotThread rThread;
+    protected Robot robot;
+    protected RobotThread robotThread;
+
+    protected BarcodePipeline barcodePipeline;
 
     private final int activations;
 
@@ -22,10 +25,12 @@ public abstract class AutonomousBase extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        r = new Robot(telemetry, hardwareMap);
+        robot = new Robot(telemetry, hardwareMap);
 
-        rThread = new RobotThread(r, this);
-        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) rThread.start();
+        robotThread = new RobotThread(robot, this);
+
+        barcodePipeline = new BarcodePipeline(telemetry);
+        if (BitUtils.isBitIn(activations, Activation.UPDATE_ANGLE)) robotThread.start();
         setup();
         waitForStart();
         runAuto();

@@ -62,7 +62,7 @@ public class Camera extends LinearOpMode {
 
         if (bP.getBarcode(this) != BarcodePipeline.Barcode.LEFT) {
             r.setLinearSlidePosition(bP.getBarcode(this) == BarcodePipeline.Barcode.RIGHT
-                    ? r.theoreticalFullExtension : r.theoreticalMiddleExtension);
+                    ? Robot.LinearSlidePosition.theoreticalFullExtension : Robot.LinearSlidePosition.theoreticalMiddleExtension);
         }
 
         camera.closeCameraDeviceAsync(() -> {

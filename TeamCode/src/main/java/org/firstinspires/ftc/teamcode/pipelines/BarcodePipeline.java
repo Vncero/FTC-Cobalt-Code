@@ -18,8 +18,8 @@ public class BarcodePipeline extends OpenCvPipeline {
 
     //TODO: test all of this, make sure it works somewhat
 
-    Telemetry t;
-    private Barcode b;
+    private Telemetry telemetry;
+    private Barcode barcode;
 
     Mat hsvMat = new Mat();
     Mat filteredMat = new Mat();
@@ -60,8 +60,8 @@ public class BarcodePipeline extends OpenCvPipeline {
     //H(217/206, 234/245) - second values were under odd lighting (divide by 2)
     //S,V(100, 255)
 
-    public BarcodePipeline (Telemetry t) {
-        this.t = t;
+    public BarcodePipeline (Telemetry telemetry) {
+        this.telemetry = telemetry;
     }
 
     @Override
@@ -75,10 +75,10 @@ public class BarcodePipeline extends OpenCvPipeline {
 
         Core.inRange(hsvMat, lower, upper, filteredMat);
         hsvMat.release();
-        /*everything that falls into the range of blue specified by lower and upper
-          turns into white, everything else turns into black
-
-        split the image into left and right sides*/
+        /*
+            everything that falls into the range of blue specified by lower and upper
+            turns into white, everything else turns into black
+        */
         Mat lROI = filteredMat.submat(leftROI);
         Mat mROI = filteredMat.submat(middleROI);
         Mat rROI = filteredMat.submat(rightROI);
@@ -88,9 +88,9 @@ public class BarcodePipeline extends OpenCvPipeline {
         double m = Core.sumElems(mROI).val[0] / middleROI.area() / 255;
         double r = Core.sumElems(rROI).val[0] / rightROI.area() / 255;
 
-        t.addData("left percentage", Math.round(l * 100) + "%");
-        t.addData("middle percentage", Math.round(m * 100)  + "%");
-        t.addData("right percentage", Math.round(r * 100) + "%");
+        telemetry.addData("left percentage", Math.round(l * 100) + "%");
+        telemetry.addData("middle percentage", Math.round(m * 100)  + "%");
+        telemetry.addData("right percentage", Math.round(r * 100) + "%");
 
         //make sure to release the submatrices after using them
         maskedInputMat.release();
@@ -104,13 +104,13 @@ public class BarcodePipeline extends OpenCvPipeline {
         boolean rElement = r > l && r > m;
 
         //ternary operators to determine Barcode
-        b = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : randomRead();
-        if (b != null) t.addData("Barcode", b.toString());
+        barcode = lElement ? Barcode.LEFT : rElement ? Barcode.RIGHT : mElement ? Barcode.MIDDLE : randomRead();
+        if (barcode != null) telemetry.addData("Barcode", barcode.toString());
 
         //convert back to rgb to visually show Barcode determination
 //        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
 
-        t.update();
+        telemetry.update();
 
         Core.bitwise_and(input, input, maskedInputMat, filteredMat);
 
@@ -119,9 +119,9 @@ public class BarcodePipeline extends OpenCvPipeline {
         Scalar empty = new Scalar(255, 0, 0);
 
         //draw the rectangles and color based on the barcode position
-        Imgproc.rectangle(maskedInputMat, leftROI, b ==  Barcode.LEFT ? barcodePosition : empty);
-        Imgproc.rectangle(maskedInputMat, middleROI, b == Barcode.MIDDLE ? barcodePosition : empty);
-        Imgproc.rectangle(maskedInputMat, rightROI, b == Barcode.RIGHT ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, leftROI, barcode ==  Barcode.LEFT ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, middleROI, barcode == Barcode.MIDDLE ? barcodePosition : empty);
+        Imgproc.rectangle(maskedInputMat, rightROI, barcode == Barcode.RIGHT ? barcodePosition : empty);
 
         return maskedInputMat;
     }
@@ -135,8 +135,8 @@ public class BarcodePipeline extends OpenCvPipeline {
     }
 
     public Barcode getBarcode (LinearOpMode opMode) {
-        while (b == null && (!opMode.isStopRequested() && opMode.opModeIsActive())) {}
-        return b;
+        while (barcode == null && (!opMode.isStopRequested() && opMode.opModeIsActive())) {}
+        return barcode;
     }
 
     public enum Barcode {

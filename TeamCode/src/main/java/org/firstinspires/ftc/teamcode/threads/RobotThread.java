@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.threads;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.R;
@@ -12,19 +10,19 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class RobotThread extends Thread {
-    public Robot r;
-    public LinearOpMode auto;
+    private Robot robot;
+    private LinearOpMode auto;
 
     public boolean cameraOpenRequested;
 
-    public RobotThread(Robot r, LinearOpMode auto) {
+    public RobotThread(Robot robot, LinearOpMode auto) {
         this.auto = auto;
-        this.r = r;
+        this.robot = robot;
     }
 
     public void run() {
         while (auto.opModeIsActive()) {
-            r.updateHeading();
+            robot.updateHeading();
 //            r.telemetry.addLine("global angles: " + r.globalAngle * 180d / Math.PI);
 //            r.telemetry.update();
             if (cameraOpenRequested) {
@@ -34,7 +32,7 @@ public class RobotThread extends Thread {
         }
     }
 
-    public void openCamera() {
+    private void openCamera() {
         int cameraMonitorViewId = auto.hardwareMap
                 .appContext
                 .getResources()
@@ -45,38 +43,36 @@ public class RobotThread extends Thread {
                                 .getPackageName());
         WebcamName wN = auto.hardwareMap.get(WebcamName.class, "Camera 1");
 
-        r.webcam.showFpsMeterOnViewport(true);
-        r.webcam.setMillisecondsPermissionTimeout(1500);
+        robot.webcam.showFpsMeterOnViewport(true);
+        robot.webcam.setMillisecondsPermissionTimeout(1500);
         
         attemptCameraOpen(wN, R.id.cameraMonitorViewId);
-        if (!r.cameraIsOpen) attemptCameraOpen(wN, cameraMonitorViewId);
+        if (!robot.isCameraOpen()) attemptCameraOpen(wN, cameraMonitorViewId);
     }
 
     private void attemptCameraOpen (WebcamName wN, int cameraMonitorViewId) {
-        r.webcam = OpenCvCameraFactory
+        robot.webcam = OpenCvCameraFactory
                 .getInstance()
                 .createWebcam(wN, cameraMonitorViewId);
 
-        r.webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robot.webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                r.webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-                r.cameraIsOpen = true;
+                robot.webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                robot.toggleCameraOpen();
             }
 
             @Override
             public void onError(int errorCode) {
-                r.cameraIsOpen = false;
-                r.telemetry.addData("error", errorCode);
-                r.telemetry.update();
+                robot.telemetryData("error", errorCode);
+                robot.telemetryUpdate();
             }
         });
 
     }
 
     public void requestCameraClose() {
-        r.webcam.stopStreaming();
-        r.webcam.closeCameraDeviceAsync(() -> r.cameraIsOpen = false);
+        robot.webcam.stopStreaming();
+        robot.webcam.closeCameraDeviceAsync(() -> robot.toggleCameraOpen());
     }
-
 }
