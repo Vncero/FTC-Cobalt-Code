@@ -8,9 +8,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.acmerobotics.dashboard:dashboard:0.4.4'
-    implementation 'org.openftc:easyopencv:1.5.1'
-
     implementation 'org.firstinspires.ftc:Inspection:8.1.1'
     implementation 'org.firstinspires.ftc:Blocks:8.1.1'
     implementation 'org.firstinspires.ftc:Tfod:8.1.1'
@@ -22,7 +19,7 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-task-vision:0.2.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'org.firstinspires.ftc:gameAssets-PowerPlay:1.0.0'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.4.4'
-    implementation 'org.openftc:easyopencv:1.5.1'
-}
 
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.5'
+    implementation 'org.openftc:easyopencv:1.6.2'
+}
